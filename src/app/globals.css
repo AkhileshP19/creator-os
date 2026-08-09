@@ -126,7 +126,7 @@
     @apply bg-background text-foreground;
   }
 
-  html {
+  /* html {
     @apply font-sans;
-  }
+  } */
 }
