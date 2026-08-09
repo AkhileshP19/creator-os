@@ -2,7 +2,7 @@
 export default function Home() {
   return (
     <div>
-      WELCOME TO CREATOR OS
+      <h1>CreatorOS landing page</h1>
     </div>
   );
 }

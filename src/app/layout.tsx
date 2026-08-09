@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
+import { Navbar } from "@/components/custom/navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,7 +16,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Creator OS",
-  description: "AI-powered content management and automation platform for short-form video creators.",
+  description:
+    "AI-powered content management and automation platform for short-form video creators.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -23,7 +26,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col bg-gray-50">
+        <ClerkProvider
+          appearance={{
+            variables: {
+              colorPrimary: "#6366F1",
+            },
+          }}
+        >
+          <Navbar />
+          {children}
+        </ClerkProvider>
+      </body>
     </html>
   );
 }
