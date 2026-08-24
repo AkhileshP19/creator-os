@@ -1,0 +1,34 @@
+{
+  "themeId": "xseed",
+  "defaultPageSize": 7,
+  "locale": "en-GB",
+  "timeZone": "Europe/London",
+  "accessRightCheckSettings": {
+    "enabled": true,
+    "hideComponents": false
+  },
+  "development": {
+    "queryCacheTimeMs": 60000,
+    "refreshQueriesOnWindowFocus": true,
+    "autoLogout": {
+      "checkEverySeconds": 30,
+      "logoutAfterTokenExpiredSeconds": 120
+    }
+  },
+  "test": {
+    "queryCacheTimeMs": 60000,
+    "refreshQueriesOnWindowFocus": true,
+    "autoLogout": {
+      "checkEverySeconds": 10,
+      "logoutAfterTokenExpiredSeconds": 30
+    }
+  },
+  "production": {
+    "queryCacheTimeMs": 60000,
+    "refreshQueriesOnWindowFocus": true,
+    "autoLogout": {
+      "checkEverySeconds": 30,
+      "logoutAfterTokenExpiredSeconds": 120
+    }
+  }
+}

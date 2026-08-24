@@ -3,7 +3,7 @@
 import { useState, ReactNode } from "react";
 import { Header } from "@/components/custom/header";
 import { SidebarMenu } from "@/components/custom/sidebar";
-import { useUser } from "@clerk/nextjs";
+import { useUser, RedirectToSignIn } from "@clerk/nextjs";
 
 export default function DashboardLayout({
   children,
@@ -11,7 +11,19 @@ export default function DashboardLayout({
   children: ReactNode;
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const user = useUser();
+  const { isLoaded, isSignedIn, user } = useUser();
+
+  // if (!isLoaded) {
+  //   return (
+  //     <div className="flex min-h-screen items-center justify-center bg-gray-50">
+  //       <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600"></div>
+  //     </div>
+  //   );
+  // }
+
+  if (!isSignedIn) {
+    return <RedirectToSignIn />;
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -28,7 +40,7 @@ export default function DashboardLayout({
         >
           <SidebarMenu
             isSidebarOpen={isSidebarOpen}
-            userName={user?.user?.firstName || ""}
+            userName={user?.firstName || ""}
           />
         </aside>
 
