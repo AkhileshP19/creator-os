@@ -18,7 +18,9 @@ export function makeServer(
             dashboardOverviewRoutes(this);
             dashboardProjectsRoutes(this);
 
-            this.passthrough("https://*.clerk.accounts.dev/**");
+            this.passthrough((request) => {
+                return !request.url.startsWith("http://localhost:8080");
+            });
         },
     });
 

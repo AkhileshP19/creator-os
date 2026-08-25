@@ -27,15 +27,20 @@ const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
     }));
 
     // Setup MirageJS server in development
-    console.log("MOCK SERVER BEFOERE");
     useEffect(() => {
+        let server: any;
         if (useMockData) {
-            console.log(useMockData);
-            makeServer();
-            console.log("MOCK SERVER CREATED");
+            console.log("Mock data enabled, starting MirageJS server");
+            server = makeServer();
         }
+        return () => {
+            if (server) {
+                server.shutdown();
+                console.log("MirageJS server shutdown");
+            }
+        };
     }, []);
-    // causing page refresh turn off makeserver ----
+
 
     return (
         // <RecoilRoot>

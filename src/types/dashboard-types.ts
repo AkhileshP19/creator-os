@@ -4,7 +4,6 @@ export type SidebarMenuItem = {
   href: string;
 }
 
-
 export type DashboardOverviewResponse = {
   user: {
     id: string;
@@ -35,4 +34,14 @@ export type DashboardOverviewResponse = {
       trend: string;
     };
   };
+}
+
+export interface ProjectData {
+  id: string,
+  name: string,
+  type: string,
+  status: string,
+  progress: number,
+  thumbnailUrl: string,
+  updatedAt: string
 }

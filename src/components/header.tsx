@@ -1,4 +1,4 @@
-import { Button } from "../ui/button";
+import { Button } from "./ui/button";
 
 import {
   InputGroup,
@@ -24,11 +24,10 @@ export const Header = ({ isSidebarOpen, setIsSidebarOpen }: HeaderProps) => {
   return (
     <div className="flex h-14 border items-center relative">
       <div
-        className={`h-14 border-r flex items-center justify-start gap-4 px-4 transition-all duration-300 ${
-          isSidebarOpen
+        className={`h-14 border-r flex items-center justify-start gap-4 px-4 transition-all duration-300 ${isSidebarOpen
             ? "w-[226px]"
             : "w-[70px] flex items-center justify-center overflow-hidden`"
-        }`}
+          }`}
       >
         <Cog height={26} width={26} strokeWidth={2} />
         {isSidebarOpen && (
@@ -58,9 +57,8 @@ export const Header = ({ isSidebarOpen, setIsSidebarOpen }: HeaderProps) => {
       {/* Fixed sidebar toggle position */}
       <Button
         type="button"
-        className={`absolute top-1/2 -translate-y-1/2 h-6 w-6 rounded-full z-20 transition-all duration-300 cursor-pointer ${
-          isSidebarOpen ? "left-[214px]" : "left-[56px]"
-        }`}
+        className={`absolute top-1/2 -translate-y-1/2 h-6 w-6 rounded-full z-20 transition-all duration-300 cursor-pointer ${isSidebarOpen ? "left-[214px]" : "left-[56px]"
+          }`}
         variant="outline"
         onPointerDown={(e) => {
           e.preventDefault();

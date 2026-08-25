@@ -3,7 +3,7 @@ export const mockProjects = [
     id: "project_001",
     name: "Everything Around You",
     type: "short_form_video",
-    status: "generating",
+    status: "in_progress",
     progress: 72,
     thumbnailUrl:
       "https://images.pexels.com/photos/1181675/pexels-photo-1181675.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -23,7 +23,7 @@ export const mockProjects = [
     id: "project_003",
     name: "The Future of AI",
     type: "short_form_video",
-    status: "completed",
+    status: "published",
     progress: 100,
     thumbnailUrl:
       "https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -33,7 +33,7 @@ export const mockProjects = [
     id: "project_004",
     name: "Hidden Places on Earth",
     type: "short_form_video",
-    status: "generating",
+    status: "in_progress",
     progress: 61,
     thumbnailUrl:
       "https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -53,7 +53,7 @@ export const mockProjects = [
     id: "project_006",
     name: "Ocean Mysteries",
     type: "short_form_video",
-    status: "completed",
+    status: "published",
     progress: 100,
     thumbnailUrl:
       "https://images.pexels.com/photos/1001682/pexels-photo-1001682.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -63,7 +63,7 @@ export const mockProjects = [
     id: "project_007",
     name: "Secrets of the Universe",
     type: "short_form_video",
-    status: "review",
+    status: "ready",
     progress: 88,
     thumbnailUrl:
       "https://images.pexels.com/photos/2150/sky-space-dark-galaxy.jpg?auto=compress&cs=tinysrgb&w=800",
@@ -73,7 +73,7 @@ export const mockProjects = [
     id: "project_008",
     name: "History in 60 Seconds",
     type: "short_form_video",
-    status: "generating",
+    status: "planning",
     progress: 34,
     thumbnailUrl:
       "https://images.pexels.com/photos/2901209/pexels-photo-2901209.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -83,7 +83,7 @@ export const mockProjects = [
     id: "project_009",
     name: "Amazing Animal Facts",
     type: "short_form_video",
-    status: "completed",
+    status: "archived",
     progress: 100,
     thumbnailUrl:
       "https://images.pexels.com/photos/145939/pexels-photo-145939.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -93,7 +93,7 @@ export const mockProjects = [
     id: "project_010",
     name: "Cities of Tomorrow",
     type: "short_form_video",
-    status: "generating",
+    status: "in_progress",
     progress: 56,
     thumbnailUrl:
       "https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -113,7 +113,7 @@ export const mockProjects = [
     id: "project_012",
     name: "Travel the World",
     type: "short_form_video",
-    status: "completed",
+    status: "published",
     progress: 100,
     thumbnailUrl:
       "https://images.pexels.com/photos/346885/pexels-photo-346885.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -133,7 +133,7 @@ export const mockProjects = [
     id: "project_014",
     name: "Tech That Changed Everything",
     type: "short_form_video",
-    status: "generating",
+    status: "in_progress",
     progress: 67,
     thumbnailUrl:
       "https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -143,7 +143,7 @@ export const mockProjects = [
     id: "project_015",
     name: "Nature's Greatest Wonders",
     type: "short_form_video",
-    status: "completed",
+    status: "ready",
     progress: 100,
     thumbnailUrl:
       "https://images.pexels.com/photos/145685/pexels-photo-145685.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -163,7 +163,7 @@ export const mockProjects = [
     id: "project_017",
     name: "The Power of Space",
     type: "short_form_video",
-    status: "generating",
+    status: "planning",
     progress: 43,
     thumbnailUrl:
       "https://images.pexels.com/photos/1252890/pexels-photo-1252890.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -173,7 +173,7 @@ export const mockProjects = [
     id: "project_018",
     name: "World's Most Beautiful Beaches",
     type: "short_form_video",
-    status: "completed",
+    status: "published",
     progress: 100,
     thumbnailUrl:
       "https://images.pexels.com/photos/1032650/pexels-photo-1032650.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -193,7 +193,7 @@ export const mockProjects = [
     id: "project_020",
     name: "The Digital Revolution",
     type: "short_form_video",
-    status: "generating",
+    status: "in_progress",
     progress: 29,
     thumbnailUrl:
       "https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -213,7 +213,7 @@ export const mockProjects = [
     id: "project_022",
     name: "Animals You Won't Believe Exist",
     type: "short_form_video",
-    status: "completed",
+    status: "published",
     progress: 100,
     thumbnailUrl:
       "https://images.pexels.com/photos/1661179/pexels-photo-1661179.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -223,7 +223,7 @@ export const mockProjects = [
     id: "project_023",
     name: "Future Transportation",
     type: "short_form_video",
-    status: "generating",
+    status: "in_progress",
     progress: 64,
     thumbnailUrl:
       "https://images.pexels.com/photos/358220/pexels-photo-358220.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -233,7 +233,7 @@ export const mockProjects = [
     id: "project_024",
     name: "The Science of Sleep",
     type: "short_form_video",
-    status: "review",
+    status: "ready",
     progress: 95,
     thumbnailUrl:
       "https://images.pexels.com/photos/271897/pexels-photo-271897.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -253,7 +253,7 @@ export const mockProjects = [
     id: "project_026",
     name: "Extreme Weather Explained",
     type: "short_form_video",
-    status: "generating",
+    status: "planning",
     progress: 51,
     thumbnailUrl:
       "https://images.pexels.com/photos/1118873/pexels-photo-1118873.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -263,7 +263,7 @@ export const mockProjects = [
     id: "project_027",
     name: "Architecture That Amazes",
     type: "short_form_video",
-    status: "completed",
+    status: "archived",
     progress: 100,
     thumbnailUrl:
       "https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -283,7 +283,7 @@ export const mockProjects = [
     id: "project_029",
     name: "Inventions That Changed History",
     type: "short_form_video",
-    status: "generating",
+    status: "in_progress",
     progress: 38,
     thumbnailUrl:
       "https://images.pexels.com/photos/1592788/pexels-photo-1592788.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -293,7 +293,7 @@ export const mockProjects = [
     id: "project_030",
     name: "Beautiful Places You Must Visit",
     type: "short_form_video",
-    status: "completed",
+    status: "published",
     progress: 100,
     thumbnailUrl:
       "https://images.pexels.com/photos/753626/pexels-photo-753626.jpeg?auto=compress&cs=tinysrgb&w=800",

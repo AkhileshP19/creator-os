@@ -1,13 +1,12 @@
 "use client"
 
-import { auth } from "@clerk/nextjs/server";
-import { DashboardHeader } from "@/components/custom/dashboard-content/dashboard-header";
+import { DashboardHeader } from "@/components/dashboard-content/dashboard-header";
 import { useFetchData } from "@/hooks/fetch/useFetchData";
 import { ApiEndPoint } from "@/types/api/api-types";
-import { DashboardOverviewResponse } from "@/types/dashboard-types";
-import { DashboardTiles } from "@/components/custom/dashboard-content/dashboard-tiles";
+import { DashboardOverviewResponse, ProjectData } from "@/types/dashboard-types";
+import { DashboardTiles } from "@/components/dashboard-content/dashboard-tiles";
 import { usePaginatedData } from "@/hooks/fetch/usePaginatedDataParams";
-import Projects from "@/components/custom/dashboard-content/projects";
+import Projects from "@/components/projects";
 
 export default function DashboardPage() {
 
@@ -20,7 +19,7 @@ export default function DashboardPage() {
     console.log("data", data);
   }
 
-  const { data: projectsData, isFetched: projectsIsFetched } = usePaginatedData({
+  const { data: projectsData, isFetched: projectsIsFetched } = usePaginatedData<ProjectData>({
     apiEndPoint: ApiEndPoint.GET_DASHBOARD_PROJECTS,
     queryKey: "hello",
     pagination: {
@@ -34,7 +33,7 @@ export default function DashboardPage() {
       <DashboardHeader />
       <DashboardTiles data={data!} />
       <div className="border rounded-md p-4">
-        <Projects data={projectsData} isFetched={projectsIsFetched} />
+        <Projects data={projectsData} />
       </div>
     </main>
   );

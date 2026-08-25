@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, ReactNode } from "react";
-import { Header } from "@/components/custom/header";
-import { SidebarMenu } from "@/components/custom/sidebar";
+import { Header } from "@/components/header";
+import { SidebarMenu } from "@/components/sidebar";
 import { useUser, RedirectToSignIn } from "@clerk/nextjs";
 
 export default function DashboardLayout({
