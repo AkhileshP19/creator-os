@@ -1,6 +1,8 @@
 import { createServer, Server } from "miragejs";
 import dashboardOverviewRoutes from "./routes/dashboard/dashboard/overview";
 import dashboardProjectsRoutes from "./routes/dashboard/dashboard/projects";
+import dashboardAiActivityRoutes from "./routes/dashboard/dashboard/ai-activity";
+import dashboardPendingReviewsRoutes from "./routes/dashboard/dashboard/pending-reviews";
 
 export function makeServer(
     { environment = "development" }: { environment?: string } = {}
@@ -17,6 +19,8 @@ export function makeServer(
 
             dashboardOverviewRoutes(this);
             dashboardProjectsRoutes(this);
+            dashboardAiActivityRoutes(this);
+            dashboardPendingReviewsRoutes(this);
 
             this.passthrough((request) => {
                 return !request.url.startsWith("http://localhost:8080");

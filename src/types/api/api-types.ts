@@ -1,6 +1,8 @@
 export const ApiEndPoint = {
   GET_DASHBOARD_OVERVIEW: "api/dashboard/overview",
   GET_DASHBOARD_PROJECTS: "api/dashboard/projects",
+  GET_AI_ACTIVITY: "api/dashboard/ai-activity",
+  GET_PENDING_REVIEWS: "api/dashboard/reviews"
 } as const;
 
 // Define API response structure

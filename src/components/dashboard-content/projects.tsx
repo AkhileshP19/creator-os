@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ProjectData } from "@/types/dashboard-types";
 import { formatDistanceToNow } from "date-fns";
-import { ProjectStatusBadge } from "./ui/custom/project-status-badge";
+import { ProjectStatusBadge } from "../ui/custom/project-status-badge";
 
 export default function Projects({ data }: { data: ProjectData[] }) {
     console.log('project', data)
     return (
-        <div >
+        <div className="border rounded-md p-4">
             <div className="flex justify-between mb-2">
                 <span className="font-semibold">Recent Projects</span>
                 <Button>view all</Button>

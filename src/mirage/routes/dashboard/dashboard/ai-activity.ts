@@ -1,13 +1,13 @@
-import { mockProjects } from "@/mirage/mock-data/dashboard/projects-data";
+import { mockAiActivity } from "@/mirage/mock-data/dashboard/ai-activity-data";
 import { ApiEndPoint } from "@/types/api/api-types";
 import { Server } from "miragejs";
 
-export default function dashboardProjectsRoutes(server: Server) {
-    server.get(ApiEndPoint.GET_DASHBOARD_PROJECTS, (_schema, request) => {
+export default function dashboardAiActivityRoutes(server: Server) {
+    server.get(ApiEndPoint.GET_AI_ACTIVITY, (_schema, request) => {
         const pageNo = Number(request.queryParams.pageNo ?? 1);
         const pageSize = Number(request.queryParams.pageSize ?? 10);
 
-        const projects = mockProjects;
+        const projects = mockAiActivity;
         const totalCount = projects.length;
         const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -21,10 +21,9 @@ export default function dashboardProjectsRoutes(server: Server) {
             startIndex,
             startIndex + pageSize
         );
-
         return {
             status: "SUCCESS",
-            message: "Dashboard projects fetched successfully",
+            message: "AI Activity fetched successfully",
             data: {
                 responseData: projectsToReturn,
                 totalCount,

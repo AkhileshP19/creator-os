@@ -45,3 +45,40 @@ export interface ProjectData {
   thumbnailUrl: string,
   updatedAt: string
 }
+
+export type AIActivityData = {
+  id: string;
+  type:
+  | "script_generated"
+  | "seo_metadata_generated"
+  | "thumbnail_generated"
+  | "video_generated"
+  | "content_published";
+  title: string;
+  description: string;
+  projectId: string;
+  contentId: string;
+  createdAt: string;
+};
+
+
+export type ApprovalStatus = "pending" | "approved" | "rejected";
+
+export type ApprovalMetadata = {
+  source: "ai_generated";
+  resolution: "1080x1920" | "1920x1080";
+  durationSeconds: number;
+};
+
+export type PendingReviewsData = {
+  id: string;
+  contentId: string;
+  projectId: string;
+  title: string;
+  status: ApprovalStatus;
+  thumbnailUrl: string;
+  metadata: ApprovalMetadata;
+  createdAt: string;
+};
+
+
