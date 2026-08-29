@@ -2,8 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { useUser } from "@clerk/nextjs";
-import { format, getHours } from "date-fns";
-import { Lightbulb, Plus, Sparkle, Sparkles, Workflow } from "lucide-react";
+import { getHours } from "date-fns";
+import { Lightbulb, Plus, Sparkles, Workflow } from "lucide-react";
 
 export const DashboardHeader = () => {
   const user = useUser();
@@ -28,7 +28,7 @@ export const DashboardHeader = () => {
             Good {time}, {user.user?.firstName}
           </h1>
           <span className="text-gray-500 text-muted-foreground">
-            Here's what's happening across your CreatorOS workspace.
+            Here&apos;s what&apos;s happening across your CreatorOS workspace.
           </span>
         </div>
         <div className="flex gap-2">

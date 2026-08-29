@@ -3,6 +3,7 @@ import dashboardOverviewRoutes from "./routes/dashboard/dashboard/overview";
 import dashboardProjectsRoutes from "./routes/dashboard/dashboard/projects";
 import dashboardAiActivityRoutes from "./routes/dashboard/dashboard/ai-activity";
 import dashboardPendingReviewsRoutes from "./routes/dashboard/dashboard/pending-reviews";
+import dashboardAutomationActivityRoutes from "./routes/dashboard/dashboard/automation-activity";
 
 export function makeServer(
     { environment = "development" }: { environment?: string } = {}
@@ -21,6 +22,7 @@ export function makeServer(
             dashboardProjectsRoutes(this);
             dashboardAiActivityRoutes(this);
             dashboardPendingReviewsRoutes(this);
+            dashboardAutomationActivityRoutes(this);
 
             this.passthrough((request) => {
                 return !request.url.startsWith("http://localhost:8080");

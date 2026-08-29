@@ -81,4 +81,12 @@ export type PendingReviewsData = {
   createdAt: string;
 };
 
+export type AutomationActivityData = {
+  id: string;
+  name: string;
+  status: "running" | "completed" | "queued" | "failed" | "waiting" | "retrying" | "cancelled";
+  currentStep: string | null;
+  progress: number;
+  updatedAt: string
+}
 

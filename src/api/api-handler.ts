@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosRequestConfig } from "axios";
 
 export const ID_PLACEHOLDER = "{id}";
@@ -88,7 +89,6 @@ export const apiHandler = async <T>(
     url: string,
     data?: unknown,
     config?: AxiosRequestConfig,
-    isAIML?: boolean
 ): Promise<T> => {
     try {
         const baseURL = "http://localhost:8080/"; // Decide backend dynamically

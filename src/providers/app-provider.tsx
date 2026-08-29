@@ -6,6 +6,7 @@ import { useMockData } from "@/config";
 import React, { useEffect, useState } from "react";
 import useConfiguration from "@/hooks/configuration/useConfiguration";
 import { makeServer } from "@/mirage";
+import { Server } from "miragejs";
 
 interface AppProvidersProps {
     children: React.ReactNode;
@@ -28,7 +29,7 @@ const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
 
     // Setup MirageJS server in development
     useEffect(() => {
-        let server: any;
+        let server: Server;
         if (useMockData) {
             console.log("Mock data enabled, starting MirageJS server");
             server = makeServer();

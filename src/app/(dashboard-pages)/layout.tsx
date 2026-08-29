@@ -11,7 +11,7 @@ export default function DashboardLayout({
   children: ReactNode;
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const { isLoaded, isSignedIn, user } = useUser();
+  const { isSignedIn, user } = useUser();
 
   // if (!isLoaded) {
   //   return (

@@ -1,14 +1,14 @@
-import { mockPendingReviews } from "@/mirage/mock-data/dashboard/pending-reviews-data";
+import { mockAutomationActivityData } from "@/mirage/mock-data/dashboard/automation-data";
 import { ApiEndPoint } from "@/types/api/api-types";
 import { Server } from "miragejs";
 
-export default function dashboardPendingReviewsRoutes(server: Server) {
-    server.get(ApiEndPoint.GET_PENDING_REVIEWS, (_schema, request) => {
+export default function dashboardAutomationActivityRoutes(server: Server) {
+    server.get(ApiEndPoint.GET_AUTOMATION_ACTIVITY, (_schema, request) => {
         const pageNo = Number(request.queryParams.pageNo ?? 1);
         const pageSize = Number(request.queryParams.pageSize ?? 10);
 
-        const projects = mockPendingReviews;
-        const totalCount = projects.length;
+        const automations = mockAutomationActivityData;
+        const totalCount = automations.length;
         const totalPages = Math.ceil(totalCount / pageSize);
 
         const currentPage = Math.min(
@@ -17,15 +17,15 @@ export default function dashboardPendingReviewsRoutes(server: Server) {
         );
 
         const startIndex = (currentPage - 1) * pageSize;
-        const projectsToReturn = projects.slice(
+        const automationDataToReturn = automations.slice(
             startIndex,
             startIndex + pageSize
         );
         return {
             status: "SUCCESS",
-            message: "AI Activity fetched successfully",
+            message: "Automation activity data fetched successfully",
             data: {
-                responseData: projectsToReturn,
+                responseData: automationDataToReturn,
                 totalCount,
                 totalPages,
                 currentPage,
