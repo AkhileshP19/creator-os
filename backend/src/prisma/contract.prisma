@@ -1,21 +1,288 @@
 // use prisma-next
 
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  username  String?
-  name      String?
-  posts     Post[]
-  createdAt TimestamptzString @default(now())
-  updatedAt temporal.updatedAtString()
+enum UserRole {
+  ADMIN
+  CREATOR
+  REVIEWER
 }
 
-model Post {
-  id        Int      @id @default(autoincrement())
+enum ProjectStatus {
+  DRAFT
+  PLANNING
+  GENERATING
+  REVIEW
+  READY
+  PUBLISHED
+  ARCHIVED
+}
+
+enum IdeaStatus {
+  DRAFT
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  ARCHIVED
+}
+
+enum PriorityLevel {
+  P0
+  P1
+  P2
+  P3
+}
+
+enum WorkflowStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REGENERATE
+}
+
+enum PublishStatus {
+  QUEUED
+  UPLOADING
+  PUBLISHED
+  FAILED
+}
+
+enum AssetType {
+  VIDEO
+  AUDIO
+  IMAGE
+  SCRIPT
+  THUMBNAIL
+  SUBTITLE
+}
+
+enum AIProvider {
+  GEMINI
+  OPENAI
+  CLAUDE
+  CUSTOM
+}
+
+model User {
+  id          String    @id @default(uuid())
+  clerkUserId String    @unique
+  fullName    String
+  email       String    @unique
+  avatarUrl   String?
+  role        UserRole  @default(CREATOR)
+  isVerified  Boolean   @default(false)
+  lastLogin   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now())
+  deletedAt   DateTime?
+
+  settings       UserSettings?
+  projects       Project[]
+  contentIdeas   ContentIdea[]
+  approvals      Approval[]
+  notifications  Notification[]
+  integrations   Integration[]
+  auditLogs      AuditLog[]
+}
+
+model UserSettings {
+  id                      String     @id @default(uuid())
+  userId                  String     @unique
+  theme                   String     @default("system")
+  timezone                String     @default("UTC")
+  language                String     @default("en")
+  aiProvider              AIProvider
+  youtubeConnected        Boolean    @default(false)
+  notificationPreferences Json
+  createdAt               DateTime   @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Project {
+  id          String        @id @default(uuid())
+  ownerId     String
+  name        String
+  description String?
+  status      ProjectStatus  @default(DRAFT)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @default(now())
+  deletedAt   DateTime?
+
+  owner       User          @relation(fields: [ownerId], references: [id])
+  contentIdeas ContentIdea[]
+
+  @@index([ownerId])
+}
+
+model ContentIdea {
+  id            String       @id @default(uuid())
+  projectId     String
+  title         String
+  description   String?
+  category      String?
+  tags          Json
+  status        IdeaStatus
+  scheduledDate DateTime?
+  priority      PriorityLevel
+  createdById   String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @default(now())
+  deletedAt     DateTime?
+
+  project     Project       @relation(fields: [projectId], references: [id])
+  createdBy   User          @relation(fields: [createdById], references: [id])
+  workflows   AIWorkflow[]
+  approvals   Approval[]
+  publishJobs PublishJob[]
+
+  @@index([projectId])
+  @@index([status])
+  @@index([projectId, status])
+}
+
+model AIWorkflow {
+  id            String         @id @default(uuid())
+  contentId     String
+  workflowType  String
+  status        WorkflowStatus
+  startedAt     DateTime?
+  completedAt   DateTime?
+  retryCount    Int            @default(0)
+  executionTime Int?
+  currentStep   String?
+  errorMessage  String?
+
+  content     ContentIdea    @relation(fields: [contentId], references: [id])
+  logs        WorkflowLog[]
+  aiRequests  AIRequest[]
+  assets      Asset[]
+
+  @@index([status])
+}
+
+model WorkflowLog {
+  id         String      @id @default(uuid())
+  workflowId String
+  stepName   String
+  response   Json
+  createdAt  DateTime    @default(now())
+
+  workflow AIWorkflow @relation(fields: [workflowId], references: [id])
+
+  @@index([workflowId])
+}
+
+model AIRequest {
+  id          String     @id @default(uuid())
+  workflowId  String
+  prompt      String
+  response    String?
+  tokenUsage  Int?
+  createdAt   DateTime   @default(now())
+
+  workflow AIWorkflow @relation(fields: [workflowId], references: [id])
+
+  @@index([workflowId])
+}
+
+model Asset {
+  id         String    @id @default(uuid())
+  workflowId String
+  storageUrl String
+  assetType  AssetType
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @default(now())
+  deletedAt  DateTime?
+
+  workflow AIWorkflow @relation(fields: [workflowId], references: [id])
+
+  @@index([workflowId])
+}
+
+model Approval {
+  id           String         @id @default(uuid())
+  contentId    String
+  decision     ApprovalStatus
+  reviewedById String
+  comment      String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @default(now())
+
+  content    ContentIdea @relation(fields: [contentId], references: [id])
+  reviewedBy User        @relation(fields: [reviewedById], references: [id])
+
+  @@index([contentId])
+}
+
+model PublishJob {
+  id              String        @id @default(uuid())
+  contentId       String
+  platform        String
+  publishStatus   PublishStatus
+  scheduledAt     DateTime?
+  publishedAt     DateTime?
+  externalVideoId String?
+  errorMessage    String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @default(now())
+
+  content ContentIdea @relation(fields: [contentId], references: [id])
+
+  @@index([publishStatus])
+  @@index([platform, publishStatus])
+}
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String
+  type      String
   title     String
-  content   String?
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  Int
-  createdAt TimestamptzString @default(now())
-  updatedAt temporal.updatedAtString()
+  message   String
+  data      Json?
+  isRead    Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  readAt    DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+}
+
+model Integration {
+  id           String    @id @default(uuid())
+  userId       String
+  provider     String
+  accessToken  String
+  refreshToken String?
+  expiresAt    DateTime?
+  metadata     Json?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id         String    @id @default(uuid())
+  userId     String?
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime  @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
 }
