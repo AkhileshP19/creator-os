@@ -48,36 +48,27 @@ export const buildUrlWithFilters = (ids: ApiIds, apiEndPoint: string, filters?: 
     return url;
 };
 
-const getCookie = (name: string): string | null => {
-    const cookies = document.cookie.split("; ");
-    for (const cookie of cookies) {
-        const [key, value] = cookie.split("=");
-        if (key === name) {
-            return decodeURIComponent(value);
-        }
-    }
-    return null;
-};
-
 export type ApiIds = number | string | (number | string)[];
 
 const api = axios.create({
-    // baseURL: baseJavaURL,
-    // withCredentials: true, // ✅ Enables sending cookies with requests
     headers: {
         Accept: "application/json",
-        // "Content-Type": "application/json",
-        "ngrok-skip-browser-warning": "true" // Disable ngrok warning and errors,
+        "ngrok-skip-browser-warning": "true" // Disable ngrok warning and errors
     }
 });
 
 // ✅ **Attach Authorization Token to Every Request**
 api.interceptors.request.use(
-    (config) => {
-        const token = getCookie("auth_token"); // Retrieve token from cookies
-        console.log(token);
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+    async (config) => {
+        if (typeof window !== "undefined" && (window as any).Clerk) {
+            try {
+                const token = await (window as any).Clerk.session?.getToken();
+                if (token) {
+                    config.headers.Authorization = `Bearer ${token}`;
+                }
+            } catch (error) {
+                console.error("Error retrieving Clerk token:", error);
+            }
         }
         return config;
     },
@@ -91,7 +82,7 @@ export const apiHandler = async <T>(
     config?: AxiosRequestConfig,
 ): Promise<T> => {
     try {
-        const baseURL = "http://localhost:8080/"; // Decide backend dynamically
+        const baseURL = "http://localhost:5000"; // Decide backend dynamically
         console.log(baseURL);
 
         // Detect if we want a blob (Excel download)

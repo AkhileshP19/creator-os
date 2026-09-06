@@ -17,11 +17,13 @@
   "license": "ISC",
   "dependencies": {
     "@clerk/express": "^2.1.64",
+    "@js-temporal/polyfill": "^0.5.1",
     "@prisma/client": "^7.10.0",
     "@prisma/orm-postgres": "^8.0.0-rc.8",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "temporal-polyfill": "^1.0.4"
   },
   "devDependencies": {
     "@prisma/cli-engine": "^0.2.3",

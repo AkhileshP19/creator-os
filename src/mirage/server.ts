@@ -16,7 +16,7 @@ export function makeServer(
         seeds() { },
 
         routes() {
-            this.urlPrefix = "http://localhost:8080";
+            this.urlPrefix = "http://localhost:5000";
 
             dashboardOverviewRoutes(this);
             dashboardProjectsRoutes(this);
@@ -25,7 +25,7 @@ export function makeServer(
             dashboardAutomationActivityRoutes(this);
 
             this.passthrough((request) => {
-                return !request.url.startsWith("http://localhost:8080");
+                return !request.url.startsWith("http://localhost:5000");
             });
         },
     });
