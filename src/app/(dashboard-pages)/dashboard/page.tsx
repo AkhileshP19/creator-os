@@ -14,17 +14,6 @@ import { useEffect } from "react";
 
 export default function DashboardPage() {
 
-  const { data: authData } = useFetchData<any>(
-    "/api/auth/me",
-    "auth-me"
-  )
-
-  useEffect(() => {
-    if (authData) {
-      console.log("auth data", authData)
-    }
-  }, [authData])
-
   const { data, isFetched } = useFetchData<DashboardOverviewResponse>(
     ApiEndPoint.GET_DASHBOARD_OVERVIEW,
     "dashboard-overview",

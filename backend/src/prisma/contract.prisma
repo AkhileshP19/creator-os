@@ -1,6 +1,6 @@
 // use prisma-next
 
-enum UserRole {
+export enum UserRole {
   ADMIN
   CREATOR
   REVIEWER

@@ -4,6 +4,9 @@ import { useState, ReactNode } from "react";
 import { Header } from "@/components/header";
 import { SidebarMenu } from "@/components/sidebar";
 import { useUser, RedirectToSignIn } from "@clerk/nextjs";
+import { useFetchData } from "@/hooks/fetch/useFetchData";
+import { ApiEndPoint } from "@/types/api/api-types";
+import { AuthUser } from "@/types/auth-types";
 
 export default function DashboardLayout({
   children,
@@ -11,7 +14,15 @@ export default function DashboardLayout({
   children: ReactNode;
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const { isSignedIn, user } = useUser();
+  const { isSignedIn, user, isLoaded } = useUser();
+
+  const { data: authData } = useFetchData<AuthUser>(
+    ApiEndPoint.GET_AUTH_ME,
+    "auth-me",
+    [],
+    {},
+    isLoaded && !!isSignedIn
+  )
 
   // if (!isLoaded) {
   //   return (

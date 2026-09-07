@@ -10,7 +10,24 @@ import authRouter from "./routes/auth-routes.js";
 
 const app: Application = express();
 
-app.use(cors());
+const frontendOrigin = process.env.FRONTEND_URL ?? "https://fluffy-fiesta-7q5xpp46x9pfrrrr-3000.app.github.dev";
+const allowedOrigins = new Set([frontendOrigin, "http://localhost:3000"]);
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.has(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`Origin ${origin} is not allowed by CORS`));
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(clerkMiddleware());
 
 app.use(express.json());

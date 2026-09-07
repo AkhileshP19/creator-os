@@ -1,5 +1,6 @@
 import { getAuth } from "@clerk/express";
 import type { NextFunction, Request, Response } from "express";
+import currentUserMiddleware from "./current-user-middleware.js";
 
 const authMiddleware = (
     req: Request,
@@ -15,7 +16,6 @@ const authMiddleware = (
             data: null,
         });
     }
-
     next();
 };
 
