@@ -4,8 +4,13 @@ import { Button } from "@/components/ui/button";
 import { useUser } from "@clerk/nextjs";
 import { getHours } from "date-fns";
 import { Lightbulb, Plus, Sparkles, Workflow } from "lucide-react";
+import { Dispatch, SetStateAction } from "react";
 
-export const DashboardHeader = () => {
+interface DashboardHeaderProps {
+  setIsCreateProjectModalOpen: Dispatch<SetStateAction<boolean>>;
+}
+
+export const DashboardHeader = ({ setIsCreateProjectModalOpen }: DashboardHeaderProps) => {
   const user = useUser();
 
   const hour = getHours(new Date());
@@ -52,6 +57,7 @@ export const DashboardHeader = () => {
       <div className="flex gap-4">
         <Button
           variant="outline"
+          onClick={() => setIsCreateProjectModalOpen(true)}
           className="flex items-center justify-center gap-2 border py-5 px-4 text-sm cursor-pointer"
         >
           <Plus stroke="#4f46e5" />

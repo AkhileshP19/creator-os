@@ -10,9 +10,12 @@ import Projects from "@/components/dashboard-content/projects";
 import { AIActivity } from "@/components/dashboard-content/ai-activity";
 import { PendingReviews } from "@/components/dashboard-content/pending-reviews";
 import { AutomationActivity } from "@/components/dashboard-content/automation-activity";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { CreateProjectModal } from "@/components/projects/create-project-modal";
 
 export default function DashboardPage() {
+
+  const [isCreateProjectModalOpen, setIsCreateProjectModalOpen] = useState<boolean>(false);
 
   const { data, isFetched } = useFetchData<DashboardOverviewResponse>(
     ApiEndPoint.GET_DASHBOARD_OVERVIEW,
@@ -61,7 +64,7 @@ export default function DashboardPage() {
 
   return (
     <main className="min-w-0 flex-1 overflow-y-auto p-6 space-y-6">
-      <DashboardHeader />
+      <DashboardHeader setIsCreateProjectModalOpen={setIsCreateProjectModalOpen} />
       <DashboardTiles data={data!} />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="col-span-1 md:col-span-2">
@@ -77,6 +80,8 @@ export default function DashboardPage() {
       <div>
         <AutomationActivity data={automationData} />
       </div>
+
+      <CreateProjectModal open={isCreateProjectModalOpen} onOpenChange={setIsCreateProjectModalOpen} />
     </main>
   );
 }
