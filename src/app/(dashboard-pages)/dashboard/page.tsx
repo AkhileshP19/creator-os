@@ -1,9 +1,15 @@
-"use client"
+"use client";
 
 import { DashboardHeader } from "@/components/dashboard-content/dashboard-header";
 import { useFetchData } from "@/hooks/fetch/useFetchData";
 import { ApiEndPoint } from "@/types/api/api-types";
-import { AIActivityData, AutomationActivityData, DashboardOverviewResponse, PendingReviewsData, ProjectData } from "@/types/dashboard-types";
+import {
+  AIActivityData,
+  AutomationActivityData,
+  DashboardOverviewResponse,
+  PendingReviewsData,
+  ProjectData,
+} from "@/types/dashboard-types";
 import { DashboardTiles } from "@/components/dashboard-content/dashboard-tiles";
 import { usePaginatedData } from "@/hooks/fetch/usePaginatedDataParams";
 import Projects from "@/components/dashboard-content/projects";
@@ -14,57 +20,67 @@ import { useEffect, useState } from "react";
 import { CreateProjectModal } from "@/components/projects/create-project-modal";
 
 export default function DashboardPage() {
-
-  const [isCreateProjectModalOpen, setIsCreateProjectModalOpen] = useState<boolean>(false);
+  const [isCreateProjectModalOpen, setIsCreateProjectModalOpen] =
+    useState<boolean>(false);
 
   const { data, isFetched } = useFetchData<DashboardOverviewResponse>(
     ApiEndPoint.GET_DASHBOARD_OVERVIEW,
     "dashboard-overview",
-  )
+    [],
+    undefined,
+    false,
+  );
 
   if (isFetched) {
     console.log("data", data);
   }
 
-  const { data: projectsData } = usePaginatedData<ProjectData>({
-    apiEndPoint: ApiEndPoint.GET_DASHBOARD_PROJECTS,
-    queryKey: "hello",
-    pagination: {
-      pageNo: 1,
-      pageSize: 5
-    }
-  })
+  const { data: projectsData, refetch: refetchProjects } =
+    usePaginatedData<ProjectData>({
+      apiEndPoint: ApiEndPoint.GET_DASHBOARD_PROJECTS,
+      queryKey: "hello",
+      pagination: {
+        pageNo: 1,
+        pageSize: 5,
+      },
+    });
 
   const { data: aiActivityData } = usePaginatedData<AIActivityData>({
     apiEndPoint: ApiEndPoint.GET_AI_ACTIVITY,
     queryKey: "ai-activity",
     pagination: {
       pageNo: 1,
-      pageSize: 5
-    }
-  })
+      pageSize: 5,
+    },
+    enabled: false,
+  });
 
-  const { data: pendingReviewsData, totalCount } = usePaginatedData<PendingReviewsData>({
-    apiEndPoint: ApiEndPoint.GET_PENDING_REVIEWS,
-    queryKey: "pending-reviews",
-    pagination: {
-      pageNo: 1,
-      pageSize: 5
-    }
-  })
+  const { data: pendingReviewsData, totalCount } =
+    usePaginatedData<PendingReviewsData>({
+      apiEndPoint: ApiEndPoint.GET_PENDING_REVIEWS,
+      queryKey: "pending-reviews",
+      pagination: {
+        pageNo: 1,
+        pageSize: 5,
+      },
+      enabled: false,
+    });
 
   const { data: automationData } = usePaginatedData<AutomationActivityData>({
     apiEndPoint: ApiEndPoint.GET_AUTOMATION_ACTIVITY,
     queryKey: "automation-activity",
     pagination: {
       pageNo: 1,
-      pageSize: 5
-    }
-  })
+      pageSize: 5,
+    },
+    enabled: false,
+  });
 
   return (
     <main className="min-w-0 flex-1 overflow-y-auto p-6 space-y-6">
-      <DashboardHeader setIsCreateProjectModalOpen={setIsCreateProjectModalOpen} />
+      <DashboardHeader
+        setIsCreateProjectModalOpen={setIsCreateProjectModalOpen}
+      />
       <DashboardTiles data={data!} />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="col-span-1 md:col-span-2">
@@ -81,7 +97,12 @@ export default function DashboardPage() {
         <AutomationActivity data={automationData} />
       </div>
 
-      <CreateProjectModal open={isCreateProjectModalOpen} onOpenChange={setIsCreateProjectModalOpen} />
+      <CreateProjectModal
+        open={isCreateProjectModalOpen}
+        onOpenChange={setIsCreateProjectModalOpen}
+        mode="create"
+        refetchProjects={refetchProjects}
+      />
     </main>
   );
 }

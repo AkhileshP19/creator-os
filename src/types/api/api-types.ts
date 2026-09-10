@@ -7,6 +7,8 @@ export const ApiEndPoint = {
   GET_AUTH_ME: "/api/auth/me",
 
   CREATE_PROJECT: "/api/projects",
+  UPDATE_PROJECT: "/api/projects/{id}",
+  DELETE_PROJECT: "/api/projects/delete/{id}",
 } as const;
 
 // Define API response structure

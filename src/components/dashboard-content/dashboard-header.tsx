@@ -46,6 +46,7 @@ export const DashboardHeader = ({ setIsCreateProjectModalOpen }: DashboardHeader
           </Button>
           <Button
             variant="outline"
+            onClick={() => setIsCreateProjectModalOpen(true)}
             className="flex items-center justify-center gap-2 border py-5 px-4 bg-indigo-600 text-white hover:bg-indigo-700 hover:text-white cursor-pointer"
           >
             <Plus />

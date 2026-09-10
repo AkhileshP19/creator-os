@@ -43,7 +43,8 @@ export interface ProjectData {
   status: string,
   progress: number,
   thumbnailUrl: string,
-  updatedAt: string
+  updatedAt: string,
+  description: string,
 }
 
 export type AIActivityData = {
