@@ -16,6 +16,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { usePatchData } from "@/hooks/fetch/usePatchData";
 import { usePostData } from "@/hooks/fetch/usePostData";
 import { ApiEndPoint } from "@/types/api/api-types";
+import {
+  CreateProjectRequest,
+  CreateProjectResponse,
+} from "@/types/project-types";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -41,14 +45,15 @@ export const CreateProjectModal = ({
   const [projectName, setProjectName] = useState("");
   const [projectDesc, setProjectDesc] = useState("");
 
-  const createProjectMutation = usePostData<any, any>(
-    ApiEndPoint.CREATE_PROJECT,
-  );
+  const createProjectMutation = usePostData<
+    CreateProjectResponse,
+    CreateProjectRequest
+  >(ApiEndPoint.CREATE_PROJECT);
 
-  const updateProjectMutation = usePatchData<any, any>(
-    ApiEndPoint.UPDATE_PROJECT,
-    projectId ?? "",
-  );
+  const updateProjectMutation = usePatchData<
+    CreateProjectResponse,
+    CreateProjectRequest
+  >(ApiEndPoint.UPDATE_PROJECT, [projectId ?? ""]);
 
   const handleCreateProject = async () => {
     try {
@@ -56,7 +61,8 @@ export const CreateProjectModal = ({
         name: projectName,
         description: projectDesc,
       };
-      await createProjectMutation.mutateAsync(payload);
+      const response = await createProjectMutation.mutateAsync(payload);
+      console.log("Project created:", response);
       toast.success("Project created successfully!");
       onOpenChange(false);
       setProjectName("");

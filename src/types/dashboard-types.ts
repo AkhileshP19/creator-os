@@ -2,7 +2,7 @@ export type SidebarMenuItem = {
   icon: React.ReactNode;
   label: string;
   href: string;
-}
+};
 
 export type DashboardOverviewResponse = {
   user: {
@@ -34,34 +34,34 @@ export type DashboardOverviewResponse = {
       trend: string;
     };
   };
-}
+};
 
 export interface ProjectData {
-  id: string,
-  name: string,
-  type: string,
-  status: string,
-  progress: number,
-  thumbnailUrl: string,
-  updatedAt: string,
-  description: string,
+  id: string;
+  name: string;
+  type: string;
+  status: string;
+  progress: number;
+  thumbnailUrl: string;
+  updatedAt: string;
+  description: string;
+  createdAt: string;
 }
 
 export type AIActivityData = {
   id: string;
   type:
-  | "script_generated"
-  | "seo_metadata_generated"
-  | "thumbnail_generated"
-  | "video_generated"
-  | "content_published";
+    | "script_generated"
+    | "seo_metadata_generated"
+    | "thumbnail_generated"
+    | "video_generated"
+    | "content_published";
   title: string;
   description: string;
   projectId: string;
   contentId: string;
   createdAt: string;
 };
-
 
 export type ApprovalStatus = "pending" | "approved" | "rejected";
 
@@ -85,9 +85,15 @@ export type PendingReviewsData = {
 export type AutomationActivityData = {
   id: string;
   name: string;
-  status: "running" | "completed" | "queued" | "failed" | "waiting" | "retrying" | "cancelled";
+  status:
+    | "running"
+    | "completed"
+    | "queued"
+    | "failed"
+    | "waiting"
+    | "retrying"
+    | "cancelled";
   currentStep: string | null;
   progress: number;
-  updatedAt: string
-}
-
+  updatedAt: string;
+};

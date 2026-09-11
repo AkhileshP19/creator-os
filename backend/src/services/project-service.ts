@@ -6,11 +6,23 @@ interface CreateProjectInput {
   ownerId: string;
 }
 
+interface UpdateProjectInput {
+  name?: string;
+  description?: string;
+}
+
 interface GetProjectsInput {
   currentUserId: string;
-  pageNo: string;
-  pageSize: string;
-  search: string;
+  pageNo: number;
+  pageSize: number;
+  search?: string;
+}
+
+interface GetProjectsResult {
+  projects: any[];
+  totalCount: number;
+  totalPages: number;
+  currentPage: number;
 }
 
 const projectService = {
@@ -20,6 +32,7 @@ const projectService = {
         name,
         description,
         ownerId,
+        deletedAt: null,
       });
 
       return newProject;
@@ -34,34 +47,49 @@ const projectService = {
     pageNo,
     pageSize,
     search,
-  }: GetProjectsInput) => {
+  }: GetProjectsInput): Promise<GetProjectsResult> => {
     try {
       let query = db.orm.public.Project.where({
         ownerId: currentUserId,
         deletedAt: null,
-      }).orderBy((p) => p.createdAt.desc());
+      });
 
       if (search) {
         query = query.where((p) => p.name.ilike(`%${search}%`));
       }
 
-      if (pageNo && pageSize) {
-        const offset = (Number(pageNo) - 1) * Number(pageSize);
-        query = query.offset(offset).limit(Number(pageSize));
-      }
+      // Use aggregate() for counting, NOT query.count()
+      const countResult = await query.aggregate((a) => ({ total: a.count() }));
+      const totalCount = Number(countResult.total);
 
-      const projects = await query.all();
-      return projects;
+      const totalPages = pageSize > 0 ? Math.ceil(totalCount / pageSize) : 0;
+
+      const offset = (pageNo - 1) * pageSize;
+
+      const projects = await query
+        .orderBy((p) => p.createdAt.desc())
+        .limit(pageSize)
+        .offset(offset)
+        .all();
+
+      return {
+        projects,
+        totalCount,
+        totalPages,
+        currentPage: pageNo,
+      };
     } catch (error) {
       console.error("Failed to get projects:", error);
       throw error;
     }
   },
 
-  getProjectById: async (projectId: string) => {
+  getProjectById: async (projectId: string, currentUserId: string) => {
     try {
       const project = await db.orm.public.Project.where({
         id: projectId,
+        ownerId: currentUserId,
+        deletedAt: null,
       }).first();
       return project;
     } catch (error) {
@@ -70,10 +98,12 @@ const projectService = {
     }
   },
 
-  deleteProjectById: async (projectId: string) => {
+  deleteProjectById: async (projectId: string, currentUserId: string) => {
     try {
       const deletedProject = await db.orm.public.Project.where({
         id: projectId,
+        ownerId: currentUserId,
+        deletedAt: null,
       }).update({ deletedAt: Temporal.Now.instant() });
       return deletedProject;
     } catch (error) {
@@ -82,17 +112,23 @@ const projectService = {
     }
   },
 
-  updateProjectById: async (projectId: string, updateData: Partial<CreateProjectInput>) => {
+  updateProjectById: async (
+    projectId: string,
+    updateData: UpdateProjectInput,
+    currentUserId: string,
+  ) => {
     try {
       const updatedProject = await db.orm.public.Project.where({
         id: projectId,
+        ownerId: currentUserId,
+        deletedAt: null,
       }).update(updateData);
       return updatedProject;
     } catch (error) {
       console.error("Failed to update project by ID:", error);
       throw error;
     }
-  }
+  },
 };
 
 export default projectService;

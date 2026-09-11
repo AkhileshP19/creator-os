@@ -46,8 +46,8 @@ export const getProjectsController: RequestHandler = async (req, res) => {
     // Fetch user projects from the service layer
     const projects = await projectService.getProjects({
       currentUserId,
-      pageNo,
-      pageSize,
+      pageNo: Number(pageNo),
+      pageSize: Number(pageSize),
       search,
     });
 
@@ -55,10 +55,10 @@ export const getProjectsController: RequestHandler = async (req, res) => {
       status: "SUCCESS",
       message: "Projects retrieved successfully",
       data: {
-        responseData: projects,
-        totalCount: projects.length,
-        totalPages: 1, // Add pagination math here later if needed
-        currentPage: 1,
+        responseData: projects.projects,
+        totalCount: projects.totalCount,
+        totalPages: projects.totalPages,
+        currentPage: projects.currentPage,
       },
     });
   } catch (error) {
@@ -75,8 +75,21 @@ export const getProjectByIdController: RequestHandler = async (req, res) => {
   try {
     const projectId = req.params.projectId;
 
+    if (!projectId || Array.isArray(projectId)) {
+      return res.status(400).json({
+        status: "ERROR",
+        message: "Invalid project ID",
+        data: null,
+      });
+    }
+
+    const currentUserId = req.currentUser.id;
+
     // Fetch the project by ID from the service layer
-    const project = await projectService.getProjectById(projectId);
+    const project = await projectService.getProjectById(
+      projectId,
+      currentUserId,
+    );
 
     return res.status(200).json({
       status: "SUCCESS",
@@ -99,8 +112,21 @@ export const deleteProjectByIdController: RequestHandler = async (req, res) => {
   try {
     const projectId = req.params.projectId;
 
+    if (!projectId || Array.isArray(projectId)) {
+      return res.status(400).json({
+        status: "ERROR",
+        message: "Invalid project ID",
+        data: null,
+      });
+    }
+
+    const currentUserId = req.currentUser.id;
+
     // Delete the project by ID from the service layer
-    const deletedProject = await projectService.deleteProjectById(projectId);
+    const deletedProject = await projectService.deleteProjectById(
+      projectId,
+      currentUserId,
+    );
 
     return res.status(200).json({
       status: "SUCCESS",
@@ -122,12 +148,23 @@ export const deleteProjectByIdController: RequestHandler = async (req, res) => {
 export const updateProjectByIdController: RequestHandler = async (req, res) => {
   try {
     const projectId = req.params.projectId;
+
+    if (!projectId || Array.isArray(projectId)) {
+      return res.status(400).json({
+        status: "ERROR",
+        message: "Invalid project ID",
+        data: null,
+      });
+    }
+
     const updateData = req.body;
+    const currentUserId = req.currentUser.id;
 
     // Update the project by ID from the service layer
     const updatedProject = await projectService.updateProjectById(
       projectId,
       updateData,
+      currentUserId,
     );
 
     return res.status(200).json({
