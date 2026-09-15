@@ -16,12 +16,16 @@ import Projects from "@/components/dashboard-content/projects";
 import { AIActivity } from "@/components/dashboard-content/ai-activity";
 import { PendingReviews } from "@/components/dashboard-content/pending-reviews";
 import { AutomationActivity } from "@/components/dashboard-content/automation-activity";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CreateProjectModal } from "@/components/projects/create-project-modal";
+import useDebounceSearch from "@/hooks/optimization/useDebounceSearch";
+import { useDashboardSearch } from "@/components/dashboard-search-context";
 
 export default function DashboardPage() {
   const [isCreateProjectModalOpen, setIsCreateProjectModalOpen] =
     useState<boolean>(false);
+  const { search } = useDashboardSearch();
+  const debouncedSearch = useDebounceSearch(search, 300);
 
   const { data, isFetched } = useFetchData<DashboardOverviewResponse>(
     ApiEndPoint.GET_DASHBOARD_OVERVIEW,
@@ -43,6 +47,7 @@ export default function DashboardPage() {
         pageNo: 1,
         pageSize: 5,
       },
+      search: debouncedSearch,
     });
 
   const { data: aiActivityData } = usePaginatedData<AIActivityData>({
@@ -98,6 +103,7 @@ export default function DashboardPage() {
       </div>
 
       <CreateProjectModal
+        key={`create-${isCreateProjectModalOpen}`}
         open={isCreateProjectModalOpen}
         onOpenChange={setIsCreateProjectModalOpen}
         mode="create"

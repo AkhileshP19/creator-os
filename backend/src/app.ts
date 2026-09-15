@@ -5,7 +5,6 @@ import healthRouter from "./routes/health-routes.js";
 import errorMiddleware from "./middleware/error-middleware.js";
 import notFoundMiddleware from "./middleware/not-found-middleware.js"
 import { clerkMiddleware } from "@clerk/express";
-import authMiddleware from "./middleware/auth-middleware.js";
 import authRouter from "./routes/auth-routes.js";
 import projectRouter from "./routes/project-routes.js";
 

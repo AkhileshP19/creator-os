@@ -7,7 +7,6 @@ import { usePostData } from "@/hooks/fetch/usePostData";
 import { ApiEndPoint } from "@/types/api/api-types";
 import { ProjectData } from "@/types/dashboard-types";
 import { CreateProjectResponse } from "@/types/project-types";
-import { Pencil, Trash } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
@@ -85,6 +84,7 @@ export default function ProjectsPage() {
       )}
 
       <CreateProjectModal
+        key={`edit-${isEditModalOpen}-${selectedProjectData?.id ?? ""}`}
         open={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}
         mode="edit"

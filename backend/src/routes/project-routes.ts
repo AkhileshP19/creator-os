@@ -4,6 +4,7 @@ import authMiddleware from "../middleware/auth-middleware.js";
 import currentUserMiddleware from "../middleware/current-user-middleware.js";
 import {
   deleteProjectByIdController,
+  getProjectByIdController,
   getProjectsController,
   projectController,
   updateProjectByIdController,
@@ -37,6 +38,13 @@ projectRouter.patch(
   authMiddleware,
   currentUserMiddleware,
   updateProjectByIdController,
+);
+
+projectRouter.get(
+  "/:projectId",
+  authMiddleware,
+  currentUserMiddleware,
+  getProjectByIdController  ,
 );
 
 export default projectRouter;

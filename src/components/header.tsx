@@ -6,6 +6,7 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { Show, UserButton } from "@clerk/nextjs";
+import { useDashboardSearch } from "@/components/dashboard-search-context";
 import {
   Bell,
   ChevronLeft,
@@ -21,6 +22,8 @@ interface HeaderProps {
 }
 
 export const Header = ({ isSidebarOpen, setIsSidebarOpen }: HeaderProps) => {
+  const { search, setSearch } = useDashboardSearch();
+
   return (
     <div className="flex h-14 border items-center relative">
       <div
@@ -38,7 +41,11 @@ export const Header = ({ isSidebarOpen, setIsSidebarOpen }: HeaderProps) => {
         <div>Dashboard</div>
         <div className="flex gap-6">
           <InputGroup className="max-w-xs">
-            <InputGroupInput placeholder="Search anything..." />
+            <InputGroupInput
+              placeholder="Search anything..."
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
             <InputGroupAddon>
               <Search />
             </InputGroupAddon>

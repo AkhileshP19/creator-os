@@ -7,8 +7,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+  DialogTitle
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,7 +19,7 @@ import {
   CreateProjectRequest,
   CreateProjectResponse,
 } from "@/types/project-types";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import toast from "react-hot-toast";
 
 interface CreateProjectModalProps {
@@ -42,8 +41,12 @@ export const CreateProjectModal = ({
   incomingProjectDesc,
   refetchProjects,
 }: CreateProjectModalProps) => {
-  const [projectName, setProjectName] = useState("");
-  const [projectDesc, setProjectDesc] = useState("");
+  const [projectName, setProjectName] = useState(
+    mode === "edit" ? (incomingProjectName ?? "") : "",
+  );
+  const [projectDesc, setProjectDesc] = useState(
+    mode === "edit" ? (incomingProjectDesc ?? "") : "",
+  );
 
   const createProjectMutation = usePostData<
     CreateProjectResponse,
@@ -70,6 +73,7 @@ export const CreateProjectModal = ({
       refetchProjects?.();
     } catch (err) {
       toast.error("Failed to create project");
+      console.log(err);
     }
   };
 
@@ -86,16 +90,10 @@ export const CreateProjectModal = ({
       setProjectDesc("");
       refetchProjects?.();
     } catch (err) {
+      console.log(err);
       toast.error("Failed to update project");
     }
   };
-
-  useEffect(() => {
-    if (open) {
-      setProjectName(mode === "edit" ? (incomingProjectName ?? "") : "");
-      setProjectDesc(mode === "edit" ? (incomingProjectDesc ?? "") : "");
-    }
-  }, [open, mode, incomingProjectName, incomingProjectDesc]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
