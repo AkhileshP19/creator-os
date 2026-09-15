@@ -16,7 +16,7 @@ export default function Projects({ data }: { data: ProjectData[] }) {
                 <Button>view all</Button>
             </div>
             {data.map((data) => (
-                <div key={data.id} className="flex justify-between space-y-6">
+                <div key={data.id} className="flex items-center gap-4 justify-between">
                     <div className="flex gap-4">
                         <div>
                             <Avatar>
@@ -25,12 +25,13 @@ export default function Projects({ data }: { data: ProjectData[] }) {
                         </div>
                         <div className="flex flex-col gap-1">
                             <span className="text-sm">{data?.name}</span>
-                            <span className="text-sm text-muted-foreground">{data?.type.replaceAll("_", " ")}</span>
+                            <span className="text-xs text-muted-foreground line-clamp-1">{data?.description}...</span>
+                            <span className="text-sm text-muted-foreground">{data?.type?.replaceAll("_", " ")}</span>
                             {data?.status === "in_progress" && <span><Progress value={data?.progress} className="h-4 " /></span>}
 
                         </div>
                     </div>
-                    <div className="flex items-center justify-center gap-6">
+                    <div className="flex items-center gap-6">
                         <span><ProjectStatusBadge status={data?.status} /></span>
                         <span className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(data?.updatedAt), { addSuffix: true })}
                         </span>

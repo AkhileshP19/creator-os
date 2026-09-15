@@ -4,6 +4,10 @@ import { useState, ReactNode } from "react";
 import { Header } from "@/components/header";
 import { SidebarMenu } from "@/components/sidebar";
 import { useUser, RedirectToSignIn } from "@clerk/nextjs";
+import { useFetchData } from "@/hooks/fetch/useFetchData";
+import { ApiEndPoint } from "@/types/api/api-types";
+import { AuthUser } from "@/types/auth-types";
+import { DashboardSearchProvider } from "@/components/dashboard-search-context";
 
 export default function DashboardLayout({
   children,
@@ -11,7 +15,15 @@ export default function DashboardLayout({
   children: ReactNode;
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const { isSignedIn, user } = useUser();
+  const { isSignedIn, user, isLoaded } = useUser();
+
+  const {} = useFetchData<AuthUser>(
+    ApiEndPoint.GET_AUTH_ME,
+    "auth-me",
+    [],
+    {},
+    isLoaded && !!isSignedIn
+  )
 
   // if (!isLoaded) {
   //   return (
@@ -26,27 +38,29 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header
-        isSidebarOpen={isSidebarOpen}
-        setIsSidebarOpen={setIsSidebarOpen}
-      />
+    <DashboardSearchProvider>
+      <div className="flex min-h-screen flex-col">
+        <Header
+          isSidebarOpen={isSidebarOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
+        />
 
-      <div className="flex min-h-0 flex-1">
-        {/* SIDEBAR */}
-        <aside
-          className={`h-[calc(100vh-64px)] shrink-0 ${isSidebarOpen ? "w-[226px]" : "w-[70px]"
-            }`}
-        >
-          <SidebarMenu
-            isSidebarOpen={isSidebarOpen}
-            userName={user?.firstName || ""}
-          />
-        </aside>
+        <div className="flex min-h-0 flex-1">
+          {/* SIDEBAR */}
+          <aside
+            className={`h-[calc(100vh-64px)] shrink-0 ${isSidebarOpen ? "w-[226px]" : "w-[70px]"
+              }`}
+          >
+            <SidebarMenu
+              isSidebarOpen={isSidebarOpen}
+              userName={user?.firstName || ""}
+            />
+          </aside>
 
-        {/* PAGE CONTENT */}
-        {children}
+          {/* PAGE CONTENT */}
+          {children}
+        </div>
       </div>
-    </div>
+    </DashboardSearchProvider>
   );
 }

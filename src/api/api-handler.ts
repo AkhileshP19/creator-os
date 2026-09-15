@@ -48,36 +48,30 @@ export const buildUrlWithFilters = (ids: ApiIds, apiEndPoint: string, filters?: 
     return url;
 };
 
-const getCookie = (name: string): string | null => {
-    const cookies = document.cookie.split("; ");
-    for (const cookie of cookies) {
-        const [key, value] = cookie.split("=");
-        if (key === name) {
-            return decodeURIComponent(value);
-        }
-    }
-    return null;
-};
-
 export type ApiIds = number | string | (number | string)[];
 
 const api = axios.create({
-    // baseURL: baseJavaURL,
-    // withCredentials: true, // ✅ Enables sending cookies with requests
     headers: {
-        Accept: "application/json",
-        // "Content-Type": "application/json",
-        "ngrok-skip-browser-warning": "true" // Disable ngrok warning and errors,
+        Accept: "application/json"
     }
 });
 
 // ✅ **Attach Authorization Token to Every Request**
 api.interceptors.request.use(
-    (config) => {
-        const token = getCookie("auth_token"); // Retrieve token from cookies
-        console.log(token);
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+    async (config) => {
+        const clerk = typeof window !== "undefined" ? (window as any).Clerk : undefined;
+
+        if (clerk) {
+            try {
+                await clerk.load();
+                const token = await clerk.session?.getToken();
+                if (token) {
+                    config.headers = config.headers ?? {};
+                    config.headers.Authorization = `Bearer ${token}`;
+                }
+            } catch (error) {
+                console.error("Error retrieving Clerk token:", error);
+            }
         }
         return config;
     },
@@ -91,7 +85,8 @@ export const apiHandler = async <T>(
     config?: AxiosRequestConfig,
 ): Promise<T> => {
     try {
-        const baseURL = "http://localhost:8080/"; // Decide backend dynamically
+        // const baseURL = "http://localhost:5000"; // Decide backend dynamically
+        const baseURL = "https://fluffy-fiesta-7q5xpp46x9pfrrrr-5000.app.github.dev";
         console.log(baseURL);
 
         // Detect if we want a blob (Excel download)
