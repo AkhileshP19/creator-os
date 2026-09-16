@@ -3,14 +3,17 @@ import cors from "cors";
 import express from "express";
 import healthRouter from "./routes/health-routes.js";
 import errorMiddleware from "./middleware/error-middleware.js";
-import notFoundMiddleware from "./middleware/not-found-middleware.js"
+import notFoundMiddleware from "./middleware/not-found-middleware.js";
 import { clerkMiddleware } from "@clerk/express";
 import authRouter from "./routes/auth-routes.js";
 import projectRouter from "./routes/project-routes.js";
+import contentIdeaRouter from "./routes/content-idea-routes.js";
 
 const app: Application = express();
 
-const frontendOrigin = process.env.FRONTEND_URL ?? "https://fluffy-fiesta-7q5xpp46x9pfrrrr-3000.app.github.dev";
+const frontendOrigin =
+  process.env.FRONTEND_URL ??
+  "https://fluffy-fiesta-7q5xpp46x9pfrrrr-3000.app.github.dev";
 const allowedOrigins = new Set([frontendOrigin, "http://localhost:3000"]);
 
 app.use(
@@ -26,7 +29,7 @@ app.use(
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-  })
+  }),
 );
 // app.use(cors());
 app.use(clerkMiddleware());
@@ -37,8 +40,9 @@ app.use("/api/health", healthRouter);
 
 app.use("/api/auth", authRouter);
 app.use("/api/projects", projectRouter);
+app.use("/api/content-ideas", contentIdeaRouter);
 app.use(notFoundMiddleware);
 
-app.use(errorMiddleware)
+app.use(errorMiddleware);
 
 export default app;

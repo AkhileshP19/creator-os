@@ -130,6 +130,20 @@ const projectService = {
       throw error;
     }
   },
+
+getAllProjects: async (currentUserId: string) => {
+    try {
+      const projects = await db.orm.public.Project.where({
+        ownerId: currentUserId,
+        deletedAt: null,
+      }).all(); // <-- Added await and .all()
+      
+      return projects;
+    } catch (error) {
+      console.error("Failed to get all projects:", error); // Fixed error log message too
+      throw error;
+    }
+  },
 };
 
 export default projectService;
