@@ -131,12 +131,16 @@ export const AddNewContentModal = ({
               <FormField
                 control={form.control}
                 name="projectId"
-                render={({ field, fieldState }) => (
+                render={({ field }) => (
                   <FormItem>
                     <FormLabel>
                       Projects <span className="text-red-500">*</span>
                     </FormLabel>
-                    <Select value={field.value} onValueChange={field.onChange}>
+                    <Select
+                      disabled={mode === "edit"}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
                       <FormControl>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select Project">
@@ -155,9 +159,7 @@ export const AddNewContentModal = ({
                         ))}
                       </SelectContent>
                     </Select>
-                    {fieldState.error && (
-                      <FormMessage>{fieldState.error?.message}</FormMessage>
-                    )}
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -227,7 +229,10 @@ export const AddNewContentModal = ({
                         value={field?.value?.join(", ")}
                         onChange={(e) =>
                           field.onChange(
-                            e.target.value.split(",").map((tag) => tag.trim()),
+                            e.target.value
+                              .split(",")
+                              .map((tag) => tag.trim())
+                              .filter(Boolean),
                           )
                         }
                       />

@@ -3,7 +3,7 @@
 import { AddNewContentModal } from "@/components/content/add-new-content-modal";
 import { Button } from "@/components/ui/button";
 import { newContentFormSchema } from "@/schema/validation-schemas/new-content-schema";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -76,7 +76,6 @@ export default function ContentPage() {
   const {
     mutateAsync: createContentIdea,
     isPending: isSubmitting,
-    error,
   } = usePostData<CreateContentIdeaResponse, CreateContentIdeaRequest>(
     ApiEndPoint.CREATE_CONTENT_IDEA,
   );
@@ -113,7 +112,11 @@ export default function ContentPage() {
         await updateContentMutation(payload);
       }
       refetchContentIdeas();
-      toast.success("Content Idea Created Successfully");
+      toast.success(
+        isCreateOrEditMode === "create"
+          ? "Content idea created successfully"
+          : "Content idea updated successfully",
+      );
       setIsAddContentModalOpen(false);
       setSelectedContentData(null);
       setIsCreateOrEditMode("create");
@@ -129,7 +132,7 @@ export default function ContentPage() {
       setContentToDeleteId(projectId);
       await deleteContentMutation.mutateAsync({});
       refetchContentIdeas();
-      toast.success("Content idea successfully");
+      toast.success("Content idea deleted successfully");
       setContentToDeleteId(null);
     } catch (error) {
       console.error("Failed to delete content idea:", error);
@@ -147,11 +150,6 @@ export default function ContentPage() {
     setPerPage(value);
     setCurrentPage(1);
   };
-
-  useEffect(
-    () => console.log("mode", isCreateOrEditMode),
-    [isCreateOrEditMode],
-  );
 
   return (
     <div className="space-y-6 p-5 max-h-[80vh] w-full overflow-y-auto">

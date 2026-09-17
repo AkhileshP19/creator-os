@@ -25,13 +25,6 @@ contentIdeaRouter.get(
   getContentIdeasController,
 );
 
-contentIdeaRouter.post(
-  "/delete/:contentId",
-  authMiddleware,
-  currentUserMiddleware,
-  deleteContentIdeaController,
-);
-
 contentIdeaRouter.patch(
   "/:contentId",
   authMiddleware,
@@ -47,7 +40,7 @@ contentIdeaRouter.post(
 );
 
 contentIdeaRouter.get(
-  "/:projectId",
+  "/:contentId",
   authMiddleware,
   currentUserMiddleware,
   getContentIdeaByIdController,

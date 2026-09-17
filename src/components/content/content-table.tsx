@@ -1,5 +1,4 @@
 import { Pencil, Trash } from "lucide-react";
-import { ProjectStatusBadge } from "../ui/custom/project-status-badge";
 import {
   Table,
   TableBody,

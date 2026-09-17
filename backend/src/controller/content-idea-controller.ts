@@ -40,9 +40,19 @@ export const createContentIdeaController: RequestHandler = async (req, res) => {
   } catch (error) {
     console.error("Failed to create content idea:", error);
 
-    return res.status(500).json({
+    const statusCode =
+      error instanceof Error &&
+        "statusCode" in error &&
+        typeof error.statusCode === "number"
+        ? error.statusCode
+        : 500;
+
+    return res.status(statusCode).json({
       status: "ERROR",
-      message: "Failed to create content idea",
+      message:
+        statusCode === 404
+          ? "Project not found or you do not have access to it"
+          : "Failed to create content idea",
       data: null,
     });
   }
@@ -134,18 +144,31 @@ export const updateContentIdeaController: RequestHandler = async (req, res) => {
       });
     }
 
-    const { scheduledDate, ...restUpdateData } = req.body;
+    const {
+      title,
+      description,
+      category,
+      tags,
+      status,
+      scheduledDate,
+      priority,
+    } = req.body;
+
     const updateData = {
-      ...restUpdateData,
-      ...(scheduledDate === undefined
-        ? {}
-        : {
-            scheduledDate:
-              scheduledDate === null
-                ? null
-                : Temporal.Instant.from(scheduledDate),
-          }),
+      ...(title !== undefined && { title }),
+      ...(description !== undefined && { description }),
+      ...(category !== undefined && { category }),
+      ...(tags !== undefined && { tags }),
+      ...(status !== undefined && { status }),
+      ...(priority !== undefined && { priority }),
+      ...(scheduledDate !== undefined && {
+        scheduledDate:
+          scheduledDate === null
+            ? null
+            : Temporal.Instant.from(scheduledDate),
+      }),
     };
+
     const currentUserId = req.currentUser.id;
 
     const updatedContentIdea = await contentIdeaService.updateContentIdea(

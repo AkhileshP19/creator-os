@@ -1,6 +1,7 @@
 import { Temporal } from "temporal-polyfill";
 import { db } from "../prisma/db.js";
 import type { JsonValue } from "@prisma/orm-postgres/target/codec-types";
+import { or } from "@prisma/orm-postgres/orm-client";
 
 export type NewContentFormValues = {
   projectId: string;
@@ -45,6 +46,16 @@ export interface ContentIdeaInput {
   deletedAt?: Temporal.Instant | null;
 }
 
+export interface UpdateContentIdeaInput {
+  title?: string;
+  description?: string | null;
+  category?: string | null;
+  tags?: JsonValue;
+  status?: IdeaStatus;
+  scheduledDate?: Temporal.Instant | null;
+  priority?: PriorityLevel;
+}
+
 const contentIdeaService = {
   createContentIdea: async ({
     projectId,
@@ -55,12 +66,28 @@ const contentIdeaService = {
     scheduledDate,
     status,
     priority,
-    createdById, // Added here so it's in scope
+    createdById,
   }: NewContentFormValues) => {
+    // Verify project ownership and active status
+    const project = await db.orm.public.Project.where({
+      id: projectId,
+      ownerId: createdById,
+      deletedAt: null,
+    }).first();
+
+    if (!project) {
+      const error = new Error(
+        "Project not found or you do not have access to it",
+      );
+
+      Object.assign(error, { statusCode: 404 });
+
+      throw error;
+    }
+
     const newContentIdea = await db.orm.public.ContentIdea.create({
       projectId,
       title,
-      // Map undefined to null if the database expects null
       description: description ?? null,
       category: category ?? null,
       tags,
@@ -86,8 +113,15 @@ const contentIdeaService = {
         deletedAt: null,
       });
 
-      if (search) {
-        query = query.where((p) => p.title.ilike(`%${search}%`));
+      if (search?.trim()) {
+        const searchTerm = search.trim();
+
+        query = query.where((p) =>
+          or(
+            p.title.ilike(`%${searchTerm}%`),
+            p.description.ilike(`%${searchTerm}%`)
+          )
+        );
       }
 
       // Use aggregate() for counting, NOT query.count()
@@ -132,7 +166,7 @@ const contentIdeaService = {
 
   updateContentIdea: async (
     contentId: string,
-    updateData: ContentIdeaInput,
+    updateData: UpdateContentIdeaInput,
     currentUserId: string,
   ) => {
     try {
@@ -141,6 +175,7 @@ const contentIdeaService = {
         createdById: currentUserId,
         deletedAt: null,
       }).update(updateData);
+
       return updatedContentIdea;
     } catch (error) {
       console.error("Failed to update content idea:", error);
