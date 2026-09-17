@@ -12,6 +12,8 @@ export const ApiEndPoint = {
   GET_ALL_PROJECTS: "/api/projects/all",
 
   CREATE_CONTENT_IDEA: "/api/content-ideas",
+  UPDATE_CONTENT_IDEA: "/api/content-ideas/{id}",
+  DELETE_CONTENT_IDEA: "/api/content-ideas/delete/{id}",
 } as const;
 
 // Define API response structure

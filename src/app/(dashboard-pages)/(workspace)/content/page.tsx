@@ -3,7 +3,7 @@
 import { AddNewContentModal } from "@/components/content/add-new-content-modal";
 import { Button } from "@/components/ui/button";
 import { newContentFormSchema } from "@/schema/validation-schemas/new-content-schema";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -12,81 +12,197 @@ import { ApiEndPoint } from "@/types/api/api-types";
 import { ProjectData } from "@/types/dashboard-types";
 import { usePostData } from "@/hooks/fetch/usePostData";
 import toast from "react-hot-toast";
+import { usePaginatedData } from "@/hooks/fetch/usePaginatedDataParams";
+import {
+  ContentIdea,
+  CreateContentIdeaRequest,
+  CreateContentIdeaResponse,
+} from "@/types/content-types";
+import { ContentTable } from "@/components/content/content-table";
+import { usePatchData } from "@/hooks/fetch/usePatchData";
+
+const emptyContentFormValues: z.infer<typeof newContentFormSchema> = {
+  projectId: "",
+  title: "",
+  description: "",
+  category: "",
+  tags: [],
+  status: "",
+  scheduledDate: undefined,
+  priority: "",
+};
 
 export default function ContentPage() {
   const [isAddContentModalOpen, setIsAddContentModalOpen] =
     useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [perPage, setPerPage] = useState<number>(7);
+  const [selectedContentData, setSelectedContentData] =
+    useState<ContentIdea | null>(null);
+  const [isCreateOrEditMode, setIsCreateOrEditMode] = useState<
+    "create" | "edit"
+  >("create");
+  const [contentToDeleteId, setContentToDeleteId] = useState<string | null>(
+    null,
+  );
 
   const form = useForm<z.infer<typeof newContentFormSchema>>({
     resolver: zodResolver(newContentFormSchema),
     mode: "onChange",
-    defaultValues: {
-      projectId: "",
-      title: "",
-      description: "",
-      category: "",
-      tags: [],
-      status: "",
-      scheduledDate: new Date(),
-      priority: "",
-    },
+    defaultValues: emptyContentFormValues,
   });
 
   const { data: allProjectsData } = useFetchData<ProjectData[]>(
     ApiEndPoint.GET_ALL_PROJECTS,
     "all-projects",
+    [],
+    undefined,
+    isAddContentModalOpen,
   );
 
   const {
+    data: contentIdeasData,
+    refetch: refetchContentIdeas,
+    totalPages: totalContentIdeasPages,
+  } = usePaginatedData<ContentIdea>({
+    apiEndPoint: ApiEndPoint.CREATE_CONTENT_IDEA,
+    queryKey: "content-ideas",
+    pagination: {
+      pageNo: currentPage,
+      pageSize: perPage,
+    },
+  });
+
+  const {
     mutateAsync: createContentIdea,
-    isPending,
+    isPending: isSubmitting,
     error,
-  } = usePostData<any, any>(ApiEndPoint.CREATE_CONTENT_IDEA);
+  } = usePostData<CreateContentIdeaResponse, CreateContentIdeaRequest>(
+    ApiEndPoint.CREATE_CONTENT_IDEA,
+  );
+
+  const { mutateAsync: updateContentMutation, isPending: isUpdating } =
+    usePatchData<CreateContentIdeaResponse, CreateContentIdeaRequest>(
+      ApiEndPoint.UPDATE_CONTENT_IDEA,
+      [selectedContentData?.id ?? ""],
+    );
+
+  const deleteContentMutation = usePostData<CreateContentIdeaResponse, unknown>(
+    ApiEndPoint.DELETE_CONTENT_IDEA,
+    [contentToDeleteId ?? ""],
+  );
 
   const handleCreateNewContent = async (
     data: z.infer<typeof newContentFormSchema>,
   ) => {
-    console.log("Form Data:", data);
-    const formData = form.getValues();
-
-    const payload = {
-      projectId: formData.projectId,
-      title: formData.title,
-      description: formData.description,
-      category: formData.category,
-      tags: formData.tags,
-      scheduledDate: formData.scheduledDate,
-      status: formData.status,
-      priority: formData.priority,
+    const payload: CreateContentIdeaRequest = {
+      projectId: data.projectId,
+      title: data.title,
+      description: data.description ?? null,
+      category: data.category ?? null,
+      tags: data.tags ?? [],
+      scheduledDate: data.scheduledDate?.toISOString() ?? null,
+      status: data.status as CreateContentIdeaRequest["status"],
+      priority: data.priority as CreateContentIdeaRequest["priority"],
     };
 
     try {
-      await createContentIdea(payload);
+      if (isCreateOrEditMode === "create") {
+        await createContentIdea(payload);
+      } else {
+        await updateContentMutation(payload);
+      }
+      refetchContentIdeas();
       toast.success("Content Idea Created Successfully");
+      setIsAddContentModalOpen(false);
+      setSelectedContentData(null);
+      setIsCreateOrEditMode("create");
+      form.reset(emptyContentFormValues);
     } catch (error) {
       console.error("failed to create content idea", error);
       toast.error("Failed to create content idea");
     }
   };
 
+  const handleDeleteContent = async (projectId: string) => {
+    try {
+      setContentToDeleteId(projectId);
+      await deleteContentMutation.mutateAsync({});
+      refetchContentIdeas();
+      toast.success("Content idea successfully");
+      setContentToDeleteId(null);
+    } catch (error) {
+      console.error("Failed to delete content idea:", error);
+      toast.error("Failed to delete content idea");
+    }
+  };
+
+  const handleClickPage = (page: number | string) => {
+    if (typeof page === "number") {
+      setCurrentPage(page);
+    }
+  };
+
+  const handlePageSizeChange = (value: number) => {
+    setPerPage(value);
+    setCurrentPage(1);
+  };
+
+  useEffect(
+    () => console.log("mode", isCreateOrEditMode),
+    [isCreateOrEditMode],
+  );
+
   return (
     <div className="space-y-6 p-5 max-h-[80vh] w-full overflow-y-auto">
       <div className="flex justify-between gap-4">
         <h1 className="text-2xl font-bold mb-4">Content</h1>
         <Button
-          onClick={() => setIsAddContentModalOpen(true)}
+          onClick={() => {
+            setSelectedContentData(null);
+            form.reset(emptyContentFormValues);
+            setIsAddContentModalOpen(true);
+            setIsCreateOrEditMode("create");
+          }}
           className="px-4 py-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md shadow-md hover:cursor-pointer"
         >
           Add New Content
         </Button>
       </div>
 
+      <div>
+        <ContentTable
+          contentIdeas={contentIdeasData}
+          currentPage={currentPage}
+          totalPages={totalContentIdeasPages}
+          onPageChange={handleClickPage}
+          perPage={perPage}
+          onPerPageChange={handlePageSizeChange}
+          setIsEditModalOpen={setIsAddContentModalOpen}
+          setSelectedContentData={setSelectedContentData}
+          setIsCreateOrEditMode={setIsCreateOrEditMode}
+          onDeleteContent={handleDeleteContent}
+        />
+      </div>
+
       <AddNewContentModal
         open={isAddContentModalOpen}
-        onOpenChange={setIsAddContentModalOpen}
+        onOpenChange={(nextOpen) => {
+          setIsAddContentModalOpen(nextOpen);
+
+          if (!nextOpen) {
+            setSelectedContentData(null);
+            setIsCreateOrEditMode("create");
+            form.reset(emptyContentFormValues);
+          }
+        }}
         form={form}
+        mode={isCreateOrEditMode}
         onSubmit={handleCreateNewContent}
         allProjects={allProjectsData ?? []}
+        isSubmitting={isSubmitting}
+        selectedContentData={selectedContentData!}
+        isUpdating={isUpdating}
       />
     </div>
   );
