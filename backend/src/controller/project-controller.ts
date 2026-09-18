@@ -183,3 +183,26 @@ export const updateProjectByIdController: RequestHandler = async (req, res) => {
     });
   }
 };
+
+export const getAllProjectsController: RequestHandler = async (req, res) => {
+      const currentUserId = req.currentUser.id;
+
+  try {
+    const projects = await projectService.getAllProjects(currentUserId);
+
+    return res.status(200).json({
+      status: "SUCCESS",
+      message: "All projects fetched successfully",
+      data: {
+        responseData: projects
+      },
+    });
+  } catch (error) {
+    console.error("Failed to fetch projects:", error);
+    return res.status(500).json({
+      status: "ERROR",
+      message: "Failed to fetch projects",
+      data: null,
+    });
+  }
+}

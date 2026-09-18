@@ -4,6 +4,7 @@ import authMiddleware from "../middleware/auth-middleware.js";
 import currentUserMiddleware from "../middleware/current-user-middleware.js";
 import {
   deleteProjectByIdController,
+  getAllProjectsController,
   getProjectByIdController,
   getProjectsController,
   projectController,
@@ -25,6 +26,13 @@ projectRouter.get(
   currentUserMiddleware,
   getProjectsController,
 );
+
+projectRouter.get(
+  "/all",
+  authMiddleware,
+  currentUserMiddleware,
+  getAllProjectsController
+)
 
 projectRouter.post(
   "/delete/:projectId",

@@ -9,6 +9,11 @@ export const ApiEndPoint = {
   CREATE_PROJECT: "/api/projects",
   UPDATE_PROJECT: "/api/projects/{id}",
   DELETE_PROJECT: "/api/projects/delete/{id}",
+  GET_ALL_PROJECTS: "/api/projects/all",
+
+  CREATE_CONTENT_IDEA: "/api/content-ideas",
+  UPDATE_CONTENT_IDEA: "/api/content-ideas/{id}",
+  DELETE_CONTENT_IDEA: "/api/content-ideas/delete/{id}",
 } as const;
 
 // Define API response structure
