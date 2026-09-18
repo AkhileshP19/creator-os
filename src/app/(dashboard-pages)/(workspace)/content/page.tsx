@@ -29,6 +29,7 @@ const emptyContentFormValues: z.infer<typeof newContentFormSchema> = {
   tags: [],
   status: "",
   scheduledDate: undefined,
+  scheduledTime: "",
   priority: "",
 };
 
@@ -73,12 +74,10 @@ export default function ContentPage() {
     },
   });
 
-  const {
-    mutateAsync: createContentIdea,
-    isPending: isSubmitting,
-  } = usePostData<CreateContentIdeaResponse, CreateContentIdeaRequest>(
-    ApiEndPoint.CREATE_CONTENT_IDEA,
-  );
+  const { mutateAsync: createContentIdea, isPending: isSubmitting } =
+    usePostData<CreateContentIdeaResponse, CreateContentIdeaRequest>(
+      ApiEndPoint.CREATE_CONTENT_IDEA,
+    );
 
   const { mutateAsync: updateContentMutation, isPending: isUpdating } =
     usePatchData<CreateContentIdeaResponse, CreateContentIdeaRequest>(
@@ -91,6 +90,20 @@ export default function ContentPage() {
     [contentToDeleteId ?? ""],
   );
 
+  const getScheduledDateTime = (
+    date: Date | undefined,
+    time: string | undefined,
+  ) => {
+    if (!date || !time) return null;
+
+    const [hours, minutes] = time.split(":").map(Number);
+
+    const scheduledDate = new Date(date);
+    scheduledDate.setHours(hours, minutes, 0, 0);
+
+    return scheduledDate.toISOString();
+  };
+
   const handleCreateNewContent = async (
     data: z.infer<typeof newContentFormSchema>,
   ) => {
@@ -100,7 +113,10 @@ export default function ContentPage() {
       description: data.description ?? null,
       category: data.category ?? null,
       tags: data.tags ?? [],
-      scheduledDate: data.scheduledDate?.toISOString() ?? null,
+      scheduledDate: getScheduledDateTime(
+        data.scheduledDate,
+        data.scheduledTime,
+      ),
       status: data.status as CreateContentIdeaRequest["status"],
       priority: data.priority as CreateContentIdeaRequest["priority"],
     };
@@ -152,7 +168,7 @@ export default function ContentPage() {
   };
 
   return (
-    <div className="space-y-6 p-5 max-h-[80vh] w-full overflow-y-auto">
+    <div className="space-y-6 p-5 max-h-[80vh] w-full">
       <div className="flex justify-between gap-4">
         <h1 className="text-2xl font-bold mb-4">Content</h1>
         <Button
@@ -168,7 +184,7 @@ export default function ContentPage() {
         </Button>
       </div>
 
-      <div>
+      <div className="space-y-6 p-5 max-h-[80vh] w-full">
         <ContentTable
           contentIdeas={contentIdeasData}
           currentPage={currentPage}

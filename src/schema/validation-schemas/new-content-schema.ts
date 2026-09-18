@@ -8,5 +8,6 @@ export const newContentFormSchema = z.object({
   tags: z.array(z.string()).optional(),
   status: z.string().min(1, { message: "Status is required" }),
   scheduledDate: z.date().optional(),
-  priority: z.string().min(1, { message: "Priority is required" })
+  scheduledTime: z.string().optional(),
+  priority: z.string().min(1, { message: "Priority is required" }),
 });

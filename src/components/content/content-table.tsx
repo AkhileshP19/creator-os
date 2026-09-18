@@ -20,7 +20,7 @@ interface ContentTableProps {
   setIsEditModalOpen: (isOpen: boolean) => void;
   setSelectedContentData: (project: ContentIdea | null) => void;
   setIsCreateOrEditMode: (value: "create" | "edit") => void;
-  onDeleteContent: (projectId: string) => void;
+  onDeleteContent: (contentId: string) => void;
 }
 
 export const ContentTable = ({
@@ -42,8 +42,8 @@ export const ContentTable = ({
           <TableRow>
             <TableHead className="w-[40px]">Name</TableHead>
             <TableHead className="w-[100px]">Status</TableHead>
-            <TableHead className="w-[100px]">Created date</TableHead>
-            <TableHead className="w-[100px]">Created time</TableHead>
+            <TableHead className="w-[100px]">Scheduled date</TableHead>
+            <TableHead className="w-[100px]">Scheduled time</TableHead>
             <TableHead className="w-[100px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -58,10 +58,14 @@ export const ContentTable = ({
               </TableCell>
               <TableCell>{contentIdea.status}</TableCell>
               <TableCell>
-                {new Date(contentIdea.createdAt).toLocaleDateString()}
+                {new Date(
+                  contentIdea.scheduledDate ?? "N/A",
+                ).toLocaleDateString()}
               </TableCell>
               <TableCell>
-                {new Date(contentIdea.createdAt).toLocaleTimeString()}
+                {new Date(
+                  contentIdea.scheduledDate ?? "N/A",
+                ).toLocaleTimeString()}
               </TableCell>
               <TableCell className="flex items-center gap-8 py-6">
                 <Pencil

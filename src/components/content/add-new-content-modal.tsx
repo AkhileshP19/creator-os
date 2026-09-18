@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { UseFormReturn } from "react-hook-form";
+import { UseFormReturn, useWatch } from "react-hook-form";
 import { newContentFormSchema } from "@/schema/validation-schemas/new-content-schema";
 import * as z from "zod";
 import {
@@ -29,6 +29,8 @@ import { ProjectData } from "@/types/dashboard-types";
 import { Loader2 } from "lucide-react";
 import { Dispatch, SetStateAction, useEffect } from "react";
 import { ContentIdea } from "@/types/content-types";
+import { FormTagsField } from "../ui/custom/content-tags-field";
+import { ScheduledDateTimePicker } from "../ui/custom/scheduled-date-time-picker";
 
 interface AddNewContentModalProps {
   open: boolean;
@@ -65,6 +67,7 @@ const emptyContentFormValues = {
   tags: [] as string[],
   status: "",
   scheduledDate: undefined,
+  scheduledTime: "",
   priority: "",
 };
 
@@ -79,6 +82,11 @@ export const AddNewContentModal = ({
   selectedContentData,
   isUpdating,
 }: AddNewContentModalProps) => {
+  const scheduledTime = useWatch({
+    control: form.control,
+    name: "scheduledTime",
+  });
+
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) {
       form.reset(emptyContentFormValues);
@@ -110,6 +118,11 @@ export const AddNewContentModal = ({
         scheduledDate: selectedContentData.scheduledDate
           ? new Date(selectedContentData.scheduledDate)
           : undefined,
+        scheduledTime: selectedContentData.scheduledDate
+          ? new Date(selectedContentData.scheduledDate)
+              .toTimeString()
+              .slice(0, 5)
+          : "",
       });
     }
   }, [open, selectedContentData, form, mode]);
@@ -117,17 +130,22 @@ export const AddNewContentModal = ({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <Form {...form}>
-        <DialogContent className="sm:max-w-lg">
-          {/* The form must be inside DialogContent because the dialog is portaled. */}
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <DialogHeader>
+        {/* Flex column dialog container constrained to viewport height */}
+        <DialogContent className="sm:max-w-2xl max-h-[95vh] flex flex-col overflow-hidden">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col flex-1 overflow-hidden"
+          >
+            {/* Sticky Header */}
+            <DialogHeader className="shrink-0 pb-4 border-b">
               <DialogTitle>
                 {mode === "create" ? "Add New Content" : "Update Content"}
               </DialogTitle>
             </DialogHeader>
 
-            <div className="space-y-4 py-4">
-              {/* Title Field */}
+            {/* Scrollable Middle Container */}
+            <div className="flex-1 overflow-y-auto space-y-4 py-4 pr-1 px-2">
+              {/* Project Field */}
               <FormField
                 control={form.control}
                 name="projectId"
@@ -164,6 +182,7 @@ export const AddNewContentModal = ({
                 )}
               />
 
+              {/* Title Field */}
               <FormField
                 control={form.control}
                 name="title"
@@ -199,7 +218,7 @@ export const AddNewContentModal = ({
                 )}
               />
 
-              {/* category */}
+              {/* Category Field */}
               <FormField
                 control={form.control}
                 name="category"
@@ -216,64 +235,34 @@ export const AddNewContentModal = ({
                 )}
               />
 
-              {/* Tags Field */}
-              <FormField
-                control={form.control}
-                name="tags"
-                render={({ field, fieldState }) => (
-                  <FormItem>
-                    <FormLabel>Tags</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter tags separated by commas..."
-                        value={field?.value?.join(", ")}
-                        onChange={(e) =>
-                          field.onChange(
-                            e.target.value
-                              .split(",")
-                              .map((tag) => tag.trim())
-                              .filter(Boolean),
-                          )
-                        }
-                      />
-                    </FormControl>
-                    {fieldState.error && (
-                      <FormMessage>{fieldState.error?.message}</FormMessage>
-                    )}
-                  </FormItem>
-                )}
-              />
+              <FormTagsField control={form.control} name="tags" label="Tags" />
 
-              {/* Scheduled Date Field */}
+              {/* Scheduled Date & Time */}
               <FormField
                 control={form.control}
                 name="scheduledDate"
-                render={({ field, fieldState }) => (
+                render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Scheduled Date</FormLabel>
+                    <FormLabel>Schedule Publishing</FormLabel>
                     <FormControl>
-                      <Input
-                        type="date"
-                        value={
-                          field.value
-                            ? new Date(field.value).toISOString().split("T")[0]
-                            : ""
-                        }
-                        onChange={(e) =>
-                          field.onChange(
-                            e.target.value ? new Date(e.target.value) : null,
-                          )
+                      <ScheduledDateTimePicker
+                        date={field.value}
+                        time={scheduledTime ?? ""}
+                        onDateChange={field.onChange}
+                        onTimeChange={(time) =>
+                          form.setValue("scheduledTime", time, {
+                            shouldValidate: true,
+                            shouldDirty: true,
+                          })
                         }
                       />
                     </FormControl>
-                    {fieldState.error && (
-                      <FormMessage>{fieldState.error?.message}</FormMessage>
-                    )}
+                    <FormMessage />
                   </FormItem>
                 )}
               />
 
-              <div className="grid grid-cols-2">
+              <div className="grid grid-cols-2 gap-4">
                 {/* Status Field */}
                 <FormField
                   control={form.control}
@@ -289,10 +278,8 @@ export const AddNewContentModal = ({
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue>
-                              {(value) =>
-                                statusLabels[value] ?? "Select a status"
-                              }
+                            <SelectValue placeholder="Select a status">
+                              {statusLabels[field.value] || "Select a status"}
                             </SelectValue>
                           </SelectTrigger>
                         </FormControl>
@@ -328,10 +315,9 @@ export const AddNewContentModal = ({
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue>
-                              {(value) =>
-                                priorityLabels[value] ?? "Select a priority"
-                              }
+                            <SelectValue placeholder="Select a priority">
+                              {priorityLabels[field.value] ||
+                                "Select a priority"}
                             </SelectValue>
                           </SelectTrigger>
                         </FormControl>
@@ -351,14 +337,15 @@ export const AddNewContentModal = ({
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-4 mt-3">
+            {/* Sticky Footer */}
+            <div className="flex items-center justify-end gap-4 pt-4 mt-2 border-t shrink-0">
               <Button
                 type="button"
                 variant="outline"
                 className="cursor-pointer p-4"
                 onClick={() => {
                   onOpenChange(false);
-                  form.reset();
+                  form.reset(emptyContentFormValues);
                 }}
               >
                 Cancel
