@@ -22,7 +22,6 @@ import type {
 
 import type {
   ContractWithTypeMaps,
-  RelationKeys,
   TypeMaps as TypeMapsType,
 } from '@prisma/orm-postgres/family-contract/types';
 import type {
@@ -34,7 +33,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'633fe3119f5905d6b9b1f8144bcd872e60ea3f1ad913565150e116d1ab1f21aa'>;
+  StorageHashBase<'ac5cbbfc7204611d094da3f675072ef0ea196bb14ed35d858d20602354a19f0e'>;
 export type ExecutionHash =
   ExecutionHashBase<'d89ca6a329807cf50a1f8a245065906af7b0c69c46c7e0143ea8959dc49fa50f'>;
 export type ProfileHash =
@@ -856,225 +855,6 @@ export type StorageColumnInputTypes = {
     };
   };
 };
-
-export namespace Models {
-  export type public_User = {
-    id: CodecTypes['pg/text@1']['output'];
-    clerkUserId: CodecTypes['pg/text@1']['output'];
-    fullName: CodecTypes['pg/text@1']['output'];
-    email: CodecTypes['pg/text@1']['output'];
-    avatarUrl: CodecTypes['pg/text@1']['output'] | null;
-    role: 'ADMIN' | 'CREATOR' | 'REVIEWER';
-    isVerified: CodecTypes['pg/bool@1']['output'];
-    lastLogin: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
-    createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-    updatedAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-    deletedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
-    approvals: public_Approval[];
-    auditLogs: public_AuditLog[];
-    contentIdeas: public_ContentIdea[];
-    integrations: public_Integration[];
-    notifications: public_Notification[];
-    projects: public_Project[];
-    settings: public_UserSettings | null;
-    readonly [RelationKeys]?:
-      | 'approvals'
-      | 'auditLogs'
-      | 'contentIdeas'
-      | 'integrations'
-      | 'notifications'
-      | 'projects'
-      | 'settings';
-  };
-  export type public_UserSettings = {
-    id: CodecTypes['pg/text@1']['output'];
-    userId: CodecTypes['pg/text@1']['output'];
-    theme: CodecTypes['pg/text@1']['output'];
-    timezone: CodecTypes['pg/text@1']['output'];
-    language: CodecTypes['pg/text@1']['output'];
-    aiProvider: 'GEMINI' | 'OPENAI' | 'CLAUDE' | 'CUSTOM';
-    youtubeConnected: CodecTypes['pg/bool@1']['output'];
-    notificationPreferences: CodecTypes['pg/json@1']['output'];
-    createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-    user: public_User;
-    readonly [RelationKeys]?: 'user';
-  };
-  export type public_Project = {
-    id: CodecTypes['pg/text@1']['output'];
-    ownerId: CodecTypes['pg/text@1']['output'];
-    name: CodecTypes['pg/text@1']['output'];
-    description: CodecTypes['pg/text@1']['output'] | null;
-    status: 'DRAFT' | 'PLANNING' | 'GENERATING' | 'REVIEW' | 'READY' | 'PUBLISHED' | 'ARCHIVED';
-    createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-    updatedAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-    deletedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
-    contentIdeas: public_ContentIdea[];
-    owner: public_User;
-    readonly [RelationKeys]?: 'contentIdeas' | 'owner';
-  };
-  export type public_ContentIdea = {
-    id: CodecTypes['pg/text@1']['output'];
-    projectId: CodecTypes['pg/text@1']['output'];
-    title: CodecTypes['pg/text@1']['output'];
-    description: CodecTypes['pg/text@1']['output'] | null;
-    category: CodecTypes['pg/text@1']['output'] | null;
-    tags: CodecTypes['pg/json@1']['output'];
-    status: 'DRAFT' | 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'ARCHIVED';
-    scheduledDate: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
-    priority: 'P0' | 'P1' | 'P2' | 'P3';
-    createdById: CodecTypes['pg/text@1']['output'];
-    createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-    updatedAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-    deletedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
-    approvals: public_Approval[];
-    createdBy: public_User;
-    project: public_Project;
-    publishJobs: public_PublishJob[];
-    workflows: public_AIWorkflow[];
-    readonly [RelationKeys]?: 'approvals' | 'createdBy' | 'project' | 'publishJobs' | 'workflows';
-  };
-  export type public_AIWorkflow = {
-    id: CodecTypes['pg/text@1']['output'];
-    contentId: CodecTypes['pg/text@1']['output'];
-    workflowType:
-      'SCRIPT_GENERATION' | 'VIDEO_GENERATION' | 'AUDIO_GENERATION' | 'IMAGE_GENERATION';
-    status: 'QUEUED' | 'RUNNING' | 'COMPLETED' | 'FAILED' | 'CANCELLED';
-    provider: 'GEMINI' | 'OPENAI' | 'CLAUDE' | 'CUSTOM';
-    model: CodecTypes['pg/text@1']['output'];
-    startedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
-    completedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
-    retryCount: CodecTypes['pg/int4@1']['output'];
-    executionTime: CodecTypes['pg/int4@1']['output'] | null;
-    currentStep: CodecTypes['pg/text@1']['output'] | null;
-    errorMessage: CodecTypes['pg/text@1']['output'] | null;
-    createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-    updatedAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-    aiRequests: public_AIRequest[];
-    assets: public_Asset[];
-    content: public_ContentIdea;
-    logs: public_WorkflowLog[];
-    readonly [RelationKeys]?: 'aiRequests' | 'assets' | 'content' | 'logs';
-  };
-  export type public_WorkflowLog = {
-    id: CodecTypes['pg/text@1']['output'];
-    workflowId: CodecTypes['pg/text@1']['output'];
-    stepName: CodecTypes['pg/text@1']['output'];
-    response: CodecTypes['pg/json@1']['output'];
-    createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-    workflow: public_AIWorkflow;
-    readonly [RelationKeys]?: 'workflow';
-  };
-  export type public_AIRequest = {
-    id: CodecTypes['pg/text@1']['output'];
-    workflowId: CodecTypes['pg/text@1']['output'];
-    provider: 'GEMINI' | 'OPENAI' | 'CLAUDE' | 'CUSTOM';
-    model: CodecTypes['pg/text@1']['output'];
-    prompt: CodecTypes['pg/text@1']['output'];
-    response: CodecTypes['pg/text@1']['output'] | null;
-    input: CodecTypes['pg/json@1']['output'] | null;
-    output: CodecTypes['pg/json@1']['output'] | null;
-    tokenUsage: CodecTypes['pg/int4@1']['output'] | null;
-    errorMessage: CodecTypes['pg/text@1']['output'] | null;
-    createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-    workflow: public_AIWorkflow;
-    readonly [RelationKeys]?: 'workflow';
-  };
-  export type public_Asset = {
-    id: CodecTypes['pg/text@1']['output'];
-    workflowId: CodecTypes['pg/text@1']['output'];
-    storageUrl: CodecTypes['pg/text@1']['output'];
-    assetType: 'VIDEO' | 'AUDIO' | 'IMAGE' | 'SCRIPT' | 'THUMBNAIL' | 'SUBTITLE';
-    createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-    updatedAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-    deletedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
-    workflow: public_AIWorkflow;
-    readonly [RelationKeys]?: 'workflow';
-  };
-  export type public_Approval = {
-    id: CodecTypes['pg/text@1']['output'];
-    contentId: CodecTypes['pg/text@1']['output'];
-    decision: 'PENDING' | 'APPROVED' | 'REJECTED' | 'REGENERATE';
-    reviewedById: CodecTypes['pg/text@1']['output'];
-    comment: CodecTypes['pg/text@1']['output'] | null;
-    createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-    updatedAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-    content: public_ContentIdea;
-    reviewedBy: public_User;
-    readonly [RelationKeys]?: 'content' | 'reviewedBy';
-  };
-  export type public_PublishJob = {
-    id: CodecTypes['pg/text@1']['output'];
-    contentId: CodecTypes['pg/text@1']['output'];
-    platform: CodecTypes['pg/text@1']['output'];
-    publishStatus: 'QUEUED' | 'UPLOADING' | 'PUBLISHED' | 'FAILED';
-    scheduledAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
-    publishedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
-    externalVideoId: CodecTypes['pg/text@1']['output'] | null;
-    errorMessage: CodecTypes['pg/text@1']['output'] | null;
-    createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-    updatedAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-    content: public_ContentIdea;
-    readonly [RelationKeys]?: 'content';
-  };
-  export type public_Notification = {
-    id: CodecTypes['pg/text@1']['output'];
-    userId: CodecTypes['pg/text@1']['output'];
-    type: CodecTypes['pg/text@1']['output'];
-    title: CodecTypes['pg/text@1']['output'];
-    message: CodecTypes['pg/text@1']['output'];
-    data: CodecTypes['pg/json@1']['output'] | null;
-    isRead: CodecTypes['pg/bool@1']['output'];
-    createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-    readAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
-    user: public_User;
-    readonly [RelationKeys]?: 'user';
-  };
-  export type public_Integration = {
-    id: CodecTypes['pg/text@1']['output'];
-    userId: CodecTypes['pg/text@1']['output'];
-    provider: CodecTypes['pg/text@1']['output'];
-    accessToken: CodecTypes['pg/text@1']['output'];
-    refreshToken: CodecTypes['pg/text@1']['output'] | null;
-    expiresAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
-    metadata: CodecTypes['pg/json@1']['output'] | null;
-    createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-    updatedAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-    user: public_User;
-    readonly [RelationKeys]?: 'user';
-  };
-  export type public_AuditLog = {
-    id: CodecTypes['pg/text@1']['output'];
-    userId: CodecTypes['pg/text@1']['output'] | null;
-    action: CodecTypes['pg/text@1']['output'];
-    entityType: CodecTypes['pg/text@1']['output'];
-    entityId: CodecTypes['pg/text@1']['output'] | null;
-    metadata: CodecTypes['pg/json@1']['output'] | null;
-    ipAddress: CodecTypes['pg/text@1']['output'] | null;
-    userAgent: CodecTypes['pg/text@1']['output'] | null;
-    createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-    user: public_User | null;
-    readonly [RelationKeys]?: 'user';
-  };
-}
-
-export declare const models: {
-  public: {
-    User: Models.public_User;
-    UserSettings: Models.public_UserSettings;
-    Project: Models.public_Project;
-    ContentIdea: Models.public_ContentIdea;
-    AIWorkflow: Models.public_AIWorkflow;
-    WorkflowLog: Models.public_WorkflowLog;
-    AIRequest: Models.public_AIRequest;
-    Asset: Models.public_Asset;
-    Approval: Models.public_Approval;
-    PublishJob: Models.public_PublishJob;
-    Notification: Models.public_Notification;
-    Integration: Models.public_Integration;
-    AuditLog: Models.public_AuditLog;
-  };
-};
-
 export type TypeMaps = TypeMapsType<
   CodecTypes,
   QueryOperationTypes,
@@ -1109,19 +889,11 @@ type ContractBase = Omit<
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
-                  readonly default: {
-                    readonly kind: 'literal';
-                    readonly value: DefaultLiteralValue<'pg/text@1', 'GEMINI'>;
-                  };
                 };
                 readonly model: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
-                  readonly default: {
-                    readonly kind: 'literal';
-                    readonly value: DefaultLiteralValue<'pg/text@1', 'gemini-3.5-flash'>;
-                  };
                 };
                 readonly prompt: {
                   readonly nativeType: 'text';
@@ -1215,19 +987,11 @@ type ContractBase = Omit<
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
-                  readonly default: {
-                    readonly kind: 'literal';
-                    readonly value: DefaultLiteralValue<'pg/text@1', 'GEMINI'>;
-                  };
                 };
                 readonly model: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
-                  readonly default: {
-                    readonly kind: 'literal';
-                    readonly value: DefaultLiteralValue<'pg/text@1', 'gemini-3.5-flash'>;
-                  };
                 };
                 readonly startedAt: {
                   readonly nativeType: 'timestamptz';
@@ -2379,7 +2143,6 @@ type ContractBase = Omit<
                   readonly model: 'AIWorkflow';
                 };
                 readonly cardinality: 'N:1';
-                readonly nullable: false;
                 readonly on: {
                   readonly localFields: readonly ['workflowId'];
                   readonly targetFields: readonly ['id'];
@@ -2504,7 +2267,6 @@ type ContractBase = Omit<
                   readonly model: 'ContentIdea';
                 };
                 readonly cardinality: 'N:1';
-                readonly nullable: false;
                 readonly on: {
                   readonly localFields: readonly ['contentId'];
                   readonly targetFields: readonly ['id'];
@@ -2587,7 +2349,6 @@ type ContractBase = Omit<
                   readonly model: 'ContentIdea';
                 };
                 readonly cardinality: 'N:1';
-                readonly nullable: false;
                 readonly on: {
                   readonly localFields: readonly ['contentId'];
                   readonly targetFields: readonly ['id'];
@@ -2596,7 +2357,6 @@ type ContractBase = Omit<
               readonly reviewedBy: {
                 readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
                 readonly cardinality: 'N:1';
-                readonly nullable: false;
                 readonly on: {
                   readonly localFields: readonly ['reviewedById'];
                   readonly targetFields: readonly ['id'];
@@ -2664,7 +2424,6 @@ type ContractBase = Omit<
                   readonly model: 'AIWorkflow';
                 };
                 readonly cardinality: 'N:1';
-                readonly nullable: false;
                 readonly on: {
                   readonly localFields: readonly ['workflowId'];
                   readonly targetFields: readonly ['id'];
@@ -2731,7 +2490,6 @@ type ContractBase = Omit<
               readonly user: {
                 readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
                 readonly cardinality: 'N:1';
-                readonly nullable: true;
                 readonly on: {
                   readonly localFields: readonly ['userId'];
                   readonly targetFields: readonly ['id'];
@@ -2836,7 +2594,6 @@ type ContractBase = Omit<
               readonly createdBy: {
                 readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
                 readonly cardinality: 'N:1';
-                readonly nullable: false;
                 readonly on: {
                   readonly localFields: readonly ['createdById'];
                   readonly targetFields: readonly ['id'];
@@ -2848,7 +2605,6 @@ type ContractBase = Omit<
                   readonly model: 'Project';
                 };
                 readonly cardinality: 'N:1';
-                readonly nullable: false;
                 readonly on: {
                   readonly localFields: readonly ['projectId'];
                   readonly targetFields: readonly ['id'];
@@ -2949,7 +2705,6 @@ type ContractBase = Omit<
               readonly user: {
                 readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
                 readonly cardinality: 'N:1';
-                readonly nullable: false;
                 readonly on: {
                   readonly localFields: readonly ['userId'];
                   readonly targetFields: readonly ['id'];
@@ -3021,7 +2776,6 @@ type ContractBase = Omit<
               readonly user: {
                 readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
                 readonly cardinality: 'N:1';
-                readonly nullable: false;
                 readonly on: {
                   readonly localFields: readonly ['userId'];
                   readonly targetFields: readonly ['id'];
@@ -3103,7 +2857,6 @@ type ContractBase = Omit<
               readonly owner: {
                 readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
                 readonly cardinality: 'N:1';
-                readonly nullable: false;
                 readonly on: {
                   readonly localFields: readonly ['ownerId'];
                   readonly targetFields: readonly ['id'];
@@ -3187,7 +2940,6 @@ type ContractBase = Omit<
                   readonly model: 'ContentIdea';
                 };
                 readonly cardinality: 'N:1';
-                readonly nullable: false;
                 readonly on: {
                   readonly localFields: readonly ['contentId'];
                   readonly targetFields: readonly ['id'];
@@ -3343,7 +3095,6 @@ type ContractBase = Omit<
                   readonly model: 'UserSettings';
                 };
                 readonly cardinality: '1:1';
-                readonly nullable: true;
                 readonly on: {
                   readonly localFields: readonly ['id'];
                   readonly targetFields: readonly ['userId'];
@@ -3414,7 +3165,6 @@ type ContractBase = Omit<
               readonly user: {
                 readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
                 readonly cardinality: 'N:1';
-                readonly nullable: false;
                 readonly on: {
                   readonly localFields: readonly ['userId'];
                   readonly targetFields: readonly ['id'];
@@ -3470,7 +3220,6 @@ type ContractBase = Omit<
                   readonly model: 'AIWorkflow';
                 };
                 readonly cardinality: 'N:1';
-                readonly nullable: false;
                 readonly on: {
                   readonly localFields: readonly ['workflowId'];
                   readonly targetFields: readonly ['id'];

@@ -273,6 +273,27 @@
                 "value": "CANCELLED"
               }
             ]
+          },
+          "WorkflowType": {
+            "codecId": "pg/text@1",
+            "members": [
+              {
+                "name": "SCRIPT_GENERATION",
+                "value": "SCRIPT_GENERATION"
+              },
+              {
+                "name": "VIDEO_GENERATION",
+                "value": "VIDEO_GENERATION"
+              },
+              {
+                "name": "AUDIO_GENERATION",
+                "value": "AUDIO_GENERATION"
+              },
+              {
+                "name": "IMAGE_GENERATION",
+                "value": "IMAGE_GENERATION"
+              }
+            ]
           }
         },
         "models": {
@@ -285,10 +306,38 @@
                   "kind": "scalar"
                 }
               },
+              "errorMessage": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "id": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "input": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/json@1",
+                  "kind": "scalar"
+                }
+              },
+              "model": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "output": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/json@1",
                   "kind": "scalar"
                 }
               },
@@ -297,6 +346,19 @@
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
+                }
+              },
+              "provider": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "AIProvider",
+                  "namespaceId": "public",
+                  "plane": "domain"
                 }
               },
               "response": {
@@ -324,6 +386,7 @@
             "relations": {
               "workflow": {
                 "cardinality": "N:1",
+                "nullable": false,
                 "on": {
                   "localFields": [
                     "workflowId"
@@ -343,11 +406,26 @@
                 "createdAt": {
                   "column": "createdAt"
                 },
+                "errorMessage": {
+                  "column": "errorMessage"
+                },
                 "id": {
                   "column": "id"
                 },
+                "input": {
+                  "column": "input"
+                },
+                "model": {
+                  "column": "model"
+                },
+                "output": {
+                  "column": "output"
+                },
                 "prompt": {
                   "column": "prompt"
+                },
+                "provider": {
+                  "column": "provider"
                 },
                 "response": {
                   "column": "response"
@@ -379,6 +457,13 @@
                   "kind": "scalar"
                 }
               },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
               "currentStep": {
                 "nullable": true,
                 "type": {
@@ -405,6 +490,26 @@
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
+                }
+              },
+              "model": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "provider": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "AIProvider",
+                  "namespaceId": "public",
+                  "plane": "domain"
                 }
               },
               "retryCount": {
@@ -434,11 +539,24 @@
                   "plane": "domain"
                 }
               },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
               "workflowType": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "WorkflowType",
+                  "namespaceId": "public",
+                  "plane": "domain"
                 }
               }
             },
@@ -475,6 +593,7 @@
               },
               "content": {
                 "cardinality": "N:1",
+                "nullable": false,
                 "on": {
                   "localFields": [
                     "contentId"
@@ -512,6 +631,9 @@
                 "contentId": {
                   "column": "contentId"
                 },
+                "createdAt": {
+                  "column": "createdAt"
+                },
                 "currentStep": {
                   "column": "currentStep"
                 },
@@ -524,6 +646,12 @@
                 "id": {
                   "column": "id"
                 },
+                "model": {
+                  "column": "model"
+                },
+                "provider": {
+                  "column": "provider"
+                },
                 "retryCount": {
                   "column": "retryCount"
                 },
@@ -532,6 +660,9 @@
                 },
                 "status": {
                   "column": "status"
+                },
+                "updatedAt": {
+                  "column": "updatedAt"
                 },
                 "workflowType": {
                   "column": "workflowType"
@@ -602,6 +733,7 @@
             "relations": {
               "content": {
                 "cardinality": "N:1",
+                "nullable": false,
                 "on": {
                   "localFields": [
                     "contentId"
@@ -617,6 +749,7 @@
               },
               "reviewedBy": {
                 "cardinality": "N:1",
+                "nullable": false,
                 "on": {
                   "localFields": [
                     "reviewedById"
@@ -720,6 +853,7 @@
             "relations": {
               "workflow": {
                 "cardinality": "N:1",
+                "nullable": false,
                 "on": {
                   "localFields": [
                     "workflowId"
@@ -831,6 +965,7 @@
             "relations": {
               "user": {
                 "cardinality": "N:1",
+                "nullable": true,
                 "on": {
                   "localFields": [
                     "userId"
@@ -1003,6 +1138,7 @@
               },
               "createdBy": {
                 "cardinality": "N:1",
+                "nullable": false,
                 "on": {
                   "localFields": [
                     "createdById"
@@ -1018,6 +1154,7 @@
               },
               "project": {
                 "cardinality": "N:1",
+                "nullable": false,
                 "on": {
                   "localFields": [
                     "projectId"
@@ -1177,6 +1314,7 @@
             "relations": {
               "user": {
                 "cardinality": "N:1",
+                "nullable": false,
                 "on": {
                   "localFields": [
                     "userId"
@@ -1294,6 +1432,7 @@
             "relations": {
               "user": {
                 "cardinality": "N:1",
+                "nullable": false,
                 "on": {
                   "localFields": [
                     "userId"
@@ -1425,6 +1564,7 @@
               },
               "owner": {
                 "cardinality": "N:1",
+                "nullable": false,
                 "on": {
                   "localFields": [
                     "ownerId"
@@ -1552,6 +1692,7 @@
             "relations": {
               "content": {
                 "cardinality": "N:1",
+                "nullable": false,
                 "on": {
                   "localFields": [
                     "contentId"
@@ -1782,6 +1923,7 @@
               },
               "settings": {
                 "cardinality": "1:1",
+                "nullable": true,
                 "on": {
                   "localFields": [
                     "id"
@@ -1911,6 +2053,7 @@
             "relations": {
               "user": {
                 "cardinality": "N:1",
+                "nullable": false,
                 "on": {
                   "localFields": [
                     "userId"
@@ -2000,6 +2143,7 @@
             "relations": {
               "workflow": {
                 "cardinality": "N:1",
+                "nullable": false,
                 "on": {
                   "localFields": [
                     "workflowId"
@@ -2046,6 +2190,13 @@
         "entries": {
           "table": {
             "aIRequest": {
+              "checks": [
+                {
+                  "expression": "\"provider\" IN ('GEMINI', 'OPENAI', 'CLAUDE', 'CUSTOM')",
+                  "name": "aIRequest_provider_check_76b212d5",
+                  "prefix": "aIRequest_provider_check"
+                }
+              ],
               "columns": {
                 "createdAt": {
                   "codecId": "pg/timestamptz-temporal@1",
@@ -2056,15 +2207,54 @@
                   "nativeType": "timestamptz",
                   "nullable": false
                 },
+                "errorMessage": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "id": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
                 },
+                "input": {
+                  "codecId": "pg/json@1",
+                  "nativeType": "json",
+                  "nullable": true
+                },
+                "model": {
+                  "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "gemini-3.5-flash"
+                  },
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "output": {
+                  "codecId": "pg/json@1",
+                  "nativeType": "json",
+                  "nullable": true
+                },
                 "prompt": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
+                },
+                "provider": {
+                  "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "GEMINI"
+                  },
+                  "nativeType": "text",
+                  "nullable": false,
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "AIProvider",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
                 },
                 "response": {
                   "codecId": "pg/text@1",
@@ -2120,9 +2310,19 @@
             "aIWorkflow": {
               "checks": [
                 {
+                  "expression": "\"provider\" IN ('GEMINI', 'OPENAI', 'CLAUDE', 'CUSTOM')",
+                  "name": "aIWorkflow_provider_check_76b212d5",
+                  "prefix": "aIWorkflow_provider_check"
+                },
+                {
                   "expression": "\"status\" IN ('QUEUED', 'RUNNING', 'COMPLETED', 'FAILED', 'CANCELLED')",
                   "name": "aIWorkflow_status_check_be53ae1d",
                   "prefix": "aIWorkflow_status_check"
+                },
+                {
+                  "expression": "\"workflowType\" IN ('SCRIPT_GENERATION', 'VIDEO_GENERATION', 'AUDIO_GENERATION', 'IMAGE_GENERATION')",
+                  "name": "aIWorkflow_workflowType_check_2b9649b5",
+                  "prefix": "aIWorkflow_workflowType_check"
                 }
               ],
               "columns": {
@@ -2134,6 +2334,15 @@
                 "contentId": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
+                  "nullable": false
+                },
+                "createdAt": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
                   "nullable": false
                 },
                 "currentStep": {
@@ -2156,6 +2365,30 @@
                   "nativeType": "text",
                   "nullable": false
                 },
+                "model": {
+                  "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "gemini-3.5-flash"
+                  },
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "provider": {
+                  "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "GEMINI"
+                  },
+                  "nativeType": "text",
+                  "nullable": false,
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "AIProvider",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
+                },
                 "retryCount": {
                   "codecId": "pg/int4@1",
                   "default": {
@@ -2172,6 +2405,10 @@
                 },
                 "status": {
                   "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "QUEUED"
+                  },
                   "nativeType": "text",
                   "nullable": false,
                   "valueSet": {
@@ -2181,10 +2418,25 @@
                     "plane": "storage"
                   }
                 },
+                "updatedAt": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
                 "workflowType": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
-                  "nullable": false
+                  "nullable": false,
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "WorkflowType",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
                 }
               },
               "foreignKeys": [
@@ -2212,6 +2464,15 @@
                   ],
                   "name": "aIWorkflow_contentId_idx_37b207ad",
                   "prefix": "aIWorkflow_contentId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "contentId",
+                    "status"
+                  ],
+                  "name": "aIWorkflow_contentId_status_idx_9952abf4",
+                  "prefix": "aIWorkflow_contentId_status_idx",
                   "unique": false
                 },
                 {
@@ -3509,6 +3770,15 @@
                 "FAILED",
                 "CANCELLED"
               ]
+            },
+            "WorkflowType": {
+              "kind": "valueSet",
+              "values": [
+                "SCRIPT_GENERATION",
+                "VIDEO_GENERATION",
+                "AUDIO_GENERATION",
+                "IMAGE_GENERATION"
+              ]
             }
           }
         },
@@ -3516,7 +3786,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "dff93810729c3b4b697e1be983091afedd99cc73daae6064ab3d39934e786392"
+    "storageHash": "633fe3119f5905d6b9b1f8144bcd872e60ea3f1ad913565150e116d1ab1f21aa"
   },
   "execution": {
     "executionHash": "d89ca6a329807cf50a1f8a245065906af7b0c69c46c7e0143ea8959dc49fa50f",
