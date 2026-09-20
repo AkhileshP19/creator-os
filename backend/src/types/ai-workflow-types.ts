@@ -22,7 +22,7 @@ export interface GeneratedScript {
 export interface ScriptGenerationInput {
     topic: string;
     fact: string;
-    channelName: string;
+    brandName: string;
     durationSeconds: number;
     aspectRatio: "9:16";
 }

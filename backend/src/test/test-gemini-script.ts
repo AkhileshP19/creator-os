@@ -11,7 +11,7 @@ Globally, sharks are responsible for an average of five to six fatal attacks
 per year. Vending machines kill roughly thirteen people annually — mostly
 from people rocking or tipping them trying to free stuck snacks, causing the
 machines to fall on them.`,
-    channelName: "Everything Around You",
+    brandName: "Everything Around You",
     durationSeconds: 10,
     aspectRatio: "9:16",
   };

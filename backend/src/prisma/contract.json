@@ -40,6 +40,10 @@
       "model": "Project",
       "namespace": "public"
     },
+    "projectSettings": {
+      "model": "ProjectSettings",
+      "namespace": "public"
+    },
     "publishJob": {
       "model": "PublishJob",
       "namespace": "public"
@@ -1577,6 +1581,22 @@
                   "model": "User",
                   "namespace": "public"
                 }
+              },
+              "settings": {
+                "cardinality": "1:1",
+                "nullable": true,
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "projectId"
+                  ]
+                },
+                "to": {
+                  "model": "ProjectSettings",
+                  "namespace": "public"
+                }
               }
             },
             "storage": {
@@ -1608,6 +1628,104 @@
               },
               "namespaceId": "public",
               "table": "project"
+            }
+          },
+          "ProjectSettings": {
+            "fields": {
+              "brandName": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "defaultAspectRatio": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "defaultDuration": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "projectId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "project": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "projectId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Project",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "brandName": {
+                  "column": "brandName"
+                },
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "defaultAspectRatio": {
+                  "column": "defaultAspectRatio"
+                },
+                "defaultDuration": {
+                  "column": "defaultDuration"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "projectId": {
+                  "column": "projectId"
+                },
+                "updatedAt": {
+                  "column": "updatedAt"
+                }
+              },
+              "namespaceId": "public",
+              "table": "projectSettings"
             }
           },
           "PublishJob": {
@@ -3269,6 +3387,92 @@
               },
               "uniques": []
             },
+            "projectSettings": {
+              "columns": {
+                "brandName": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "createdAt": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "defaultAspectRatio": {
+                  "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "9:16"
+                  },
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "defaultDuration": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 10
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "projectId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "updatedAt": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "source": {
+                    "columns": [
+                      "projectId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "projectSettings"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "project"
+                  }
+                }
+              ],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "projectId"
+                  ]
+                }
+              ]
+            },
             "publishJob": {
               "checks": [
                 {
@@ -3786,10 +3990,10 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "633fe3119f5905d6b9b1f8144bcd872e60ea3f1ad913565150e116d1ab1f21aa"
+    "storageHash": "b5bedaf442300aeb087be6591eb15c0eeffe8d52567883e751f5203397ea456d"
   },
   "execution": {
-    "executionHash": "d89ca6a329807cf50a1f8a245065906af7b0c69c46c7e0143ea8959dc49fa50f",
+    "executionHash": "355bd382d172b725b2744b758bca97ea474e0acbb64c4adffb07f3c881b1f01e",
     "mutations": {
       "defaults": [
         {
@@ -3889,6 +4093,17 @@
             "column": "id",
             "namespace": "public",
             "table": "project"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "uuidv4",
+            "kind": "generator"
+          },
+          "ref": {
+            "column": "id",
+            "namespace": "public",
+            "table": "projectSettings"
           }
         },
         {

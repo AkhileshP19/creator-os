@@ -8,6 +8,8 @@ import { clerkMiddleware } from "@clerk/express";
 import authRouter from "./routes/auth-routes.js";
 import projectRouter from "./routes/project-routes.js";
 import contentIdeaRouter from "./routes/content-idea-routes.js";
+import aiWorkflowRouter from "./routes/ai-workflow-routes.js";
+import projectSettingsRouter from "./routes/project-settings-routes.js";
 
 const app: Application = express();
 
@@ -41,6 +43,8 @@ app.use("/api/health", healthRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/projects", projectRouter);
 app.use("/api/content-ideas", contentIdeaRouter);
+app.use("/api/ai", aiWorkflowRouter);
+app.use("/api/projects", projectSettingsRouter);
 app.use(notFoundMiddleware);
 
 app.use(errorMiddleware);

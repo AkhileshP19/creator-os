@@ -77,7 +77,7 @@ export async function generateScript(
     const prompt = `
 Create a highly engaging short-form factual video script.
 
-Channel: ${input.channelName}
+Brand: ${input.brandName}
 Topic: ${input.topic}
 Fact: ${input.fact}
 Duration: ${input.durationSeconds} seconds
