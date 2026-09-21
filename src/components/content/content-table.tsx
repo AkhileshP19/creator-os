@@ -1,4 +1,4 @@
-import { Pencil, Trash } from "lucide-react";
+import { Loader2, Pencil, Trash } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -9,6 +9,7 @@ import {
 } from "../ui/table";
 import { ContentIdea } from "@/types/content-types";
 import { PaginationController } from "../ui/custom/pagination-controller";
+import { Button } from "../ui/button";
 
 interface ContentTableProps {
   contentIdeas: ContentIdea[];
@@ -18,9 +19,12 @@ interface ContentTableProps {
   perPage: number;
   onPerPageChange: (value: number) => void;
   setIsEditModalOpen: (isOpen: boolean) => void;
+  setIsViewScriptModalOpen: (isOpen: boolean) => void;
   setSelectedContentData: (project: ContentIdea | null) => void;
   setIsCreateOrEditMode: (value: "create" | "edit") => void;
   onDeleteContent: (contentId: string) => void;
+  onGenerateScript: (contentId: string) => void;
+  isGeneratingScript: boolean;
 }
 
 export const ContentTable = ({
@@ -31,9 +35,12 @@ export const ContentTable = ({
   perPage,
   onPageChange,
   setIsEditModalOpen,
+  setIsViewScriptModalOpen,
   setSelectedContentData,
   setIsCreateOrEditMode,
   onDeleteContent,
+  onGenerateScript,
+  isGeneratingScript
 }: ContentTableProps) => {
   return (
     <div>
@@ -45,6 +52,7 @@ export const ContentTable = ({
             <TableHead className="w-[100px]">Scheduled date</TableHead>
             <TableHead className="w-[100px]">Scheduled time</TableHead>
             <TableHead className="w-[100px]">Actions</TableHead>
+            <TableHead className="w-[100px]">Script</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -58,14 +66,14 @@ export const ContentTable = ({
               </TableCell>
               <TableCell>{contentIdea.status}</TableCell>
               <TableCell>
-                {new Date(
-                  contentIdea.scheduledDate ?? "N/A",
-                ).toLocaleDateString()}
+                {contentIdea.scheduledDate
+                  ? new Date(contentIdea.scheduledDate).toLocaleDateString()
+                  : "-"}
               </TableCell>
               <TableCell>
-                {new Date(
-                  contentIdea.scheduledDate ?? "N/A",
-                ).toLocaleTimeString()}
+                {contentIdea.scheduledDate
+                  ? new Date(contentIdea.scheduledDate).toLocaleTimeString()
+                  : "-"}
               </TableCell>
               <TableCell className="flex items-center gap-8 py-6">
                 <Pencil
@@ -80,6 +88,46 @@ export const ContentTable = ({
                   onClick={() => onDeleteContent(contentIdea.id)}
                   className="cursor-pointer"
                 />
+              </TableCell>
+              <TableCell>
+                {contentIdea.script.status === "NOT_GENERATED" && (
+                  <Button
+                    className="bg-indigo-600 hover:bg-indigo-700 cursor-pointer py-4"
+                    onClick={() => onGenerateScript(contentIdea.id)}
+                    disabled={isGeneratingScript}
+                  >
+                    {isGeneratingScript && <Loader2 className="w-6 h-6 animate-spin mr-2" />}
+                    Generate Script
+                  </Button>
+                )}
+
+                {contentIdea.script.status === "COMPLETED" && (
+                  <Button
+                    className="bg-indigo-600 hover:bg-indigo-700 cursor-pointer py-4"
+                    onClick={() => {
+                      setIsViewScriptModalOpen(true);
+                      setSelectedContentData(contentIdea);
+                    }}
+                  >
+                    View Script
+                  </Button>
+                )}
+
+                {contentIdea.script.status === "FAILED" && (
+                  <Button
+                    className="bg-indigo-600 hover:bg-indigo-700 cursor-pointer py-4"
+                    onClick={() => onGenerateScript(contentIdea.id)}
+                    disabled={isGeneratingScript}
+                  >
+                    {isGeneratingScript && <Loader2 className="w-6 h-6 animate-spin mr-2" />}
+                    Retry Script
+                  </Button>
+                )}
+
+                {/* {(contentIdea.script.status === "RUNNING" ||
+                  contentIdea.script.status === "QUEUED") && (
+                  <Button disabled>Generating...</Button>
+                )} */}
               </TableCell>
             </TableRow>
           ))}

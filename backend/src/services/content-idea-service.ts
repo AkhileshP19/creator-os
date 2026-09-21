@@ -23,7 +23,7 @@ interface GetContentIdeasInput {
 }
 
 interface GetContentIdeasResult {
-  contentIdeas: any[];
+  contentIdeasWithScriptState: any[];
   totalCount: number;
   totalPages: number;
   currentPage: number;
@@ -54,6 +54,14 @@ export interface UpdateContentIdeaInput {
   status?: IdeaStatus;
   scheduledDate?: Temporal.Instant | null;
   priority?: PriorityLevel;
+}
+
+type ScriptGenerationStatus =
+  "NOT_GENERATED" | "QUEUED" | "RUNNING" | "COMPLETED" | "FAILED" | "CANCELLED";
+
+interface ContentScriptState {
+  status: ScriptGenerationStatus;
+  workflowId: string | null;
 }
 
 const contentIdeaService = {
@@ -119,8 +127,8 @@ const contentIdeaService = {
         query = query.where((p) =>
           or(
             p.title.ilike(`%${searchTerm}%`),
-            p.description.ilike(`%${searchTerm}%`)
-          )
+            p.description.ilike(`%${searchTerm}%`),
+          ),
         );
       }
 
@@ -138,8 +146,34 @@ const contentIdeaService = {
         .offset(offset)
         .all();
 
+      const contentIdeasWithScriptState = await Promise.all(
+        contentIdeas.map(async (contentIdea) => {
+          const latestScriptWorkflow = await db.orm.public.AIWorkflow.where({
+            contentId: contentIdea.id,
+            workflowType: "SCRIPT_GENERATION",
+          })
+            .orderBy((workflow) => workflow.createdAt.desc())
+            .first();
+
+          const script: ContentScriptState = latestScriptWorkflow
+            ? {
+                status: latestScriptWorkflow.status,
+                workflowId: latestScriptWorkflow.id,
+              }
+            : {
+                status: "NOT_GENERATED",
+                workflowId: null,
+              };
+
+          return {
+            ...contentIdea,
+            script,
+          };
+        }),
+      );
+
       return {
-        contentIdeas,
+        contentIdeasWithScriptState,
         totalCount,
         totalPages,
         currentPage: pageNo,

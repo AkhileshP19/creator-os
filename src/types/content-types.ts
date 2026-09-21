@@ -1,3 +1,11 @@
+type ScriptGenerationStatus =
+  | "NOT_GENERATED"
+  | "QUEUED"
+  | "RUNNING"
+  | "COMPLETED"
+  | "FAILED"
+  | "CANCELLED";
+
 export interface ContentIdea {
   id: string;
   projectId: string;
@@ -12,6 +20,10 @@ export interface ContentIdea {
   deletedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  script: {
+    status: ScriptGenerationStatus;
+    workflowId: string;
+  };
 }
 
 export interface CreateContentIdeaRequest {

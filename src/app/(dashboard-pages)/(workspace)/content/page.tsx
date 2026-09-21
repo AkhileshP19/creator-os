@@ -20,6 +20,8 @@ import {
 } from "@/types/content-types";
 import { ContentTable } from "@/components/content/content-table";
 import { usePatchData } from "@/hooks/fetch/usePatchData";
+import { GeneratedScript, GenerateScriptRequest, GenerateScriptResponse } from "@/types/generate-script-types";
+import { GeneratedScriptModal } from "@/components/content/generated-script-modal";
 
 const emptyContentFormValues: z.infer<typeof newContentFormSchema> = {
   projectId: "",
@@ -46,6 +48,7 @@ export default function ContentPage() {
   const [contentToDeleteId, setContentToDeleteId] = useState<string | null>(
     null,
   );
+  const [isViewScriptModalOpen, setIsViewScriptModalOpen] = useState<boolean>(false);
 
   const form = useForm<z.infer<typeof newContentFormSchema>>({
     resolver: zodResolver(newContentFormSchema),
@@ -89,6 +92,15 @@ export default function ContentPage() {
     ApiEndPoint.DELETE_CONTENT_IDEA,
     [contentToDeleteId ?? ""],
   );
+
+  const {mutateAsync: generateScriptMutation, isPending: isGeneratingScript} = usePostData<GenerateScriptResponse, GenerateScriptRequest>(ApiEndPoint.GENERATE_SCRIPT);
+
+  const {data: scriptData, isLoading: isFetchingScript} = useFetchData<GeneratedScript>(
+    ApiEndPoint.GET_SCRIPT_BY_ID,
+    "get-script",
+    [selectedContentData?.script.workflowId ?? ""],
+    undefined,
+!!(selectedContentData?.script.workflowId && isViewScriptModalOpen)  )
 
   const getScheduledDateTime = (
     date: Date | undefined,
@@ -156,6 +168,23 @@ export default function ContentPage() {
     }
   };
 
+const handleScriptGeneration = async (contentId: string) => {
+  try {
+    const payload: GenerateScriptRequest = {
+      contentId,
+    };
+
+    await generateScriptMutation(payload);
+
+    toast.success("Script generated successfully");
+
+    await refetchContentIdeas();
+  } catch (error) {
+    console.error("Failed to generate script", error);
+    toast.error("Failed to generate script");
+  }
+};
+
   const handleClickPage = (page: number | string) => {
     if (typeof page === "number") {
       setCurrentPage(page);
@@ -193,9 +222,12 @@ export default function ContentPage() {
           perPage={perPage}
           onPerPageChange={handlePageSizeChange}
           setIsEditModalOpen={setIsAddContentModalOpen}
+          setIsViewScriptModalOpen={setIsViewScriptModalOpen}
           setSelectedContentData={setSelectedContentData}
           setIsCreateOrEditMode={setIsCreateOrEditMode}
           onDeleteContent={handleDeleteContent}
+          onGenerateScript={handleScriptGeneration}
+          isGeneratingScript={isGeneratingScript}
         />
       </div>
 
@@ -218,6 +250,8 @@ export default function ContentPage() {
         selectedContentData={selectedContentData!}
         isUpdating={isUpdating}
       />
+
+      <GeneratedScriptModal open={isViewScriptModalOpen} onOpenChange={setIsAddContentModalOpen} scriptData={scriptData}/>
     </div>
   );
 }
