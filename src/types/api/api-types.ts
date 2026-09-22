@@ -19,7 +19,8 @@ export const ApiEndPoint = {
   UPDATE_CONTENT_IDEA: "/api/content-ideas/{id}",
   DELETE_CONTENT_IDEA: "/api/content-ideas/delete/{id}",
   GENERATE_SCRIPT: "/api/ai/workflows",
-  GET_SCRIPT_BY_ID: "/api/ai/workflws/{id}",
+  GET_WORKFLOW: "/api/ai/workflws/{id}",
+  GET_SCRIPT: "/api/ai/workflows/{id}/script",
 } as const;
 
 // Define API response structure

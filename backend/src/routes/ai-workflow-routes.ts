@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   createScriptWorkflowController,
+  getGeneratedScriptController,
   getWorkflowByIdController,
 } from "../controller/ai-workflow-controller.js";
 import authMiddleware from "../middleware/auth-middleware.js";
@@ -13,6 +14,13 @@ aiWorkflowRouter.post(
   authMiddleware,
   currentUserMiddleware,
   createScriptWorkflowController,
+);
+
+aiWorkflowRouter.get(
+  "/workflows/:workflowId/script",
+  authMiddleware,
+  currentUserMiddleware,
+  getGeneratedScriptController,
 );
 
 aiWorkflowRouter.get(

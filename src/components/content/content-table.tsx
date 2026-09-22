@@ -24,7 +24,7 @@ interface ContentTableProps {
   setIsCreateOrEditMode: (value: "create" | "edit") => void;
   onDeleteContent: (contentId: string) => void;
   onGenerateScript: (contentId: string) => void;
-  isGeneratingScript: boolean;
+  isGeneratingScript: string | null;
 }
 
 export const ContentTable = ({
@@ -40,7 +40,7 @@ export const ContentTable = ({
   setIsCreateOrEditMode,
   onDeleteContent,
   onGenerateScript,
-  isGeneratingScript
+  isGeneratingScript,
 }: ContentTableProps) => {
   return (
     <div>
@@ -94,9 +94,12 @@ export const ContentTable = ({
                   <Button
                     className="bg-indigo-600 hover:bg-indigo-700 cursor-pointer py-4"
                     onClick={() => onGenerateScript(contentIdea.id)}
-                    disabled={isGeneratingScript}
+                    // Only disable and show loader if THIS row's ID matches
+                    disabled={isGeneratingScript === contentIdea.id}
                   >
-                    {isGeneratingScript && <Loader2 className="w-6 h-6 animate-spin mr-2" />}
+                    {isGeneratingScript === contentIdea.id && (
+                      <Loader2 className="w-6 h-6 animate-spin mr-2" />
+                    )}
                     Generate Script
                   </Button>
                 )}
@@ -117,17 +120,15 @@ export const ContentTable = ({
                   <Button
                     className="bg-indigo-600 hover:bg-indigo-700 cursor-pointer py-4"
                     onClick={() => onGenerateScript(contentIdea.id)}
-                    disabled={isGeneratingScript}
+                    // Only disable and show loader if THIS row's ID matches
+                    disabled={isGeneratingScript === contentIdea.id}
                   >
-                    {isGeneratingScript && <Loader2 className="w-6 h-6 animate-spin mr-2" />}
+                    {isGeneratingScript === contentIdea.id && (
+                      <Loader2 className="w-6 h-6 animate-spin mr-2" />
+                    )}
                     Retry Script
                   </Button>
                 )}
-
-                {/* {(contentIdea.script.status === "RUNNING" ||
-                  contentIdea.script.status === "QUEUED") && (
-                  <Button disabled>Generating...</Button>
-                )} */}
               </TableCell>
             </TableRow>
           ))}
