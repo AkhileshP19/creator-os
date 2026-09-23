@@ -20,8 +20,13 @@ import {
 } from "@/types/content-types";
 import { ContentTable } from "@/components/content/content-table";
 import { usePatchData } from "@/hooks/fetch/usePatchData";
-import { GeneratedScript, GenerateScriptRequest, GenerateScriptResponse } from "@/types/generate-script-types";
+import {
+  GeneratedScript,
+  GenerateScriptRequest,
+  GenerateScriptResponse,
+} from "@/types/generate-script-types";
 import { GeneratedScriptModal } from "@/components/content/generated-script-modal";
+import { GenerateVideoRequest } from "@/types/generate-video-types";
 
 const emptyContentFormValues: z.infer<typeof newContentFormSchema> = {
   projectId: "",
@@ -48,8 +53,11 @@ export default function ContentPage() {
   const [contentToDeleteId, setContentToDeleteId] = useState<string | null>(
     null,
   );
-  const [isViewScriptModalOpen, setIsViewScriptModalOpen] = useState<boolean>(false);
-  const [generatingScriptId, setGeneratingScriptId] = useState<string | null>(null);
+  const [isViewScriptModalOpen, setIsViewScriptModalOpen] =
+    useState<boolean>(false);
+  const [generatingScriptId, setGeneratingScriptId] = useState<string | null>(
+    null,
+  );
 
   const form = useForm<z.infer<typeof newContentFormSchema>>({
     resolver: zodResolver(newContentFormSchema),
@@ -94,14 +102,22 @@ export default function ContentPage() {
     [contentToDeleteId ?? ""],
   );
 
-  const {mutateAsync: generateScriptMutation, isPending: isGeneratingScript} = usePostData<GenerateScriptResponse, GenerateScriptRequest>(ApiEndPoint.GENERATE_SCRIPT);
+  const { mutateAsync: generateScriptMutation, isPending: isGeneratingScript } =
+    usePostData<GenerateScriptResponse, GenerateScriptRequest>(
+      ApiEndPoint.GENERATE_SCRIPT,
+    );
 
-  const {data: scriptData, isLoading: isFetchingScript} = useFetchData<GeneratedScript>(
-    ApiEndPoint.GET_SCRIPT,
-    "get-script",
-    [selectedContentData?.script.workflowId ?? ""],
-    undefined,
-    !!(selectedContentData?.script.workflowId && isViewScriptModalOpen)  )
+  const { data: scriptData, isLoading: isFetchingScript } =
+    useFetchData<GeneratedScript>(
+      ApiEndPoint.GET_SCRIPT,
+      "get-script",
+      [selectedContentData?.script.workflowId ?? ""],
+      undefined,
+      !!(selectedContentData?.script.workflowId && isViewScriptModalOpen),
+    );
+
+  const { mutateAsync: generateVideoMutation, isPending: isGeneratingVideo } =
+    usePostData<any, any>(ApiEndPoint.GENERATE_VIDEO);
 
   const getScheduledDateTime = (
     date: Date | undefined,
@@ -169,24 +185,39 @@ export default function ContentPage() {
     }
   };
 
-const handleScriptGeneration = async (contentId: string) => {
-  try {
-    setGeneratingScriptId(contentId);
-    const payload: GenerateScriptRequest = {
-      contentId,
-    };
+  const handleScriptGeneration = async (contentId: string) => {
+    try {
+      setGeneratingScriptId(contentId);
+      const payload: GenerateScriptRequest = {
+        contentId,
+      };
 
-    await generateScriptMutation(payload);
-    toast.success("Script generated successfully");
-    refetchContentIdeas();
-  } catch (error) {
-    console.error("Failed to generate script", error);
-    toast.error("Failed to generate script");
-    refetchContentIdeas();
-  } finally {
-    setGeneratingScriptId(null);
-  }
-};
+      await generateScriptMutation(payload);
+      toast.success("Script generated successfully");
+      refetchContentIdeas();
+    } catch (error) {
+      console.error("Failed to generate script", error);
+      toast.error("Failed to generate script");
+      refetchContentIdeas();
+    } finally {
+      setGeneratingScriptId(null);
+    }
+  };
+
+  const handleVideoGeneration = async (contentId: string) => {
+    try {
+      const payload: GenerateVideoRequest = {
+        contentId,
+      };
+      await generateVideoMutation(payload);
+      toast.success("Video has began generating");
+      refetchContentIdeas();
+    } catch (error) {
+      console.error("Failed to generate script", error);
+      toast.error("Failed to generate script");
+      refetchContentIdeas();
+    }
+  };
 
   const handleClickPage = (page: number | string) => {
     if (typeof page === "number") {
@@ -230,7 +261,8 @@ const handleScriptGeneration = async (contentId: string) => {
           setIsCreateOrEditMode={setIsCreateOrEditMode}
           onDeleteContent={handleDeleteContent}
           onGenerateScript={handleScriptGeneration}
-          isGeneratingScript={generatingScriptId}          
+          isGeneratingScript={generatingScriptId}
+          onGenerateVideo={handleVideoGeneration}
         />
       </div>
 
@@ -254,7 +286,11 @@ const handleScriptGeneration = async (contentId: string) => {
         isUpdating={isUpdating}
       />
 
-      <GeneratedScriptModal open={isViewScriptModalOpen} onOpenChange={setIsViewScriptModalOpen} scriptData={scriptData!}/>
+      <GeneratedScriptModal
+        open={isViewScriptModalOpen}
+        onOpenChange={setIsViewScriptModalOpen}
+        scriptData={scriptData!}
+      />
     </div>
   );
 }

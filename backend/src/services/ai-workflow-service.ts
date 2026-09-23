@@ -31,6 +31,7 @@ interface UpdateWorkflowStateInput {
 }
 
 const geminiModel = process.env.GEMINI_MODEL;
+const geminiVideoModel = process.env.GEMINI_VIDEO_MODEL;
 
 if (!geminiModel) {
   throw new Error("GEMINI_MODEL is not configured");
@@ -42,7 +43,7 @@ const aiWorkflowService = {
     currentUserId,
     workflowType,
     provider = "GEMINI",
-    model = geminiModel,
+    model,
   }: CreateAIWorkflowInput) => {
     // Verify that the ContentIdea exists, is active,
     // and belongs to the currently authenticated user.
@@ -62,12 +63,22 @@ const aiWorkflowService = {
       throw error;
     }
 
+    const resolvedModel =
+      model ??
+      (workflowType === "VIDEO_GENERATION" ? geminiVideoModel : geminiModel);
+
+    if (!resolvedModel) {
+      throw new Error(
+        `AI model is not configured for workflow type ${workflowType}`,
+      );
+    }
+
     const workflow = await db.orm.public.AIWorkflow.create({
       contentId,
       workflowType,
       status: "QUEUED",
       provider,
-      model,
+      model: resolvedModel,
       startedAt: null,
       completedAt: null,
       retryCount: 0,

@@ -25,6 +25,7 @@ interface ContentTableProps {
   onDeleteContent: (contentId: string) => void;
   onGenerateScript: (contentId: string) => void;
   isGeneratingScript: string | null;
+  onGenerateVideo: (contentId: string) => void;
 }
 
 export const ContentTable = ({
@@ -41,6 +42,7 @@ export const ContentTable = ({
   onDeleteContent,
   onGenerateScript,
   isGeneratingScript,
+  onGenerateVideo,
 }: ContentTableProps) => {
   return (
     <div>
@@ -53,6 +55,7 @@ export const ContentTable = ({
             <TableHead className="w-[100px]">Scheduled time</TableHead>
             <TableHead className="w-[100px]">Actions</TableHead>
             <TableHead className="w-[100px]">Script</TableHead>
+            <TableHead className="w-[100px]">Video</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -129,6 +132,11 @@ export const ContentTable = ({
                     Retry Script
                   </Button>
                 )}
+              </TableCell>
+              <TableCell>
+                <Button onClick={() => onGenerateVideo(contentIdea.id)}>
+                  Generate Video
+                </Button>
               </TableCell>
             </TableRow>
           ))}
