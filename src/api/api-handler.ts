@@ -101,7 +101,7 @@ export const apiHandler = async <T>(
   try {
     // const baseURL = "http://localhost:5000"; // Decide backend dynamically
     // const baseURL = "https://fluffy-fiesta-7q5xpp46x9pfrrrr-5000.app.github.dev";
-    const baseURL = "https://556916922e98bd.lhr.life";
+    const baseURL = "https://840bfc6a05b8a2.lhr.life";
     console.log(baseURL);
 
     // Detect if we want a blob (Excel download)

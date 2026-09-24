@@ -4,6 +4,8 @@ import path from "node:path";
 
 const browserProfilePath = path.resolve(process.cwd(), "browser-profile");
 
+const isHeadless = process.env.BROWSER_HEADLESS === "true";
+
 let browserContext: BrowserContext | null = null;
 
 export async function getBrowserPage(): Promise<Page> {
@@ -11,7 +13,7 @@ export async function getBrowserPage(): Promise<Page> {
     browserContext = await chromium.launchPersistentContext(
       browserProfilePath,
       {
-        headless: false,
+        headless: isHeadless,
         viewport: {
           width: 1440,
           height: 900,
