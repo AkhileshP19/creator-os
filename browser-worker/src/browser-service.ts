@@ -1,32 +1,37 @@
 import { chromium } from "playwright";
-import type { BrowserContext, Page } from "playwright";
-import path from "node:path";
+import type { Browser, BrowserContext, Page } from "playwright";
 
-const browserProfilePath = path.resolve(process.cwd(), "browser-profile");
-
-const isHeadless = process.env.BROWSER_HEADLESS === "true";
-
+let browser: Browser | null = null;
 let browserContext: BrowserContext | null = null;
 
 export async function getBrowserPage(): Promise<Page> {
+  if (!browser) {
+    browser = await chromium.connectOverCDP(
+      process.env.CHROME_CDP_URL ??
+      "http://127.0.0.1:9222",
+    );
+
+    const contexts = browser.contexts();
+
+    if (contexts.length === 0) {
+      throw new Error(
+        "No Chrome browser context found.",
+      );
+    }
+
+    browserContext = contexts[0]!;
+  }
+
   if (!browserContext) {
-    browserContext = await chromium.launchPersistentContext(
-      browserProfilePath,
-      {
-        headless: isHeadless,
-        viewport: {
-          width: 1440,
-          height: 900,
-        },
-        acceptDownloads: true,
-      },
+    throw new Error(
+      "Chrome browser context is not available.",
     );
   }
 
-  const existingPages = browserContext.pages();
+  const pages = browserContext.pages();
 
-  if (existingPages.length > 0) {
-    return existingPages[0]!;
+  if (pages.length > 0) {
+    return pages[0]!;
   }
 
   return browserContext.newPage();
