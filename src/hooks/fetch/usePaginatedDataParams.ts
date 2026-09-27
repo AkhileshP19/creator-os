@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ApiError, PaginatedApiResponse } from "@/types/api/api-types";
 import { apiHandler, ApiIds, buildEndpointUrl } from "@/api/api-handler";
 
-interface UsePaginatedDataParams<TFilters> {
+interface UsePaginatedDataParams<TFilters, TData = unknown> {
     apiEndPoint: string; // The API endpoint
     queryKey: string; // Cache key
     ids?: ApiIds;
@@ -11,6 +11,10 @@ interface UsePaginatedDataParams<TFilters> {
     pagination: { pageNo: number; pageSize: number }; // Pagination params
     enabled?: boolean;
     search?: string;
+    refetchInterval?:
+        | number
+        | false
+        | ((data: PaginatedApiResponse<TData> | undefined) => number | false);
 }
 
 export const usePaginatedData = <TData, TFilters = Record<string, unknown>>({
@@ -20,8 +24,9 @@ export const usePaginatedData = <TData, TFilters = Record<string, unknown>>({
     filters = {} as TFilters,
     pagination,
     enabled = true,
-    search = ""
-}: UsePaginatedDataParams<TFilters>) => {
+    search = "",
+    refetchInterval,
+}: UsePaginatedDataParams<TFilters, TData>) => {
     const fetchPaginatedData = async (): Promise<PaginatedApiResponse<TData>> => {
         const params = {
             search: search,
@@ -40,8 +45,11 @@ export const usePaginatedData = <TData, TFilters = Record<string, unknown>>({
     const { data, isLoading, isFetching, isFetched, error, refetch } = useQuery<PaginatedApiResponse<TData>, ApiError>({
         queryKey: [queryKey, filters, pagination, search],
         queryFn: fetchPaginatedData,
-        // keepPreviousData: true,
-        enabled
+        enabled,
+        refetchInterval:
+            typeof refetchInterval === "function"
+                ? (query) => refetchInterval(query.state.data)
+                : refetchInterval,
     });
 
     return {

@@ -37,6 +37,7 @@ export interface VideoGenerationInput {
 }
 
 export interface GeneratedVideoResult {
-  localFilePath: string;
   fileName: string;
+  localFilePath: string;
+  objectKey: string;
 }

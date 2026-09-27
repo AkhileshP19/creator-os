@@ -19,32 +19,32 @@ const frontendOrigin =
   "https://3000-cs-b0a3eeed-73e8-4ee2-8e5d-ac3dd27f7294.cs-asia-southeast1-bool.cloudshell.dev";
 const allowedOrigins = new Set([frontendOrigin, "http://localhost:3000"]);
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.has(origin)) {
-        callback(null, true);
-        return;
-      }
+// app.use(
+//   cors({
+//     origin: (origin, callback) => {
+//       if (!origin || allowedOrigins.has(origin)) {
+//         callback(null, true);
+//         return;
+//       }
 
-      callback(new Error(`Origin ${origin} is not allowed by CORS`));
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  }),
-);
+//       callback(new Error(`Origin ${origin} is not allowed by CORS`));
+//     },
+//     credentials: true,
+//     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+//     allowedHeaders: ["Content-Type", "Authorization"],
+//   }),
+// );
 
-// app.use(cors());
+app.use(cors());
 app.use(clerkMiddleware());
 
 app.use(express.json());
 
 app.use(
-    "/generated-videos",
-    express.static(
-        path.resolve(process.cwd(), "generated-videos"),
-    ),
+  "/generated-videos",
+  express.static(
+    path.resolve(process.cwd(), "generated-videos"),
+  ),
 );
 
 app.use("/api/health", healthRouter);

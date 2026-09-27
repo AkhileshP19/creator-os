@@ -24,6 +24,7 @@ export const ApiEndPoint = {
   GET_SCRIPT: "/api/ai/workflows/{id}/script",
 
   GENERATE_VIDEO: "/api/ai/video-workflows",
+  GET_VIDEO: "/api/ai/workflows/{id}/video",
 } as const;
 
 // Define API response structure

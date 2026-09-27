@@ -1,6 +1,8 @@
 import { Temporal } from "temporal-polyfill";
 import { db } from "../prisma/db.js";
 
+import { getB2SignedUrl } from "./b2-storage-service.js";
+
 export type WorkflowType =
   | "SCRIPT_GENERATION"
   | "VIDEO_GENERATION"
@@ -189,6 +191,53 @@ const aiWorkflowService = {
     }
 
     return aiRequest.output;
+  },
+
+  getGeneratedVideo: async (workflowId: string, currentUserId: string) => {
+    const workflow = await aiWorkflowService.getWorkflowById(
+      workflowId,
+      currentUserId,
+    );
+
+    if (workflow.workflowType !== "VIDEO_GENERATION") {
+      const error = new Error("Workflow is not a video generation workflow");
+
+      Object.assign(error, { statusCode: 400 });
+
+      throw error;
+    }
+
+    if (workflow.status !== "COMPLETED") {
+      const error = new Error("Video generation has not been completed");
+
+      Object.assign(error, { statusCode: 400 });
+
+      throw error;
+    }
+
+    const asset = await db.orm.public.Asset.where({
+      workflowId,
+      assetType: "VIDEO",
+    })
+      .orderBy((a) => a.createdAt.desc())
+      .first();
+
+    if (!asset || !asset.storageUrl) {
+      const error = new Error("Generated video asset not found");
+
+      Object.assign(error, { statusCode: 404 });
+
+      throw error;
+    }
+
+    const videoUrl = await getB2SignedUrl(asset.storageUrl);
+
+    return {
+      workflowId: workflow.id,
+      assetId: asset.id,
+      objectKey: asset.storageUrl,
+      videoUrl,
+    };
   },
 
   updateWorkflowState: async (

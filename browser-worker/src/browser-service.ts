@@ -1,26 +1,77 @@
 import { chromium } from "playwright";
-import type { Browser, BrowserContext, Page } from "playwright";
+import type {
+  Browser,
+  BrowserContext,
+  Page,
+} from "playwright";
+
+const defaultCdpUrl =
+  "http://127.0.0.1:9222";
+
+const flowHostname =
+  "flow.google.com";
 
 let browser: Browser | null = null;
-let browserContext: BrowserContext | null = null;
 
-export async function getBrowserPage(): Promise<Page> {
-  if (!browser) {
-    browser = await chromium.connectOverCDP(
-      process.env.CHROME_CDP_URL ??
-      "http://127.0.0.1:9222",
+let browserContext:
+  BrowserContext | null = null;
+
+function isFlowPage(
+  page: Page,
+): boolean {
+  try {
+    const url = new URL(page.url());
+
+    return (
+      url.hostname === flowHostname
+    );
+  } catch {
+    return false;
+  }
+}
+
+async function connectToBrowser(): Promise<void> {
+  if (
+    browser &&
+    browser.isConnected() &&
+    browserContext
+  ) {
+    return;
+  }
+
+  browser = null;
+  browserContext = null;
+
+  const cdpUrl =
+    process.env.CHROME_CDP_URL ??
+    defaultCdpUrl;
+
+  browser =
+    await chromium.connectOverCDP(
+      cdpUrl,
     );
 
-    const contexts = browser.contexts();
+  const contexts =
+    browser.contexts();
 
-    if (contexts.length === 0) {
-      throw new Error(
-        "No Chrome browser context found.",
-      );
-    }
-
-    browserContext = contexts[0]!;
+  if (contexts.length === 0) {
+    throw new Error(
+      "No Chrome browser context found. Start Chrome with remote debugging enabled first.",
+    );
   }
+
+  browserContext =
+    contexts[0] ?? null;
+
+  if (!browserContext) {
+    throw new Error(
+      "Chrome browser context is not available.",
+    );
+  }
+}
+
+export async function getBrowserPage(): Promise<Page> {
+  await connectToBrowser();
 
   if (!browserContext) {
     throw new Error(
@@ -28,10 +79,14 @@ export async function getBrowserPage(): Promise<Page> {
     );
   }
 
-  const pages = browserContext.pages();
+  const pages =
+    browserContext.pages();
 
-  if (pages.length > 0) {
-    return pages[0]!;
+  const flowPage =
+    pages.find(isFlowPage);
+
+  if (flowPage) {
+    return flowPage;
   }
 
   return browserContext.newPage();

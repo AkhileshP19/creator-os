@@ -26,7 +26,11 @@ import {
   GenerateScriptResponse,
 } from "@/types/generate-script-types";
 import { GeneratedScriptModal } from "@/components/content/generated-script-modal";
-import { GenerateVideoRequest } from "@/types/generate-video-types";
+import { GeneratedVideoModal } from "@/components/content/generated-video-modal";
+import {
+  GeneratedVideo,
+  GenerateVideoRequest,
+} from "@/types/generate-video-types";
 
 const emptyContentFormValues: z.infer<typeof newContentFormSchema> = {
   projectId: "",
@@ -58,6 +62,11 @@ export default function ContentPage() {
   const [generatingScriptId, setGeneratingScriptId] = useState<string | null>(
     null,
   );
+  const [isViewVideoModalOpen, setIsViewVideoModalOpen] =
+    useState<boolean>(false);
+  const [generatingVideoId, setGeneratingVideoId] = useState<string | null>(
+    null,
+  );
 
   const form = useForm<z.infer<typeof newContentFormSchema>>({
     resolver: zodResolver(newContentFormSchema),
@@ -83,6 +92,14 @@ export default function ContentPage() {
     pagination: {
       pageNo: currentPage,
       pageSize: perPage,
+    },
+    refetchInterval: (data) => {
+      const items = data?.responseData ?? [];
+      const hasGeneratingVideo = items.some(
+        (item) =>
+          item.video?.status === "QUEUED" || item.video?.status === "RUNNING",
+      );
+      return hasGeneratingVideo ? 3000 : false;
     },
   });
 
@@ -116,8 +133,17 @@ export default function ContentPage() {
       !!(selectedContentData?.script.workflowId && isViewScriptModalOpen),
     );
 
-  const { mutateAsync: generateVideoMutation, isPending: isGeneratingVideo } =
+  const { mutateAsync: generateVideoMutation } =
     usePostData<any, any>(ApiEndPoint.GENERATE_VIDEO);
+
+  const { data: videoData, isLoading: isFetchingVideo } =
+    useFetchData<GeneratedVideo>(
+      ApiEndPoint.GET_VIDEO,
+      "get-video",
+      [selectedContentData?.video?.workflowId ?? ""],
+      undefined,
+      !!(selectedContentData?.video?.workflowId && isViewVideoModalOpen),
+    );
 
   const getScheduledDateTime = (
     date: Date | undefined,
@@ -206,16 +232,19 @@ export default function ContentPage() {
 
   const handleVideoGeneration = async (contentId: string) => {
     try {
+      setGeneratingVideoId(contentId);
       const payload: GenerateVideoRequest = {
         contentId,
       };
       await generateVideoMutation(payload);
-      toast.success("Video has began generating");
+      toast.success("Video generation started");
       refetchContentIdeas();
     } catch (error) {
-      console.error("Failed to generate script", error);
-      toast.error("Failed to generate script");
+      console.error("Failed to generate video", error);
+      toast.error("Failed to start video generation");
       refetchContentIdeas();
+    } finally {
+      setGeneratingVideoId(null);
     }
   };
 
@@ -257,12 +286,14 @@ export default function ContentPage() {
           onPerPageChange={handlePageSizeChange}
           setIsEditModalOpen={setIsAddContentModalOpen}
           setIsViewScriptModalOpen={setIsViewScriptModalOpen}
+          setIsViewVideoModalOpen={setIsViewVideoModalOpen}
           setSelectedContentData={setSelectedContentData}
           setIsCreateOrEditMode={setIsCreateOrEditMode}
           onDeleteContent={handleDeleteContent}
           onGenerateScript={handleScriptGeneration}
           isGeneratingScript={generatingScriptId}
           onGenerateVideo={handleVideoGeneration}
+          isGeneratingVideo={generatingVideoId}
         />
       </div>
 
@@ -290,6 +321,14 @@ export default function ContentPage() {
         open={isViewScriptModalOpen}
         onOpenChange={setIsViewScriptModalOpen}
         scriptData={scriptData!}
+      />
+
+      <GeneratedVideoModal
+        open={isViewVideoModalOpen}
+        onOpenChange={setIsViewVideoModalOpen}
+        videoData={videoData}
+        title={selectedContentData?.title}
+        isLoading={isFetchingVideo}
       />
     </div>
   );

@@ -20,12 +20,14 @@ interface ContentTableProps {
   onPerPageChange: (value: number) => void;
   setIsEditModalOpen: (isOpen: boolean) => void;
   setIsViewScriptModalOpen: (isOpen: boolean) => void;
+  setIsViewVideoModalOpen: (isOpen: boolean) => void;
   setSelectedContentData: (project: ContentIdea | null) => void;
   setIsCreateOrEditMode: (value: "create" | "edit") => void;
   onDeleteContent: (contentId: string) => void;
   onGenerateScript: (contentId: string) => void;
   isGeneratingScript: string | null;
   onGenerateVideo: (contentId: string) => void;
+  isGeneratingVideo: string | null;
 }
 
 export const ContentTable = ({
@@ -37,12 +39,14 @@ export const ContentTable = ({
   onPageChange,
   setIsEditModalOpen,
   setIsViewScriptModalOpen,
+  setIsViewVideoModalOpen,
   setSelectedContentData,
   setIsCreateOrEditMode,
   onDeleteContent,
   onGenerateScript,
   isGeneratingScript,
   onGenerateVideo,
+  isGeneratingVideo,
 }: ContentTableProps) => {
   return (
     <div>
@@ -134,9 +138,63 @@ export const ContentTable = ({
                 )}
               </TableCell>
               <TableCell>
-                <Button onClick={() => onGenerateVideo(contentIdea.id)}>
-                  Generate Video
-                </Button>
+                {(!contentIdea.video ||
+                  contentIdea.video.status === "NOT_GENERATED") && (
+                  <Button
+                    className="bg-indigo-600 hover:bg-indigo-700 cursor-pointer py-4"
+                    onClick={() => onGenerateVideo(contentIdea.id)}
+                    disabled={
+                      contentIdea.script.status !== "COMPLETED" ||
+                      isGeneratingVideo === contentIdea.id
+                    }
+                    title={
+                      contentIdea.script.status !== "COMPLETED"
+                        ? "Please generate script first"
+                        : undefined
+                    }
+                  >
+                    {isGeneratingVideo === contentIdea.id && (
+                      <Loader2 className="w-6 h-6 animate-spin mr-2" />
+                    )}
+                    Generate Video
+                  </Button>
+                )}
+
+                {(contentIdea.video?.status === "QUEUED" ||
+                  contentIdea.video?.status === "RUNNING") && (
+                  <Button
+                    disabled
+                    className="bg-indigo-600/80 py-4 cursor-wait"
+                  >
+                    <Loader2 className="w-6 h-6 animate-spin mr-2" />
+                    Generating...
+                  </Button>
+                )}
+
+                {contentIdea.video?.status === "COMPLETED" && (
+                  <Button
+                    className="bg-indigo-600 hover:bg-indigo-700 cursor-pointer py-4"
+                    onClick={() => {
+                      setIsViewVideoModalOpen(true);
+                      setSelectedContentData(contentIdea);
+                    }}
+                  >
+                    View Video
+                  </Button>
+                )}
+
+                {contentIdea.video?.status === "FAILED" && (
+                  <Button
+                    className="bg-indigo-600 hover:bg-indigo-700 cursor-pointer py-4"
+                    onClick={() => onGenerateVideo(contentIdea.id)}
+                    disabled={isGeneratingVideo === contentIdea.id}
+                  >
+                    {isGeneratingVideo === contentIdea.id && (
+                      <Loader2 className="w-6 h-6 animate-spin mr-2" />
+                    )}
+                    Retry Video
+                  </Button>
+                )}
               </TableCell>
             </TableRow>
           ))}

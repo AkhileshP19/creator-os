@@ -3,6 +3,7 @@ import {
   createScriptWorkflowController,
   createVideoWorkflowController,
   getGeneratedScriptController,
+  getGeneratedVideoController,
   getWorkflowByIdController,
 } from "../controller/ai-workflow-controller.js";
 import authMiddleware from "../middleware/auth-middleware.js";
@@ -29,6 +30,13 @@ aiWorkflowRouter.get(
   authMiddleware,
   currentUserMiddleware,
   getGeneratedScriptController,
+);
+
+aiWorkflowRouter.get(
+  "/workflows/:workflowId/video",
+  authMiddleware,
+  currentUserMiddleware,
+  getGeneratedVideoController,
 );
 
 aiWorkflowRouter.get(

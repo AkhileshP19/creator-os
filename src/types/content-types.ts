@@ -1,4 +1,4 @@
-type ScriptGenerationStatus =
+type WorkflowStatus =
   | "NOT_GENERATED"
   | "QUEUED"
   | "RUNNING"
@@ -21,8 +21,12 @@ export interface ContentIdea {
   createdAt: string;
   updatedAt: string;
   script: {
-    status: ScriptGenerationStatus;
-    workflowId: string;
+    status: WorkflowStatus;
+    workflowId: string | null;
+  };
+  video?: {
+    status: WorkflowStatus;
+    workflowId: string | null;
   };
 }
 

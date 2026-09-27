@@ -31,7 +31,9 @@ const generatedVideosDirectory = path.resolve(
   "generated-videos",
 );
 
-export function buildVideoPrompt(input: VideoGenerationInput): string {
+export function buildVideoPrompt(
+  input: VideoGenerationInput,
+): string {
   const scenes = input.scenes
     .map(
       (scene) => `
@@ -45,72 +47,100 @@ On-screen text: ${scene.onScreenText}
     .join("\n");
 
   return `
-Create a highly engaging vertical short-form factual video.
+Generate the FINAL VIDEO immediately using the finalized production specification below.
 
-Title: ${input.title}
-Hook: ${input.hook}
-Narration: ${input.narration}
+IMPORTANT EXECUTION INSTRUCTIONS:
+- Generate the final video now.
+- Do not create a storyboard.
+- Do not create reference images.
+- Do not generate images before generating the video.
+- Do not rewrite or expand the script.
+- Do not ask whether the storyboard or breakdown is acceptable.
+- Do not ask for confirmation.
+- Do not ask clarification questions.
+- Do not propose a plan.
+- Do not wait for further instructions.
+- The production specification below is already finalized and approved.
+- Proceed directly to final video generation.
 
-Target duration: ${input.durationSeconds} seconds
-Aspect ratio: ${input.aspectRatio}
+TITLE:
+${input.title}
 
-Scenes:
+HOOK:
+${input.hook}
+
+NARRATION:
+${input.narration}
+
+TARGET DURATION:
+${input.durationSeconds} seconds
+
+ASPECT RATIO:
+${input.aspectRatio}
+
+SCENES:
 ${scenes}
 
-Important keywords:
+IMPORTANT KEYWORDS:
 ${input.keywords.join(", ")}
 
-Call to action:
+CALL TO ACTION:
 ${input.callToAction}
 
-Requirements:
-- Create a polished vertical social-media video.
-- Keep the pacing fast and engaging.
+FINAL VIDEO REQUIREMENTS:
+- Generate exactly one final video.
+- Follow the supplied scene order.
+- Follow the supplied narration.
 - Follow the visual descriptions closely.
 - Preserve subject consistency across scenes.
 - Use realistic cinematic visuals.
 - Use natural camera movement.
+- Keep the pacing fast and engaging.
 - Optimize everything for 9:16 mobile viewing.
 - Include appropriate native audio.
+- Do not add additional facts.
+- Do not add additional scenes.
+
+Begin final video generation immediately.
 `;
 }
 
-export async function generateVideo(
-  input: VideoGenerationInput,
-  workflowId: string,
-): Promise<GeneratedVideoResult> {
-  const prompt = buildVideoPrompt(input);
+// export async function generateVideo(
+//   input: VideoGenerationInput,
+//   workflowId: string,
+// ): Promise<GeneratedVideoResult> {
+//   const prompt = buildVideoPrompt(input);
 
-  await fs.mkdir(generatedVideosDirectory, {
-    recursive: true,
-  });
+//   await fs.mkdir(generatedVideosDirectory, {
+//     recursive: true,
+//   });
 
-  const fileName = `${workflowId}.mp4`;
+//   const fileName = `${workflowId}.mp4`;
 
-  const localFilePath = path.join(generatedVideosDirectory, fileName);
+//   const localFilePath = path.join(generatedVideosDirectory, fileName);
 
-  const interaction = await geminiClient.interactions.create({
-    model,
-    input: prompt,
-    response_format: {
-      type: "video",
-      aspect_ratio: "9:16",
-      resolution: "720p",
-    },
-  });
+//   const interaction = await geminiClient.interactions.create({
+//     model,
+//     input: prompt,
+//     response_format: {
+//       type: "video",
+//       aspect_ratio: "9:16",
+//       resolution: "720p",
+//     },
+//   });
 
-  const videoData = interaction.output_video?.data;
+//   const videoData = interaction.output_video?.data;
 
-  if (!videoData) {
-    throw new Error("Gemini Omni did not return generated video data");
-  }
+//   if (!videoData) {
+//     throw new Error("Gemini Omni did not return generated video data");
+//   }
 
-  const videoBuffer = Buffer.from(videoData, "base64");
+//   const videoBuffer = Buffer.from(videoData, "base64");
 
-  await fs.writeFile(localFilePath, videoBuffer);
+//   await fs.writeFile(localFilePath, videoBuffer);
 
-  return {
-    localFilePath,
-    fileName,
-  };
-}
+//   return {
+//     localFilePath,
+//     fileName,
+//   };
+// }

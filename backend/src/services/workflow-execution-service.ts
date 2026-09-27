@@ -9,8 +9,11 @@ import type {
 } from "../types/ai-workflow-types.js";
 import type { JsonValue } from "@prisma/orm-postgres/target/codec-types";
 import { generatedScriptSchema } from "../schema/validation-schemas/ai-workflow-validation.js";
-import { buildVideoPrompt, generateVideo } from "./gemini-video-service.js";
 
+import {
+  generateVideo,
+} from "./flow-video-service.js";
+import { buildVideoPrompt } from "./video-prompt-service.js";
 const workflowExecutionService = {
   executeScriptGeneration: async (
     workflowId: string,
@@ -340,18 +343,19 @@ const workflowExecutionService = {
     });
 
     try {
-      const generatedVideo = await generateVideo(videoInput, workflow.id);
+      const generatedVideo = await generateVideo({
+        workflowId: workflow.id,
+        userId: currentUserId,
+        projectId: contentIdea.projectId,
+        videoInput,
+      });
 
-      /*
-       * DEV-ONLY storage URL.
-       *
-       * Later this becomes the permanent S3/R2/etc. URL.
-       */
-      const storageUrl = `/generated-videos/${generatedVideo.fileName}`;
+      const storageUrl =
+        generatedVideo.objectKey;
 
       const videoOutputJson: JsonValue = {
         fileName: generatedVideo.fileName,
-        storageUrl,
+        objectKey: generatedVideo.objectKey,
       };
 
       await db.orm.public.AIRequest.create({
@@ -361,7 +365,7 @@ const workflowExecutionService = {
         prompt,
         response: JSON.stringify({
           fileName: generatedVideo.fileName,
-          storageUrl,
+          objectKey: generatedVideo.objectKey,
         }),
         input: videoInputJson,
         output: videoOutputJson,

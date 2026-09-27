@@ -189,3 +189,43 @@ export const createVideoWorkflowController: RequestHandler = async (
     });
   }
 };
+
+export const getGeneratedVideoController: RequestHandler = async (
+  req,
+  res,
+) => {
+  try {
+    const workflowId = req.params.workflowId;
+
+    if (!workflowId || Array.isArray(workflowId)) {
+      return res.status(400).json({
+        status: "ERROR",
+        message: "Invalid workflow ID",
+        data: null,
+      });
+    }
+
+    const currentUserId = req.currentUser.id;
+
+    const generatedVideo = await aiWorkflowService.getGeneratedVideo(
+      workflowId,
+      currentUserId,
+    );
+
+    return res.status(200).json({
+      status: "SUCCESS",
+      message: "Generated video retrieved successfully",
+      data: {
+        responseData: generatedVideo,
+      },
+    });
+  } catch (error) {
+    console.error("Failed to fetch generated video:", error);
+
+    return res.status(500).json({
+      status: "ERROR",
+      message: "Failed to fetch generated video",
+      data: null,
+    });
+  }
+};

@@ -64,6 +64,14 @@ interface ContentScriptState {
   workflowId: string | null;
 }
 
+type VideoGenerationStatus =
+  "NOT_GENERATED" | "QUEUED" | "RUNNING" | "COMPLETED" | "FAILED" | "CANCELLED";
+
+interface ContentVideoState {
+  status: VideoGenerationStatus;
+  workflowId: string | null;
+}
+
 const contentIdeaService = {
   createContentIdea: async ({
     projectId,
@@ -165,9 +173,27 @@ const contentIdeaService = {
                 workflowId: null,
               };
 
+          const latestVideoWorkflow = await db.orm.public.AIWorkflow.where({
+            contentId: contentIdea.id,
+            workflowType: "VIDEO_GENERATION",
+          })
+            .orderBy((workflow) => workflow.createdAt.desc())
+            .first();
+
+          const video: ContentVideoState = latestVideoWorkflow
+            ? {
+                status: latestVideoWorkflow.status,
+                workflowId: latestVideoWorkflow.id,
+              }
+            : {
+                status: "NOT_GENERATED",
+                workflowId: null,
+              };
+
           return {
             ...contentIdea,
             script,
+            video,
           };
         }),
       );
