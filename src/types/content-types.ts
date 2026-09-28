@@ -1,3 +1,11 @@
+type WorkflowStatus =
+  | "NOT_GENERATED"
+  | "QUEUED"
+  | "RUNNING"
+  | "COMPLETED"
+  | "FAILED"
+  | "CANCELLED";
+
 export interface ContentIdea {
   id: string;
   projectId: string;
@@ -12,6 +20,14 @@ export interface ContentIdea {
   deletedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  script: {
+    status: WorkflowStatus;
+    workflowId: string | null;
+  };
+  video?: {
+    status: WorkflowStatus;
+    workflowId: string | null;
+  };
 }
 
 export interface CreateContentIdeaRequest {

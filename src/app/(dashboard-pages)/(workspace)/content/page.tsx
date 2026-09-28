@@ -20,6 +20,17 @@ import {
 } from "@/types/content-types";
 import { ContentTable } from "@/components/content/content-table";
 import { usePatchData } from "@/hooks/fetch/usePatchData";
+import {
+  GeneratedScript,
+  GenerateScriptRequest,
+  GenerateScriptResponse,
+} from "@/types/generate-script-types";
+import { GeneratedScriptModal } from "@/components/content/generated-script-modal";
+import { GeneratedVideoModal } from "@/components/content/generated-video-modal";
+import {
+  GeneratedVideo,
+  GenerateVideoRequest,
+} from "@/types/generate-video-types";
 
 const emptyContentFormValues: z.infer<typeof newContentFormSchema> = {
   projectId: "",
@@ -44,6 +55,16 @@ export default function ContentPage() {
     "create" | "edit"
   >("create");
   const [contentToDeleteId, setContentToDeleteId] = useState<string | null>(
+    null,
+  );
+  const [isViewScriptModalOpen, setIsViewScriptModalOpen] =
+    useState<boolean>(false);
+  const [generatingScriptId, setGeneratingScriptId] = useState<string | null>(
+    null,
+  );
+  const [isViewVideoModalOpen, setIsViewVideoModalOpen] =
+    useState<boolean>(false);
+  const [generatingVideoId, setGeneratingVideoId] = useState<string | null>(
     null,
   );
 
@@ -72,6 +93,14 @@ export default function ContentPage() {
       pageNo: currentPage,
       pageSize: perPage,
     },
+    refetchInterval: (data) => {
+      const items = data?.responseData ?? [];
+      const hasGeneratingVideo = items.some(
+        (item) =>
+          item.video?.status === "QUEUED" || item.video?.status === "RUNNING",
+      );
+      return hasGeneratingVideo ? 3000 : false;
+    },
   });
 
   const { mutateAsync: createContentIdea, isPending: isSubmitting } =
@@ -89,6 +118,32 @@ export default function ContentPage() {
     ApiEndPoint.DELETE_CONTENT_IDEA,
     [contentToDeleteId ?? ""],
   );
+
+  const { mutateAsync: generateScriptMutation, isPending: isGeneratingScript } =
+    usePostData<GenerateScriptResponse, GenerateScriptRequest>(
+      ApiEndPoint.GENERATE_SCRIPT,
+    );
+
+  const { data: scriptData, isLoading: isFetchingScript } =
+    useFetchData<GeneratedScript>(
+      ApiEndPoint.GET_SCRIPT,
+      "get-script",
+      [selectedContentData?.script.workflowId ?? ""],
+      undefined,
+      !!(selectedContentData?.script.workflowId && isViewScriptModalOpen),
+    );
+
+  const { mutateAsync: generateVideoMutation } =
+    usePostData<any, any>(ApiEndPoint.GENERATE_VIDEO);
+
+  const { data: videoData, isLoading: isFetchingVideo } =
+    useFetchData<GeneratedVideo>(
+      ApiEndPoint.GET_VIDEO,
+      "get-video",
+      [selectedContentData?.video?.workflowId ?? ""],
+      undefined,
+      !!(selectedContentData?.video?.workflowId && isViewVideoModalOpen),
+    );
 
   const getScheduledDateTime = (
     date: Date | undefined,
@@ -156,6 +211,43 @@ export default function ContentPage() {
     }
   };
 
+  const handleScriptGeneration = async (contentId: string) => {
+    try {
+      setGeneratingScriptId(contentId);
+      const payload: GenerateScriptRequest = {
+        contentId,
+      };
+
+      await generateScriptMutation(payload);
+      toast.success("Script generated successfully");
+      refetchContentIdeas();
+    } catch (error) {
+      console.error("Failed to generate script", error);
+      toast.error("Failed to generate script");
+      refetchContentIdeas();
+    } finally {
+      setGeneratingScriptId(null);
+    }
+  };
+
+  const handleVideoGeneration = async (contentId: string) => {
+    try {
+      setGeneratingVideoId(contentId);
+      const payload: GenerateVideoRequest = {
+        contentId,
+      };
+      await generateVideoMutation(payload);
+      toast.success("Video generation started");
+      refetchContentIdeas();
+    } catch (error) {
+      console.error("Failed to generate video", error);
+      toast.error("Failed to start video generation");
+      refetchContentIdeas();
+    } finally {
+      setGeneratingVideoId(null);
+    }
+  };
+
   const handleClickPage = (page: number | string) => {
     if (typeof page === "number") {
       setCurrentPage(page);
@@ -193,9 +285,15 @@ export default function ContentPage() {
           perPage={perPage}
           onPerPageChange={handlePageSizeChange}
           setIsEditModalOpen={setIsAddContentModalOpen}
+          setIsViewScriptModalOpen={setIsViewScriptModalOpen}
+          setIsViewVideoModalOpen={setIsViewVideoModalOpen}
           setSelectedContentData={setSelectedContentData}
           setIsCreateOrEditMode={setIsCreateOrEditMode}
           onDeleteContent={handleDeleteContent}
+          onGenerateScript={handleScriptGeneration}
+          isGeneratingScript={generatingScriptId}
+          onGenerateVideo={handleVideoGeneration}
+          isGeneratingVideo={generatingVideoId}
         />
       </div>
 
@@ -217,6 +315,20 @@ export default function ContentPage() {
         isSubmitting={isSubmitting}
         selectedContentData={selectedContentData!}
         isUpdating={isUpdating}
+      />
+
+      <GeneratedScriptModal
+        open={isViewScriptModalOpen}
+        onOpenChange={setIsViewScriptModalOpen}
+        scriptData={scriptData!}
+      />
+
+      <GeneratedVideoModal
+        open={isViewVideoModalOpen}
+        onOpenChange={setIsViewVideoModalOpen}
+        videoData={videoData}
+        title={selectedContentData?.title}
+        isLoading={isFetchingVideo}
       />
     </div>
   );

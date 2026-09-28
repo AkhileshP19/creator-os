@@ -1,0 +1,125 @@
+[
+  {
+    "id": "table.projectSettings",
+    "label": "Create table \"projectSettings\"",
+    "summary": "Creates table \"projectSettings\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "projectSettings"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"projectSettings\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"projectSettings\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"projectSettings\"",
+        "sql": "CREATE TABLE \"public\".\"projectSettings\" (\n  \"brandName\" text NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"defaultAspectRatio\" text DEFAULT '9:16' NOT NULL,\n  \"defaultDuration\" int4 DEFAULT 10 NOT NULL,\n  \"id\" text NOT NULL,\n  \"projectId\" text NOT NULL,\n  \"updatedAt\" timestamptz DEFAULT (now()) NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"projectSettings\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"projectSettings\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.projectSettings.projectSettings_projectId_key",
+    "label": "Add unique constraint on \"projectSettings\" (projectId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "projectSettings_projectId_key",
+        "table": "projectSettings"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"projectSettings_projectId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "projectSettings_projectId_key",
+          "public",
+          "\"public\".\"projectSettings\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"projectSettings_projectId_key\"",
+        "sql": "ALTER TABLE \"public\".\"projectSettings\" ADD CONSTRAINT \"projectSettings_projectId_key\" UNIQUE (\"projectId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"projectSettings_projectId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "projectSettings_projectId_key",
+          "public",
+          "\"public\".\"projectSettings\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.projectSettings.projectSettings_projectId_fkey",
+    "label": "Add foreign key \"projectSettings_projectId_fkey\" on \"projectSettings\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "projectSettings_projectId_fkey",
+        "table": "projectSettings"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"projectSettings_projectId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "projectSettings_projectId_fkey",
+          "public",
+          "\"public\".\"projectSettings\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"projectSettings_projectId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"projectSettings\"\nADD CONSTRAINT \"projectSettings_projectId_fkey\"\nFOREIGN KEY (\"projectId\")\nREFERENCES \"public\".\"project\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"projectSettings_projectId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "projectSettings_projectId_fkey",
+          "public",
+          "\"public\".\"projectSettings\""
+        ]
+      }
+    ]
+  }
+]

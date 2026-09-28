@@ -1,6 +1,6 @@
 // use prisma-next
 
-export enum UserRole {
+enum UserRole {
   ADMIN
   CREATOR
   REVIEWER
@@ -69,6 +69,13 @@ enum AIProvider {
   CUSTOM
 }
 
+enum WorkflowType {
+  SCRIPT_GENERATION
+  VIDEO_GENERATION
+  AUDIO_GENERATION
+  IMAGE_GENERATION
+}
+
 model User {
   id          String    @id @default(uuid())
   clerkUserId String    @unique
@@ -110,15 +117,30 @@ model Project {
   ownerId     String
   name        String
   description String?
-  status      ProjectStatus  @default(DRAFT)
+  status      ProjectStatus @default(DRAFT)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @default(now())
   deletedAt   DateTime?
 
-  owner       User          @relation(fields: [ownerId], references: [id])
+  owner        User             @relation(fields: [ownerId], references: [id])
+  settings     ProjectSettings?
   contentIdeas ContentIdea[]
 
   @@index([ownerId])
+}
+
+model ProjectSettings {
+  id                 String   @id @default(uuid())
+  projectId          String   @unique
+
+  brandName          String
+  defaultDuration    Int      @default(10)
+  defaultAspectRatio String   @default("9:16")
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id])
 }
 
 model ContentIdea {
@@ -150,8 +172,12 @@ model ContentIdea {
 model AIWorkflow {
   id            String         @id @default(uuid())
   contentId     String
-  workflowType  String
-  status        WorkflowStatus
+  workflowType  WorkflowType
+  status        WorkflowStatus @default(QUEUED)
+
+  provider      AIProvider     @default(GEMINI)
+  model         String         @default("gemini-3.5-flash")
+
   startedAt     DateTime?
   completedAt   DateTime?
   retryCount    Int            @default(0)
@@ -159,12 +185,17 @@ model AIWorkflow {
   currentStep   String?
   errorMessage  String?
 
-  content     ContentIdea    @relation(fields: [contentId], references: [id])
-  logs        WorkflowLog[]
-  aiRequests  AIRequest[]
-  assets      Asset[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @default(now())
+  
+  content       ContentIdea    @relation(fields: [contentId], references: [id])
+  logs          WorkflowLog[]
+  aiRequests    AIRequest[]
+  assets        Asset[]
 
+  @@index([contentId])
   @@index([status])
+  @@index([contentId, status])
 }
 
 model WorkflowLog {
@@ -180,12 +211,22 @@ model WorkflowLog {
 }
 
 model AIRequest {
-  id          String     @id @default(uuid())
-  workflowId  String
-  prompt      String
-  response    String?
-  tokenUsage  Int?
-  createdAt   DateTime   @default(now())
+  id           String   @id @default(uuid())
+  workflowId   String
+
+  provider     AIProvider @default(GEMINI)
+  model        String     @default("gemini-3.5-flash")
+
+  prompt       String
+  response     String?
+
+  input        Json?
+  output       Json?
+
+  tokenUsage   Int?
+  errorMessage String?
+
+  createdAt    DateTime @default(now())
 
   workflow AIWorkflow @relation(fields: [workflowId], references: [id])
 

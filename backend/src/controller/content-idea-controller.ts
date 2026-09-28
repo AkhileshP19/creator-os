@@ -42,8 +42,8 @@ export const createContentIdeaController: RequestHandler = async (req, res) => {
 
     const statusCode =
       error instanceof Error &&
-        "statusCode" in error &&
-        typeof error.statusCode === "number"
+      "statusCode" in error &&
+      typeof error.statusCode === "number"
         ? error.statusCode
         : 500;
 
@@ -77,7 +77,7 @@ export const getContentIdeasController: RequestHandler = async (req, res) => {
       status: "SUCCESS",
       message: "Content ideas fetched successfully",
       data: {
-        responseData: contentIdeas.contentIdeas,
+        responseData: contentIdeas.contentIdeasWithScriptState,
         totalCount: contentIdeas.totalCount,
         totalPages: contentIdeas.totalPages,
         currentPage: contentIdeas.currentPage,
@@ -163,9 +163,7 @@ export const updateContentIdeaController: RequestHandler = async (req, res) => {
       ...(priority !== undefined && { priority }),
       ...(scheduledDate !== undefined && {
         scheduledDate:
-          scheduledDate === null
-            ? null
-            : Temporal.Instant.from(scheduledDate),
+          scheduledDate === null ? null : Temporal.Instant.from(scheduledDate),
       }),
     };
 

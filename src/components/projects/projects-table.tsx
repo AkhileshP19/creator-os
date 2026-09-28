@@ -1,4 +1,4 @@
-import { Pencil, Trash } from "lucide-react";
+import { Pencil, Trash, Settings } from "lucide-react";
 import { ProjectStatusBadge } from "../ui/custom/project-status-badge";
 import {
   Table,
@@ -15,6 +15,7 @@ interface ProjectsTableProps {
   projects: ProjectData[];
   setIsEditModalOpen: (isOpen: boolean) => void;
   setSelectedProjectData: (project: ProjectData | null) => void;
+  setIsSettingsModalOpen: (isOpen: boolean) => void;
   onDeleteProject: (projectId: string) => void;
   currentPage: number;
   totalPages: number;
@@ -27,6 +28,7 @@ export const ProjectsTable = ({
   projects,
   setIsEditModalOpen,
   setSelectedProjectData,
+  setIsSettingsModalOpen,
   onDeleteProject,
   currentPage,
   totalPages,
@@ -69,6 +71,13 @@ export const ProjectsTable = ({
                   onClick={() => {
                     setIsEditModalOpen(true);
                     setSelectedProjectData(project);
+                  }}
+                  className="cursor-pointer"
+                />
+                <Settings
+                  onClick={() => {
+                    setSelectedProjectData(project);
+                    setIsSettingsModalOpen(true);
                   }}
                   className="cursor-pointer"
                 />
