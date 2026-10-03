@@ -1,0 +1,378 @@
+[
+  {
+    "id": "column.public.approval.assetId",
+    "label": "Add column \"assetId\" to \"approval\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "assetId",
+        "table": "approval"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"assetId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "approval",
+          "assetId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"assetId\"",
+        "sql": "ALTER TABLE \"public\".\"approval\" ADD COLUMN \"assetId\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"assetId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "approval",
+          "assetId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.approval.regenerationWorkflowId",
+    "label": "Add column \"regenerationWorkflowId\" to \"approval\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "regenerationWorkflowId",
+        "table": "approval"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"regenerationWorkflowId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "approval",
+          "regenerationWorkflowId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"regenerationWorkflowId\"",
+        "sql": "ALTER TABLE \"public\".\"approval\" ADD COLUMN \"regenerationWorkflowId\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"regenerationWorkflowId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "approval",
+          "regenerationWorkflowId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.approval.reviewedAt",
+    "label": "Add column \"reviewedAt\" to \"approval\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "reviewedAt",
+        "table": "approval"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"reviewedAt\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "approval",
+          "reviewedAt"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"reviewedAt\"",
+        "sql": "ALTER TABLE \"public\".\"approval\" ADD COLUMN \"reviewedAt\" timestamptz"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"reviewedAt\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "approval",
+          "reviewedAt"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "alterNullability.dropNotNull.approval.reviewedById",
+    "label": "Drop NOT NULL on \"approval\".\"reviewedById\"",
+    "operationClass": "widening",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "reviewedById",
+        "table": "approval"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"reviewedById\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "approval",
+          "reviewedById"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop NOT NULL on \"reviewedById\"",
+        "sql": "ALTER TABLE \"public\".\"approval\" ALTER COLUMN \"reviewedById\" DROP NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"reviewedById\" is nullable",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "approval",
+          "reviewedById",
+          "YES"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.approval.approval_assetId_key",
+    "label": "Add unique constraint on \"approval\" (assetId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "approval_assetId_key",
+        "table": "approval"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"approval_assetId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "approval_assetId_key",
+          "public",
+          "\"public\".\"approval\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"approval_assetId_key\"",
+        "sql": "ALTER TABLE \"public\".\"approval\" ADD CONSTRAINT \"approval_assetId_key\" UNIQUE (\"assetId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"approval_assetId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "approval_assetId_key",
+          "public",
+          "\"public\".\"approval\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.approval.approval_regenerationWorkflowId_key",
+    "label": "Add unique constraint on \"approval\" (regenerationWorkflowId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "approval_regenerationWorkflowId_key",
+        "table": "approval"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"approval_regenerationWorkflowId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "approval_regenerationWorkflowId_key",
+          "public",
+          "\"public\".\"approval\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"approval_regenerationWorkflowId_key\"",
+        "sql": "ALTER TABLE \"public\".\"approval\" ADD CONSTRAINT \"approval_regenerationWorkflowId_key\" UNIQUE (\"regenerationWorkflowId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"approval_regenerationWorkflowId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "approval_regenerationWorkflowId_key",
+          "public",
+          "\"public\".\"approval\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.approval.approval_decision_idx_cb87c9d6",
+    "label": "Create index \"approval_decision_idx_cb87c9d6\" on \"approval\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "approval_decision_idx_cb87c9d6",
+        "table": "approval"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"approval_decision_idx_cb87c9d6\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"approval_decision_idx_cb87c9d6\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"approval_decision_idx_cb87c9d6\"",
+        "sql": "CREATE INDEX \"approval_decision_idx_cb87c9d6\" ON \"public\".\"approval\" (\"decision\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"approval_decision_idx_cb87c9d6\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"approval_decision_idx_cb87c9d6\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.approval.approval_assetId_fkey",
+    "label": "Add foreign key \"approval_assetId_fkey\" on \"approval\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "approval_assetId_fkey",
+        "table": "approval"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"approval_assetId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "approval_assetId_fkey",
+          "public",
+          "\"public\".\"approval\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"approval_assetId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"approval\"\nADD CONSTRAINT \"approval_assetId_fkey\"\nFOREIGN KEY (\"assetId\")\nREFERENCES \"public\".\"asset\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"approval_assetId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "approval_assetId_fkey",
+          "public",
+          "\"public\".\"approval\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.approval.approval_regenerationWorkflowId_fkey",
+    "label": "Add foreign key \"approval_regenerationWorkflowId_fkey\" on \"approval\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "approval_regenerationWorkflowId_fkey",
+        "table": "approval"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"approval_regenerationWorkflowId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "approval_regenerationWorkflowId_fkey",
+          "public",
+          "\"public\".\"approval\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"approval_regenerationWorkflowId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"approval\"\nADD CONSTRAINT \"approval_regenerationWorkflowId_fkey\"\nFOREIGN KEY (\"regenerationWorkflowId\")\nREFERENCES \"public\".\"aIWorkflow\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"approval_regenerationWorkflowId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "approval_regenerationWorkflowId_fkey",
+          "public",
+          "\"public\".\"approval\""
+        ]
+      }
+    ]
+  }
+]

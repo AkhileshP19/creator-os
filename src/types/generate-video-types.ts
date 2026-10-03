@@ -5,6 +5,5 @@ export interface GenerateVideoRequest {
 export interface GeneratedVideo {
   workflowId: string;
   assetId: string;
-  objectKey: string;
   videoUrl: string;
 }

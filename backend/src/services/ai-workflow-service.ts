@@ -1,5 +1,6 @@
 import { Temporal } from "temporal-polyfill";
 import { db } from "../prisma/db.js";
+import { lockOwnedContent, workflowError } from "./video-review-service.js";
 
 import { getB2SignedUrl } from "./b2-storage-service.js";
 
@@ -20,6 +21,7 @@ interface CreateAIWorkflowInput {
   workflowType: WorkflowType;
   provider?: AIProvider;
   model?: string;
+  regenerationApprovalId?: string;
 }
 
 interface UpdateWorkflowStateInput {
@@ -46,25 +48,8 @@ const aiWorkflowService = {
     workflowType,
     provider = "GEMINI",
     model,
+    regenerationApprovalId,
   }: CreateAIWorkflowInput) => {
-    // Verify that the ContentIdea exists, is active,
-    // and belongs to the currently authenticated user.
-    const contentIdea = await db.orm.public.ContentIdea.where({
-      id: contentId,
-      createdById: currentUserId,
-      deletedAt: null,
-    }).first();
-
-    if (!contentIdea) {
-      const error = new Error(
-        "Content idea not found or you do not have access to it",
-      );
-
-      Object.assign(error, { statusCode: 404 });
-
-      throw error;
-    }
-
     const resolvedModel =
       model ??
       (workflowType === "VIDEO_GENERATION" ? geminiVideoModel : geminiModel);
@@ -75,21 +60,84 @@ const aiWorkflowService = {
       );
     }
 
-    const workflow = await db.orm.public.AIWorkflow.create({
-      contentId,
-      workflowType,
-      status: "QUEUED",
-      provider,
-      model: resolvedModel,
-      startedAt: null,
-      completedAt: null,
-      retryCount: 0,
-      executionTime: null,
-      currentStep: null,
-      errorMessage: null,
-    });
+    if (regenerationApprovalId && workflowType !== "VIDEO_GENERATION") {
+      workflowError(
+        "Regeneration approval can only be used for video generation",
+        400,
+      );
+    }
 
-    return workflow;
+    return db.transaction(async (tx) => {
+      await lockOwnedContent(tx, contentId, currentUserId);
+      if (workflowType === "VIDEO_GENERATION") {
+        const active = await tx.orm.public.AIWorkflow.where({
+          contentId,
+          workflowType,
+        })
+          .where((w) => w.status.in(["QUEUED", "RUNNING"]))
+          .first();
+        if (active)
+          workflowError(
+            "Video generation is already running for this content",
+            409,
+          );
+      }
+      if (regenerationApprovalId) {
+        const approval = await tx.orm.public.Approval.where({
+          id: regenerationApprovalId,
+          contentId,
+        }).first();
+        if (!approval) workflowError("Approval not found", 404);
+        if (approval.decision !== "REJECTED")
+          workflowError("Only rejected videos can be regenerated", 409);
+        if (!approval.assetId) workflowError("Video asset not found", 404);
+        const asset = await tx.orm.public.Asset.where({
+          id: approval.assetId,
+          assetType: "VIDEO",
+          deletedAt: null,
+        }).first();
+        if (!asset?.storageUrl) workflowError("Video asset not found", 404);
+        const source = await tx.orm.public.AIWorkflow.where({
+          id: asset.workflowId,
+          contentId,
+          workflowType: "VIDEO_GENERATION",
+          status: "COMPLETED",
+        }).first();
+        if (!source)
+          workflowError("Source video generation is not complete", 409);
+      }
+      const workflow = await tx.orm.public.AIWorkflow.create({
+        contentId,
+        workflowType,
+        status: "QUEUED",
+        provider,
+        model: resolvedModel,
+        startedAt: null,
+        completedAt: null,
+        retryCount: 0,
+        executionTime: null,
+        currentStep: null,
+        errorMessage: null,
+      });
+      if (regenerationApprovalId) {
+        await tx.orm.public.Approval.where({
+          id: regenerationApprovalId,
+        }).update({
+          decision: "REGENERATE",
+          regenerationWorkflowId: workflow.id,
+          updatedAt: Temporal.Now.instant(),
+        });
+        await tx.orm.public.WorkflowLog.create({
+          workflowId: workflow.id,
+          stepName: "REGENERATION_REQUESTED",
+          response: {
+            approvalId: regenerationApprovalId,
+            requestedById: currentUserId,
+          },
+        });
+      }
+      return workflow;
+    });
   },
 
   getWorkflowById: async (workflowId: string, currentUserId: string) => {
@@ -109,7 +157,6 @@ const aiWorkflowService = {
     // so ownership is resolved through its ContentIdea.
     const contentIdea = await db.orm.public.ContentIdea.where({
       id: workflow.contentId,
-      createdById: currentUserId,
       deletedAt: null,
     }).first();
 
@@ -123,6 +170,13 @@ const aiWorkflowService = {
       throw error;
     }
 
+    const project = await db.orm.public.Project.where({
+      id: contentIdea.projectId,
+      ownerId: currentUserId,
+      deletedAt: null,
+    }).first();
+    if (!project)
+      workflowError("Workflow not found or you do not have access to it", 404);
     return workflow;
   },
 
@@ -131,7 +185,6 @@ const aiWorkflowService = {
     // with the ContentIdea.
     const contentIdea = await db.orm.public.ContentIdea.where({
       id: contentId,
-      createdById: currentUserId,
       deletedAt: null,
     }).first();
 
@@ -145,6 +198,12 @@ const aiWorkflowService = {
       throw error;
     }
 
+    const project = await db.orm.public.Project.where({
+      id: contentIdea.projectId,
+      ownerId: currentUserId,
+      deletedAt: null,
+    }).first();
+    if (!project) workflowError("Project not found", 404);
     const workflows = await db.orm.public.AIWorkflow.where({
       contentId,
     })
@@ -218,6 +277,7 @@ const aiWorkflowService = {
     const asset = await db.orm.public.Asset.where({
       workflowId,
       assetType: "VIDEO",
+      deletedAt: null,
     })
       .orderBy((a) => a.createdAt.desc())
       .first();
@@ -231,11 +291,13 @@ const aiWorkflowService = {
     }
 
     const videoUrl = await getB2SignedUrl(asset.storageUrl);
+    if (!/^https?:\/\//.test(videoUrl))
+      workflowError("Video playback is temporarily unavailable", 503);
 
     return {
       workflowId: workflow.id,
       assetId: asset.id,
-      objectKey: asset.storageUrl,
+
       videoUrl,
     };
   },

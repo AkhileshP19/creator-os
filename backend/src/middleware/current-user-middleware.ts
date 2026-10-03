@@ -11,8 +11,11 @@ const currentUserMiddleware = async(
     const auth = getAuth(req);
     const clerkUserId = auth.userId;
     const dbUser = await db.orm.public.User
-        .where({ clerkUserId })
+        .where({ clerkUserId, deletedAt: null })
         .first();
+    if (!dbUser) {
+        return res.status(401).json({ status: "ERROR", message: "Current user not found", data: null });
+    }
     req.currentUser = dbUser;
     next();
 };

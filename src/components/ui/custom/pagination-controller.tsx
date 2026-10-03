@@ -63,7 +63,7 @@ export const PaginationController = ({
   const pageItems = getPages();
 
   return (
-    <div className="grid grid-cols-3 items-center px-4 py-2 bg-background border-t border-border min-h-[56px]">
+    <div className="flex flex-col gap-3 sm:grid sm:grid-cols-3 items-center px-4 py-2 bg-background border-t border-border min-h-[56px]">
       <div className="flex items-center gap-2">
         {onPerPageChange && perPage !== undefined && (
           <div className="flex items-center justify-start gap-2">

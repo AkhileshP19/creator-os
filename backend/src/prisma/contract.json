@@ -625,6 +625,22 @@
                   "model": "WorkflowLog",
                   "namespace": "public"
                 }
+              },
+              "regenerationApproval": {
+                "cardinality": "1:1",
+                "nullable": true,
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "regenerationWorkflowId"
+                  ]
+                },
+                "to": {
+                  "model": "Approval",
+                  "namespace": "public"
+                }
               }
             },
             "storage": {
@@ -678,6 +694,13 @@
           },
           "Approval": {
             "fields": {
+              "assetId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "comment": {
                 "nullable": true,
                 "type": {
@@ -719,8 +742,22 @@
                   "kind": "scalar"
                 }
               },
+              "regenerationWorkflowId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "reviewedAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
               "reviewedById": {
-                "nullable": false,
+                "nullable": true,
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
@@ -735,6 +772,22 @@
               }
             },
             "relations": {
+              "asset": {
+                "cardinality": "N:1",
+                "nullable": true,
+                "on": {
+                  "localFields": [
+                    "assetId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Asset",
+                  "namespace": "public"
+                }
+              },
               "content": {
                 "cardinality": "N:1",
                 "nullable": false,
@@ -751,9 +804,25 @@
                   "namespace": "public"
                 }
               },
+              "regenerationWorkflow": {
+                "cardinality": "N:1",
+                "nullable": true,
+                "on": {
+                  "localFields": [
+                    "regenerationWorkflowId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "AIWorkflow",
+                  "namespace": "public"
+                }
+              },
               "reviewedBy": {
                 "cardinality": "N:1",
-                "nullable": false,
+                "nullable": true,
                 "on": {
                   "localFields": [
                     "reviewedById"
@@ -770,6 +839,9 @@
             },
             "storage": {
               "fields": {
+                "assetId": {
+                  "column": "assetId"
+                },
                 "comment": {
                   "column": "comment"
                 },
@@ -784,6 +856,12 @@
                 },
                 "id": {
                   "column": "id"
+                },
+                "regenerationWorkflowId": {
+                  "column": "regenerationWorkflowId"
+                },
+                "reviewedAt": {
+                  "column": "reviewedAt"
                 },
                 "reviewedById": {
                   "column": "reviewedById"
@@ -855,6 +933,22 @@
               }
             },
             "relations": {
+              "approval": {
+                "cardinality": "1:1",
+                "nullable": true,
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "assetId"
+                  ]
+                },
+                "to": {
+                  "model": "Approval",
+                  "namespace": "public"
+                }
+              },
               "workflow": {
                 "cardinality": "N:1",
                 "nullable": false,
@@ -2618,6 +2712,11 @@
                 }
               ],
               "columns": {
+                "assetId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "comment": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -2653,10 +2752,20 @@
                   "nativeType": "text",
                   "nullable": false
                 },
+                "regenerationWorkflowId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "reviewedAt": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
                 "reviewedById": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
-                  "nullable": false
+                  "nullable": true
                 },
                 "updatedAt": {
                   "codecId": "pg/timestamptz-temporal@1",
@@ -2700,6 +2809,38 @@
                     "namespaceId": "public",
                     "tableName": "user"
                   }
+                },
+                {
+                  "source": {
+                    "columns": [
+                      "assetId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "approval"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "asset"
+                  }
+                },
+                {
+                  "source": {
+                    "columns": [
+                      "regenerationWorkflowId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "approval"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "aIWorkflow"
+                  }
                 }
               ],
               "indexes": [
@@ -2709,6 +2850,14 @@
                   ],
                   "name": "approval_contentId_idx_37b207ad",
                   "prefix": "approval_contentId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "decision"
+                  ],
+                  "name": "approval_decision_idx_cb87c9d6",
+                  "prefix": "approval_decision_idx",
                   "unique": false
                 },
                 {
@@ -2725,7 +2874,18 @@
                   "id"
                 ]
               },
-              "uniques": []
+              "uniques": [
+                {
+                  "columns": [
+                    "assetId"
+                  ]
+                },
+                {
+                  "columns": [
+                    "regenerationWorkflowId"
+                  ]
+                }
+              ]
             },
             "asset": {
               "checks": [
@@ -3990,7 +4150,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "b5bedaf442300aeb087be6591eb15c0eeffe8d52567883e751f5203397ea456d"
+    "storageHash": "37c7868863fc3424e32cd4d07a0dbed3ffce2abf69826af9a9944845a9625cfa"
   },
   "execution": {
     "executionHash": "355bd382d172b725b2744b758bca97ea474e0acbb64c4adffb07f3c881b1f01e",

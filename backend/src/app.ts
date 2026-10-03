@@ -11,6 +11,7 @@ import contentIdeaRouter from "./routes/content-idea-routes.js";
 import aiWorkflowRouter from "./routes/ai-workflow-routes.js";
 import projectSettingsRouter from "./routes/project-settings-routes.js";
 import path from "node:path";
+import approvalRouter from "./routes/approval-routes.js";
 
 const app: Application = express();
 
@@ -54,6 +55,7 @@ app.use("/api/projects", projectRouter);
 app.use("/api/content-ideas", contentIdeaRouter);
 app.use("/api/ai", aiWorkflowRouter);
 app.use("/api/projects", projectSettingsRouter);
+app.use("/api/approvals", approvalRouter);
 app.use(notFoundMiddleware);
 
 app.use(errorMiddleware);
