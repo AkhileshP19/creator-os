@@ -47,7 +47,7 @@ export const createScriptWorkflowController: RequestHandler = async (
   } catch (error) {
     console.error("Failed to generate script:", error);
 
-    return res.status(500).json({
+    return res.status(error instanceof Error && "statusCode" in error && typeof error.statusCode === "number" ? error.statusCode : 500).json({
       status: "ERROR",
       message: "Failed to generate script",
       data: null,
@@ -84,7 +84,7 @@ export const getWorkflowByIdController: RequestHandler = async (req, res) => {
   } catch (error) {
     console.error("Failed to fetch AI workflow:", error);
 
-    return res.status(500).json({
+    return res.status(error instanceof Error && "statusCode" in error && typeof error.statusCode === "number" ? error.statusCode : 500).json({
       status: "ERROR",
       message: "Failed to fetch AI workflow",
       data: null,
@@ -124,7 +124,7 @@ export const getGeneratedScriptController: RequestHandler = async (
   } catch (error) {
     console.error("Failed to fetch generated script:", error);
 
-    return res.status(500).json({
+    return res.status(error instanceof Error && "statusCode" in error && typeof error.statusCode === "number" ? error.statusCode : 500).json({
       status: "ERROR",
       message: "Failed to fetch generated script",
       data: null,
@@ -148,23 +148,7 @@ export const createVideoWorkflowController: RequestHandler = async (
       });
     }
 
-    const workflow = await aiWorkflowService.createWorkflow({
-      contentId,
-      currentUserId,
-      workflowType: "VIDEO_GENERATION",
-    });
-
-    /*
-     * Don't wait for Veo.
-     *
-     * For our current MVP this runs in the Express process.
-     * Later this gets moved into a proper worker/queue.
-     */
-    void workflowExecutionService
-      .executeVideoGeneration(workflow.id, currentUserId)
-      .catch((error: unknown) => {
-        console.error("Background video generation failed:", error);
-      });
+    const workflow = await workflowExecutionService.startVideoGeneration(contentId, currentUserId);
 
     return res.status(202).json({
       status: "SUCCESS",
@@ -182,7 +166,7 @@ export const createVideoWorkflowController: RequestHandler = async (
   } catch (error) {
     console.error("Failed to start video generation:", error);
 
-    return res.status(500).json({
+    return res.status(error instanceof Error && "statusCode" in error && typeof error.statusCode === "number" ? error.statusCode : 500).json({
       status: "ERROR",
       message: "Failed to start video generation",
       data: null,
@@ -222,7 +206,7 @@ export const getGeneratedVideoController: RequestHandler = async (
   } catch (error) {
     console.error("Failed to fetch generated video:", error);
 
-    return res.status(500).json({
+    return res.status(error instanceof Error && "statusCode" in error && typeof error.statusCode === "number" ? error.statusCode : 500).json({
       status: "ERROR",
       message: "Failed to fetch generated video",
       data: null,

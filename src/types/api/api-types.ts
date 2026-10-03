@@ -20,11 +20,16 @@ export const ApiEndPoint = {
   DELETE_CONTENT_IDEA: "/api/content-ideas/delete/{id}",
 
   GENERATE_SCRIPT: "/api/ai/workflows",
-  GET_WORKFLOW: "/api/ai/workflws/{id}",
+  GET_WORKFLOW: "/api/ai/workflows/{id}",
   GET_SCRIPT: "/api/ai/workflows/{id}/script",
 
   GENERATE_VIDEO: "/api/ai/video-workflows",
   GET_VIDEO: "/api/ai/workflows/{id}/video",
+  GET_APPROVALS: "/api/approvals",
+  GET_APPROVAL: "/api/approvals/{id}",
+  APPROVE_VIDEO: "/api/approvals/{id}/approve",
+  REJECT_VIDEO: "/api/approvals/{id}/reject",
+  REGENERATE_VIDEO: "/api/approvals/{id}/regenerate",
 } as const;
 
 // Define API response structure

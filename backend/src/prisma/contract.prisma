@@ -192,6 +192,7 @@ model AIWorkflow {
   logs          WorkflowLog[]
   aiRequests    AIRequest[]
   assets        Asset[]
+  regenerationApproval Approval?
 
   @@index([contentId])
   @@index([status])
@@ -244,6 +245,8 @@ model Asset {
 
   workflow AIWorkflow @relation(fields: [workflowId], references: [id])
 
+  approval Approval?
+
   @@index([workflowId])
 }
 
@@ -251,14 +254,20 @@ model Approval {
   id           String         @id @default(uuid())
   contentId    String
   decision     ApprovalStatus
-  reviewedById String
+  reviewedById String?
+  reviewedAt DateTime?
+  assetId String? @unique
+  regenerationWorkflowId String? @unique
   comment      String?
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @default(now())
 
   content    ContentIdea @relation(fields: [contentId], references: [id])
-  reviewedBy User        @relation(fields: [reviewedById], references: [id])
+  reviewedBy User?       @relation(fields: [reviewedById], references: [id])
+  asset Asset? @relation(fields: [assetId], references: [id])
+  regenerationWorkflow AIWorkflow? @relation(fields: [regenerationWorkflowId], references: [id])
 
+  @@index([decision])
   @@index([contentId])
 }
 

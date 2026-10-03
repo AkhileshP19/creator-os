@@ -14,7 +14,30 @@ import {
   generateVideo,
 } from "./flow-video-service.js";
 import { buildVideoPrompt } from "./video-prompt-service.js";
+import { completeVideoWorkflow } from "./video-review-service.js";
 const workflowExecutionService = {
+  startVideoGeneration: async (contentId: string, currentUserId: string, regenerationApprovalId?: string) => {
+    const workflow = await aiWorkflowService.createWorkflow({
+      contentId, currentUserId, workflowType: "VIDEO_GENERATION",
+      ...(regenerationApprovalId ? { regenerationApprovalId } : {}),
+    });
+    // Keep the existing in-process execution architecture. Persist failures even
+    // when validation fails before the provider is invoked.
+    void workflowExecutionService.executeVideoGeneration(workflow.id, currentUserId)
+      .catch(async (error: unknown) => {
+        console.error("Background video generation failed:", error);
+        await db.transaction(async (tx) => {
+          await tx.orm.public.AIWorkflow.where({ id: workflow.id }).update({
+            status: "FAILED", completedAt: Temporal.Now.instant(), updatedAt: Temporal.Now.instant(),
+            currentStep: "VIDEO_GENERATION_FAILED",
+            errorMessage: error instanceof Error ? error.message : "Video generation failed",
+          });
+          await tx.orm.public.Approval.where({ regenerationWorkflowId: workflow.id, decision: "REGENERATE" })
+            .update({ decision: "REJECTED", updatedAt: Temporal.Now.instant() });
+        });
+      }).catch((error: unknown) => console.error("Failed to persist video failure:", error));
+    return workflow;
+  },
   executeScriptGeneration: async (
     workflowId: string,
     currentUserId: string,
@@ -40,7 +63,6 @@ const workflowExecutionService = {
 
     const contentIdea = await db.orm.public.ContentIdea.where({
       id: workflow.contentId,
-      createdById: currentUserId,
       deletedAt: null,
     }).first();
 
@@ -225,7 +247,6 @@ const workflowExecutionService = {
 
     const contentIdea = await db.orm.public.ContentIdea.where({
       id: workflow.contentId,
-      createdById: currentUserId,
       deletedAt: null,
     }).first();
 
@@ -378,23 +399,9 @@ const workflowExecutionService = {
        *
        * We store the URL/path, NOT the MP4 binary itself.
        */
-      const asset = await db.orm.public.Asset.create({
-        workflowId: workflow.id,
-        storageUrl,
-        assetType: "VIDEO",
-      });
-
-      const completedAt = Temporal.Now.instant();
-      const executionTime = Date.now() - startTime;
-
-      await aiWorkflowService.updateWorkflowState(workflow.id, {
-        status: "COMPLETED",
-        completedAt,
-        executionTime,
-        currentStep: "VIDEO_GENERATED",
-        errorMessage: null,
-      });
-
+      const asset = await completeVideoWorkflow(
+        workflow.id, currentUserId, storageUrl, Date.now() - startTime,
+      );
       return {
         workflowId: workflow.id,
         assetId: asset.id,
