@@ -6,6 +6,8 @@ import toast from "react-hot-toast";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorState } from "@/components/ui/custom/query-error-state";
 import {
   Select,
   SelectContent,
@@ -234,20 +236,27 @@ export default function PublishingPage() {
       </div>
 
       {jobs.isPending ? (
-        <div className="flex items-center justify-center p-12 text-muted-foreground">
-          <Loader2 className="size-6 animate-spin text-indigo-600 mr-2" />
-          <span>Loading publishing jobs…</span>
+        <div className="space-y-4" role="status" aria-label="Loading publishing jobs">
+          {[1, 2, 3].map((item) => (
+            <Card key={item} className="rounded-xl border shadow-xs p-4 sm:p-5 space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <Skeleton className="h-6 w-48 sm:w-64" />
+                <Skeleton className="h-6 w-20 rounded-full" />
+              </div>
+              <div className="flex flex-wrap items-center gap-4">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-4 w-40" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+            </Card>
+          ))}
         </div>
       ) : jobs.isError ? (
-        <Card className="p-8 text-center space-y-3">
-          <p className="text-sm text-destructive">Unable to load publishing jobs.</p>
-          <Button
-            onClick={() => jobs.refetch()}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer"
-          >
-            Try again
-          </Button>
-        </Card>
+        <QueryErrorState
+          title="Failed to load publishing jobs"
+          message={jobs.error?.message || "Unable to load publishing jobs. Please try again."}
+          onRetry={() => jobs.refetch()}
+        />
       ) : !jobs.data?.responseData.length ? (
         <Card className="p-12 text-center space-y-2">
           <Film className="size-10 text-muted-foreground mx-auto mb-2" />

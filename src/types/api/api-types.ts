@@ -1,14 +1,9 @@
 export const ApiEndPoint = {
-  YOUTUBE_CONNECT: "/api/integrations/youtube/connect",
-  YOUTUBE_STATUS: "/api/integrations/youtube/status",
-  YOUTUBE_DISCONNECT: "/api/integrations/youtube",
-  PUBLISH_JOBS: "/api/publish-jobs",
-  RETRY_PUBLISH_JOB: "/api/publish-jobs/{id}/retry",
-  GET_DASHBOARD_OVERVIEW: "api/dashboard/overview",
+  GET_DASHBOARD_OVERVIEW: "/api/dashboard/overview",
   GET_DASHBOARD_PROJECTS: "/api/projects",
-  GET_AI_ACTIVITY: "api/dashboard/ai-activity",
-  GET_PENDING_REVIEWS: "api/dashboard/reviews",
-  GET_AUTOMATION_ACTIVITY: "api/dashboard/automation",
+  GET_AI_ACTIVITY: "/api/dashboard/ai-activity",
+  GET_PENDING_REVIEWS: "/api/dashboard/reviews",
+  GET_AUTOMATION_ACTIVITY: "/api/dashboard/automation",
   GET_AUTH_ME: "/api/auth/me",
 
   CREATE_PROJECT: "/api/projects",
@@ -35,6 +30,12 @@ export const ApiEndPoint = {
   APPROVE_VIDEO: "/api/approvals/{id}/approve",
   REJECT_VIDEO: "/api/approvals/{id}/reject",
   REGENERATE_VIDEO: "/api/approvals/{id}/regenerate",
+
+  YOUTUBE_CONNECT: "/api/integrations/youtube/connect",
+  YOUTUBE_STATUS: "/api/integrations/youtube/status",
+  YOUTUBE_DISCONNECT: "/api/integrations/youtube",
+  PUBLISH_JOBS: "/api/publish-jobs",
+  RETRY_PUBLISH_JOB: "/api/publish-jobs/{id}/retry",
 } as const;
 
 // Define API response structure

@@ -11,8 +11,11 @@ import {
 import { ProjectData } from "@/types/dashboard-types";
 import { PaginationController } from "../ui/custom/pagination-controller";
 
+import { Skeleton } from "../ui/skeleton";
+
 interface ProjectsTableProps {
   projects: ProjectData[];
+  isLoading?: boolean;
   setIsEditModalOpen: (isOpen: boolean) => void;
   setSelectedProjectData: (project: ProjectData | null) => void;
   setIsSettingsModalOpen: (isOpen: boolean) => void;
@@ -26,6 +29,7 @@ interface ProjectsTableProps {
 
 export const ProjectsTable = ({
   projects,
+  isLoading,
   setIsEditModalOpen,
   setSelectedProjectData,
   setIsSettingsModalOpen,
@@ -50,14 +54,44 @@ export const ProjectsTable = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {projects.map((project) => (
-              <TableRow
-                key={project.id}
-                className="hover:bg-indigo-50/20 transition-colors"
-              >
-                <TableCell className="text-indigo-600 font-semibold py-4 max-w-[200px] truncate">
-                  {project.name}
+            {isLoading ? (
+              Array.from({ length: perPage || 5 }).map((_, index) => (
+                <TableRow key={`project-skeleton-${index}`}>
+                  <TableCell className="py-4">
+                    <Skeleton className="h-4 w-36" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-5 w-20 rounded-full" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-24" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-16" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-7 w-24" />
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : projects.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={5}
+                  className="h-32 text-center text-sm text-muted-foreground"
+                >
+                  No projects found. Create a new project to get started.
                 </TableCell>
+              </TableRow>
+            ) : (
+              projects.map((project) => (
+                <TableRow
+                  key={project.id}
+                  className="hover:bg-indigo-50/20 transition-colors"
+                >
+                  <TableCell className="text-indigo-600 font-semibold py-4 max-w-[200px] truncate">
+                    {project.name}
+                  </TableCell>
                 <TableCell>
                   <ProjectStatusBadge status={project.status} />
                 </TableCell>
@@ -105,8 +139,9 @@ export const ProjectsTable = ({
                   </div>
                 </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
+            ))
+          )}
+        </TableBody>
         </Table>
       </div>
 

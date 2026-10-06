@@ -38,6 +38,7 @@ interface AddNewContentModalProps {
   form: UseFormReturn<z.infer<typeof newContentFormSchema>>;
   onSubmit: (data: z.infer<typeof newContentFormSchema>) => void;
   allProjects: ProjectData[];
+  isLoadingProjects?: boolean;
   isSubmitting: boolean;
   mode: "create" | "edit";
   selectedContentData?: ContentIdea;
@@ -68,6 +69,7 @@ export const AddNewContentModal = ({
   form,
   onSubmit,
   allProjects,
+  isLoadingProjects = false,
   isSubmitting,
   mode,
   selectedContentData,
@@ -145,13 +147,19 @@ export const AddNewContentModal = ({
                       Projects <span className="text-red-500">*</span>
                     </FormLabel>
                     <Select
-                      disabled={mode === "edit"}
+                      disabled={mode === "edit" || isLoadingProjects}
                       value={field.value}
                       onValueChange={field.onChange}
                     >
                       <FormControl>
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select Project">
+                          <SelectValue
+                            placeholder={
+                              isLoadingProjects
+                                ? "Loading projects..."
+                                : "Select Project"
+                            }
+                          >
                             {
                               allProjects.find((p) => p.id === field.value)
                                 ?.name
@@ -159,14 +167,33 @@ export const AddNewContentModal = ({
                           </SelectValue>
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
-                        {allProjects.map((project) => (
-                          <SelectItem key={project.id} value={project.id}>
-                            {project.name}
-                          </SelectItem>
-                        ))}
+                      <SelectContent alignItemWithTrigger={false} side="bottom">
+                        {isLoadingProjects ? (
+                          <div className="flex items-center justify-center p-3 text-xs text-muted-foreground gap-2">
+                            <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
+                            Loading projects...
+                          </div>
+                        ) : allProjects.length === 0 ? (
+                          <div className="p-4 text-center text-xs space-y-1">
+                            <p className="font-medium text-foreground">No projects found</p>
+                            <p className="text-muted-foreground text-[11px]">
+                              Create a project under the Projects page first.
+                            </p>
+                          </div>
+                        ) : (
+                          allProjects.map((project) => (
+                            <SelectItem key={project.id} value={project.id}>
+                              {project.name}
+                            </SelectItem>
+                          ))
+                        )}
                       </SelectContent>
                     </Select>
+                    {!isLoadingProjects && allProjects.length === 0 && (
+                      <p className="text-xs text-amber-600 font-medium">
+                        No projects available. Please create a project first in the Projects section.
+                      </p>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}

@@ -5,7 +5,7 @@ export type SidebarMenuItem = {
 };
 
 export type DashboardOverviewResponse = {
-  user: {
+  user?: {
     id: string;
     name: string;
     role: string;
@@ -13,15 +13,15 @@ export type DashboardOverviewResponse = {
   metrics: {
     activeProjects: {
       value: number;
-      change: number;
-      changePeriod: string;
-      trend: string;
+      change: string | number | null;
+      changePeriod: string | null;
+      trend: "up" | "down" | null;
     };
     contentCreated: {
       value: number;
-      change: number;
-      changePeriod: string;
-      trend: string;
+      change: string | number | null;
+      changePeriod: string | null;
+      trend: "up" | "down" | null;
     };
     pendingReviews: {
       value: number;
@@ -29,9 +29,9 @@ export type DashboardOverviewResponse = {
     };
     published: {
       value: number;
-      change: number;
-      changePeriod: string;
-      trend: string;
+      change: string | number | null;
+      changePeriod: string | null;
+      trend: "up" | "down" | null;
     };
   };
 };

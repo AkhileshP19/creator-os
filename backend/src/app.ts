@@ -14,6 +14,7 @@ import path from "node:path";
 import approvalRouter from "./routes/approval-routes.js";
 import integrationRouter from "./routes/integration-routes.js";
 import publishRouter from "./routes/publish-routes.js";
+import dashboardRouter from "./routes/dashboard-routes.js";
 
 const app: Application = express();
 
@@ -69,6 +70,7 @@ app.use("/api/projects", projectSettingsRouter);
 app.use("/api/approvals", approvalRouter);
 app.use("/api/integrations", integrationRouter);
 app.use("/api/publish-jobs", publishRouter);
+app.use("/api/dashboard", dashboardRouter);
 app.use(notFoundMiddleware);
 
 app.use(errorMiddleware);

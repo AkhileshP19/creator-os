@@ -5,10 +5,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "npm run build && node --test dist/test/approval-workflow.test.js dist/test/publishing-workflow.test.js",
+    "test": "npm run build && node --test dist/test/approval-workflow.test.js dist/test/publishing-workflow.test.js dist/test/dashboard-workflow.test.js",
     "postinstall": "prisma skills sync || exit 0",
     "contract:emit": "prisma contract emit",
-    "dev": "tsx src/server.ts",
+    "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js"
   },

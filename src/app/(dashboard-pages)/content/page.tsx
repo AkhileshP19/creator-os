@@ -35,6 +35,7 @@ import {
   GeneratedVideo,
   GenerateVideoRequest,
 } from "@/types/generate-video-types";
+import { QueryErrorState } from "@/components/ui/custom/query-error-state";
 
 const emptyContentFormValues: z.infer<typeof newContentFormSchema> = {
   projectId: "",
@@ -89,16 +90,19 @@ export default function ContentPage() {
     defaultValues: emptyContentFormValues,
   });
 
-  const { data: allProjectsData } = useFetchData<ProjectData[]>(
-    ApiEndPoint.GET_ALL_PROJECTS,
-    "all-projects",
-    [],
-    undefined,
-    isAddContentModalOpen,
-  );
+  const { data: allProjectsData, isLoading: isLoadingProjects } =
+    useFetchData<ProjectData[]>(
+      ApiEndPoint.GET_ALL_PROJECTS,
+      "all-projects",
+      [],
+      undefined,
+      isAddContentModalOpen,
+    );
 
   const {
     data: contentIdeasData,
+    isLoading: isLoadingContentIdeas,
+    error: contentIdeasError,
     refetch: refetchContentIdeas,
     totalPages: totalContentIdeasPages,
   } = usePaginatedData<ContentIdea>({
@@ -312,24 +316,33 @@ export default function ContentPage() {
         </Button>
       </div>
 
-      <ContentTable
-        contentIdeas={contentIdeasData}
-        currentPage={currentPage}
-        totalPages={totalContentIdeasPages}
-        onPageChange={handleClickPage}
-        perPage={perPage}
-        onPerPageChange={handlePageSizeChange}
-        setIsEditModalOpen={setIsAddContentModalOpen}
-        setIsViewScriptModalOpen={setIsViewScriptModalOpen}
-        setIsViewVideoModalOpen={setIsViewVideoModalOpen}
-        setSelectedContentData={setSelectedContentData}
-        setIsCreateOrEditMode={setIsCreateOrEditMode}
-        onDeleteContent={handleDeleteContent}
-        onGenerateScript={handleScriptGeneration}
-        isGeneratingScript={generatingScriptId}
-        onGenerateVideo={handleVideoGeneration}
-        isGeneratingVideo={generatingVideoId}
-      />
+      {contentIdeasError ? (
+        <QueryErrorState
+          title="Failed to load content ideas"
+          message="An error occurred while fetching your content ideas. Please try again."
+          onRetry={refetchContentIdeas}
+        />
+      ) : (
+        <ContentTable
+          contentIdeas={contentIdeasData}
+          isLoading={isLoadingContentIdeas}
+          currentPage={currentPage}
+          totalPages={totalContentIdeasPages}
+          onPageChange={handleClickPage}
+          perPage={perPage}
+          onPerPageChange={handlePageSizeChange}
+          setIsEditModalOpen={setIsAddContentModalOpen}
+          setIsViewScriptModalOpen={setIsViewScriptModalOpen}
+          setIsViewVideoModalOpen={setIsViewVideoModalOpen}
+          setSelectedContentData={setSelectedContentData}
+          setIsCreateOrEditMode={setIsCreateOrEditMode}
+          onDeleteContent={handleDeleteContent}
+          onGenerateScript={handleScriptGeneration}
+          isGeneratingScript={generatingScriptId}
+          onGenerateVideo={handleVideoGeneration}
+          isGeneratingVideo={generatingVideoId}
+        />
+      )}
 
       <AddNewContentModal
         open={isAddContentModalOpen}
@@ -346,6 +359,7 @@ export default function ContentPage() {
         mode={isCreateOrEditMode}
         onSubmit={handleCreateNewContent}
         allProjects={allProjectsData ?? []}
+        isLoadingProjects={isLoadingProjects}
         isSubmitting={isSubmitting}
         selectedContentData={selectedContentData!}
         isUpdating={isUpdating}
@@ -354,7 +368,8 @@ export default function ContentPage() {
       <GeneratedScriptModal
         open={isViewScriptModalOpen}
         onOpenChange={setIsViewScriptModalOpen}
-        scriptData={scriptData!}
+        scriptData={scriptData}
+        isLoading={isFetchingScript}
       />
 
       <GeneratedVideoModal

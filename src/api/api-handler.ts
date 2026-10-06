@@ -115,9 +115,10 @@ export const apiHandler = async <T>(
     const wantsExcel =
       config?.headers?.Accept ===
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    const normalizedUrl = url.startsWith("/") ? url : `/${url}`;
     const requestConfig: AxiosRequestConfig = {
       method,
-      url: `${baseURL}${url}`,
+      url: `${baseURL}${normalizedUrl}`,
       data,
       ...config,
       headers: {

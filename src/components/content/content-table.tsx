@@ -11,8 +11,11 @@ import { ContentIdea } from "@/types/content-types";
 import { PaginationController } from "../ui/custom/pagination-controller";
 import { Button } from "../ui/button";
 
+import { Skeleton } from "../ui/skeleton";
+
 interface ContentTableProps {
   contentIdeas: ContentIdea[];
+  isLoading?: boolean;
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
@@ -32,6 +35,7 @@ interface ContentTableProps {
 
 export const ContentTable = ({
   contentIdeas,
+  isLoading = false,
   currentPage,
   totalPages,
   onPerPageChange,
@@ -56,23 +60,64 @@ export const ContentTable = ({
         <Table className="w-full min-w-[700px]">
           <TableHeader>
             <TableRow className="bg-muted/40 hover:bg-muted/40">
-              <TableHead className="min-w-[180px] font-semibold text-xs">Title</TableHead>
-              <TableHead className="w-[110px] font-semibold text-xs">Status</TableHead>
-              <TableHead className="w-[120px] font-semibold text-xs">Scheduled Date</TableHead>
-              <TableHead className="w-[110px] font-semibold text-xs">Scheduled Time</TableHead>
-              <TableHead className="w-[90px] font-semibold text-xs">Actions</TableHead>
-              <TableHead className="w-[130px] font-semibold text-xs">Script</TableHead>
-              <TableHead className="w-[130px] font-semibold text-xs">Video</TableHead>
+              <TableHead className="min-w-[180px] font-semibold text-xs">
+                Title
+              </TableHead>
+              <TableHead className="w-[110px] font-semibold text-xs">
+                Status
+              </TableHead>
+              <TableHead className="w-[120px] font-semibold text-xs">
+                Scheduled Date
+              </TableHead>
+              <TableHead className="w-[110px] font-semibold text-xs">
+                Scheduled Time
+              </TableHead>
+              <TableHead className="w-[90px] font-semibold text-xs">
+                Actions
+              </TableHead>
+              <TableHead className="w-[130px] font-semibold text-xs">
+                Script
+              </TableHead>
+              <TableHead className="w-[130px] font-semibold text-xs">
+                Video
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {items.length === 0 ? (
+            {isLoading ? (
+              Array.from({ length: perPage || 5 }).map((_, i) => (
+                <TableRow key={`skeleton-${i}`}>
+                  <TableCell className="py-4">
+                    <Skeleton className="h-5 w-44" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-5 w-20 rounded-full" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-20" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-16" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-7 w-16" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-8 w-28 rounded-md" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-8 w-28 rounded-md" />
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : items.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={7}
                   className="h-32 text-center text-sm text-muted-foreground"
                 >
-                  No content ideas found. Click &quot;Add New Content&quot; to get started.
+                  No content ideas found. Click &quot;Add New Content&quot; to
+                  get started.
                 </TableCell>
               </TableRow>
             ) : (
@@ -104,10 +149,13 @@ export const ContentTable = ({
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground">
                     {contentIdea.scheduledDate
-                      ? new Date(contentIdea.scheduledDate).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })
+                      ? new Date(contentIdea.scheduledDate).toLocaleTimeString(
+                          [],
+                          {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          },
+                        )
                       : "-"}
                   </TableCell>
                   <TableCell>

@@ -20,9 +20,6 @@ export const SidebarMenu = ({
 }: SidebarMenuProps) => {
   const pathname = usePathname();
   const router = useRouter();
-
-  const activePath = pathname.split("/")[1] || "dashboard";
-
   const strokeWidth = 2;
   const iconSize = 19;
 
@@ -47,13 +44,10 @@ export const SidebarMenu = ({
               </h3>
             )}
 
+
             <div className="space-y-1">
               {Object.values(options).map((item) => {
-                const itemPath = item.label
-                  .toLowerCase()
-                  .replace(" ", "-");
-
-                const isActive = itemPath === activePath;
+                const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
                 return (
                   <button
@@ -68,7 +62,7 @@ export const SidebarMenu = ({
                       !isSidebarOpen && "justify-center px-0",
                     )}
                     onClick={() => {
-                      router.push(`/${itemPath}`);
+                      router.push(item.href);
                       onNavigate?.();
                     }}
                   >

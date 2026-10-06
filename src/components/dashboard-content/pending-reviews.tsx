@@ -8,12 +8,24 @@ import { ClipboardCheck } from "lucide-react";
 import { buttonVariants } from "../ui/button";
 import Link from "next/link";
 
+import { Skeleton } from "../ui/skeleton";
+import { QueryErrorState } from "../ui/custom/query-error-state";
+
 interface PendingReviewsProps {
-  data: PendingReviewsData[];
-  totalCount: number;
+  data?: PendingReviewsData[];
+  totalCount?: number;
+  isLoading?: boolean;
+  error?: unknown;
+  onRetry?: () => void;
 }
 
-export const PendingReviews = ({ data, totalCount }: PendingReviewsProps) => {
+export const PendingReviews = ({
+  data,
+  totalCount,
+  isLoading,
+  error,
+  onRetry,
+}: PendingReviewsProps) => {
   const items = data || [];
 
   return (
@@ -28,7 +40,7 @@ export const PendingReviews = ({ data, totalCount }: PendingReviewsProps) => {
             variant="outline"
             className="border-indigo-200 bg-indigo-50 text-indigo-700 font-medium text-xs ml-1"
           >
-            {totalCount || items.length}
+            {totalCount ?? items.length}
           </Badge>
         </div>
         <Link
@@ -44,7 +56,32 @@ export const PendingReviews = ({ data, totalCount }: PendingReviewsProps) => {
         </Link>
       </div>
 
-      {items.length === 0 ? (
+      {error ? (
+        <QueryErrorState
+          title="Failed to load pending reviews"
+          message="Could not retrieve your pending approvals."
+          onRetry={onRetry}
+          className="my-2"
+        />
+      ) : isLoading ? (
+        <div className="space-y-2.5">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="p-3 border rounded-lg flex items-center justify-between gap-3"
+            >
+              <div className="flex items-center gap-3">
+                <Skeleton className="size-9 rounded-lg shrink-0" />
+                <div className="space-y-1.5">
+                  <Skeleton className="h-4 w-40" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+              </div>
+              <Skeleton className="h-5 w-16 rounded-full" />
+            </div>
+          ))}
+        </div>
+      ) : items.length === 0 ? (
         <div className="text-center py-8 text-sm text-muted-foreground">
           No pending reviews right now.
         </div>

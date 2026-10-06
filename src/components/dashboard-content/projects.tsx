@@ -7,9 +7,23 @@ import { ProjectData } from "@/types/dashboard-types";
 import { formatDistanceToNow } from "date-fns";
 import { ProjectStatusBadge } from "../ui/custom/project-status-badge";
 import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorState } from "../ui/custom/query-error-state";
 import { FolderKanban } from "lucide-react";
 
-export default function Projects({ data }: { data: ProjectData[] }) {
+interface ProjectsProps {
+  data?: ProjectData[];
+  isLoading?: boolean;
+  error?: unknown;
+  onRetry?: () => void;
+}
+
+export default function Projects({
+  data,
+  isLoading,
+  error,
+  onRetry,
+}: ProjectsProps) {
   const items = data || [];
 
   return (
@@ -34,7 +48,32 @@ export default function Projects({ data }: { data: ProjectData[] }) {
         </Link>
       </div>
 
-      {items.length === 0 ? (
+      {error ? (
+        <QueryErrorState
+          title="Failed to load projects"
+          message="Could not retrieve your recent projects."
+          onRetry={onRetry}
+          className="my-2"
+        />
+      ) : isLoading ? (
+        <div className="divide-y divide-border/60">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="flex items-center justify-between gap-3 py-3.5 first:pt-0 last:pb-0"
+            >
+              <div className="flex items-center gap-3">
+                <Skeleton className="size-9 rounded-lg shrink-0" />
+                <div className="space-y-1.5">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-48" />
+                </div>
+              </div>
+              <Skeleton className="h-5 w-20 rounded-full" />
+            </div>
+          ))}
+        </div>
+      ) : items.length === 0 ? (
         <div className="text-center py-8 text-sm text-muted-foreground">
           No recent projects found.
         </div>
@@ -88,4 +127,4 @@ export default function Projects({ data }: { data: ProjectData[] }) {
       )}
     </div>
   );
-}
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Film, Search } from "lucide-react";
+import { Film, Loader2, Search } from "lucide-react";
 import { ApprovalCard } from "@/components/approvals/approval-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PaginationController } from "@/components/ui/custom/pagination-controller";
+import { QueryErrorState } from "@/components/ui/custom/query-error-state";
 import { usePaginatedData } from "@/hooks/fetch/usePaginatedDataParams";
 import { useFetchData } from "@/hooks/fetch/useFetchData";
 import useDebounceSearch from "@/hooks/optimization/useDebounceSearch";
@@ -140,20 +141,28 @@ export default function ApprovalPage() {
           <Select
             items={projectOptions}
             value={projectId || "ALL"}
+            disabled={projects.isLoading}
             onValueChange={(value) => {
               setProjectId(value === "ALL" || !value ? "" : value);
               setPageNo(1);
             }}
           >
             <SelectTrigger aria-label="Project" className="h-10 w-full">
-              <SelectValue />
+              <SelectValue placeholder={projects.isLoading ? "Loading projects..." : "All Projects"} />
             </SelectTrigger>
             <SelectContent>
-              {projectOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
+              {projects.isLoading ? (
+                <div className="flex items-center justify-center p-3 text-xs text-muted-foreground gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
+                  Loading projects...
+                </div>
+              ) : (
+                projectOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))
+              )}
             </SelectContent>
           </Select>
           <Select
@@ -209,26 +218,25 @@ export default function ApprovalPage() {
         )}
         <TabsContent value={status}>
           {approvals.error ? (
-            <Card className="space-y-3 p-8 text-center" role="alert">
-              <p>{approvals.error.message ?? "Unable to load approvals."}</p>
-              <Button variant="outline" onClick={() => approvals.refetch()}>
-                Try again
-              </Button>
-            </Card>
-          ) : initialLoading ? (
+            <QueryErrorState
+              title="Failed to load approvals"
+              message={approvals.error.message || "Unable to load approvals. Please try again."}
+              onRetry={() => approvals.refetch()}
+            />
+          ) : approvals.isLoading ? (
             <div
-              className="grid gap-5 2xl:grid-cols-2"
+              className="grid gap-5 grid-cols-1 xl:grid-cols-2"
               role="status"
               aria-label="Loading approvals"
             >
               {[1, 2, 3, 4].map((item) => (
                 <Card key={item} className="flex gap-5 overflow-hidden p-4">
-                  <Skeleton className="aspect-[9/16] w-32 shrink-0" />
+                  <Skeleton className="aspect-[9/16] w-32 shrink-0 rounded-lg" />
                   <div className="flex-1 space-y-4 pt-2">
                     <Skeleton className="h-5 w-24" />
                     <Skeleton className="h-6 w-full" />
                     <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full rounded-md" />
                   </div>
                 </Card>
               ))}

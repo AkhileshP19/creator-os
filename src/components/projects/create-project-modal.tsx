@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -7,11 +10,18 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { usePatchData } from "@/hooks/fetch/usePatchData";
 import { usePostData } from "@/hooks/fetch/usePostData";
 import { ApiEndPoint } from "@/types/api/api-types";
@@ -19,8 +29,13 @@ import {
   CreateProjectRequest,
   CreateProjectResponse,
 } from "@/types/project-types";
-import { Dispatch, SetStateAction, useState } from "react";
+import {
+  createProjectSchema,
+  CreateProjectFormValues,
+} from "@/schema/validation-schemas/create-project-schema";
+import { Dispatch, SetStateAction } from "react";
 import toast from "react-hot-toast";
+import { Loader2 } from "lucide-react";
 
 interface CreateProjectModalProps {
   open: boolean;
@@ -29,7 +44,7 @@ interface CreateProjectModalProps {
   projectId?: string;
   incomingProjectName?: string;
   incomingProjectDesc?: string;
-  refetchProjects?: () => void; // Optional function to refetch projects after creation or update
+  refetchProjects?: () => void;
 }
 
 export const CreateProjectModal = ({
@@ -41,12 +56,23 @@ export const CreateProjectModal = ({
   incomingProjectDesc,
   refetchProjects,
 }: CreateProjectModalProps) => {
-  const [projectName, setProjectName] = useState(
-    mode === "edit" ? (incomingProjectName ?? "") : "",
-  );
-  const [projectDesc, setProjectDesc] = useState(
-    mode === "edit" ? (incomingProjectDesc ?? "") : "",
-  );
+  const form = useForm<CreateProjectFormValues>({
+    resolver: zodResolver(createProjectSchema),
+    mode: "onChange",
+    defaultValues: {
+      name: mode === "edit" ? incomingProjectName ?? "" : "",
+      description: mode === "edit" ? incomingProjectDesc ?? "" : "",
+    },
+  });
+
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        name: mode === "edit" ? incomingProjectName ?? "" : "",
+        description: mode === "edit" ? incomingProjectDesc ?? "" : "",
+      });
+    }
+  }, [open, mode, incomingProjectName, incomingProjectDesc, form]);
 
   const createProjectMutation = usePostData<
     CreateProjectResponse,
@@ -58,89 +84,122 @@ export const CreateProjectModal = ({
     CreateProjectRequest
   >(ApiEndPoint.UPDATE_PROJECT, [projectId ?? ""]);
 
-  const handleCreateProject = async () => {
+  const isSubmitting =
+    createProjectMutation.isPending || updateProjectMutation.isPending;
+
+  const onSubmit = async (values: CreateProjectFormValues) => {
     try {
-      const payload = {
-        name: projectName,
-        description: projectDesc,
-      };
-      const response = await createProjectMutation.mutateAsync(payload);
-      console.log("Project created:", response);
-      toast.success("Project created successfully!");
+      if (mode === "create") {
+        await createProjectMutation.mutateAsync(values);
+        toast.success("Project created successfully!");
+      } else {
+        await updateProjectMutation.mutateAsync(values);
+        toast.success("Project updated successfully!");
+      }
       onOpenChange(false);
-      setProjectName("");
-      setProjectDesc("");
+      form.reset({ name: "", description: "" });
       refetchProjects?.();
     } catch (err) {
-      toast.error("Failed to create project");
-      console.log(err);
+      console.error(err);
+      toast.error(
+        mode === "create"
+          ? "Failed to create project"
+          : "Failed to update project",
+      );
     }
   };
 
-  const handleUpdateProject = async () => {
-    try {
-      const payload = {
-        name: projectName,
-        description: projectDesc,
-      };
-      await updateProjectMutation.mutateAsync(payload);
-      toast.success("Project updated successfully!");
-      onOpenChange(false);
-      setProjectName("");
-      setProjectDesc("");
-      refetchProjects?.();
-    } catch (err) {
-      console.log(err);
-      toast.error("Failed to update project");
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      form.reset({ name: "", description: "" });
     }
+    onOpenChange(newOpen);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>
-            {mode === "create" ? "Create Project" : "Edit Project"}
-          </DialogTitle>
-          <DialogDescription>
-            Enter the details for your new project. Click Create when
-            you&apos;re ready.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Name
-            </Label>
-            <Input
-              id="name"
-              value={projectName}
-              onChange={(e) => setProjectName(e.target.value)}
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="description" className="text-right">
-              Description
-            </Label>
-            <Textarea
-              id="description"
-              value={projectDesc}
-              onChange={(e) => setProjectDesc(e.target.value)}
-              className="col-span-3 resize-none"
-              placeholder="Add a brief description of your project..."
-            />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button
-            onClick={() =>
-              mode === "create" ? handleCreateProject() : handleUpdateProject()
-            }
-          >
-            {mode === "create" ? "Create" : "Update"}
-          </Button>
-        </DialogFooter>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-[450px]">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <DialogHeader>
+              <DialogTitle>
+                {mode === "create" ? "Create Project" : "Edit Project"}
+              </DialogTitle>
+              <DialogDescription>
+                Enter the details for your project below. Both fields are required.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-2">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">
+                      Project Name <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g. YouTube Masterclass"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">
+                      Description <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Add a brief description of your project..."
+                        className="resize-none min-h-[100px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleOpenChange(false)}
+                disabled={isSubmitting}
+                className="cursor-pointer"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {mode === "create" ? "Creating..." : "Updating..."}
+                  </>
+                ) : mode === "create" ? (
+                  "Create Project"
+                ) : (
+                  "Update Project"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

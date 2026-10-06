@@ -12,6 +12,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Loader2 } from "lucide-react";
 export function YouTubeIntegration() {
   const connection = useYouTubeConnection();
   const [confirm, setConfirm] = useState(false);
@@ -49,14 +50,22 @@ export function YouTubeIntegration() {
       <CardContent className="space-y-4">
         <h2 className="text-lg font-semibold">YouTube</h2>
         {connection.isPending ? (
-          <p role="status">Loading connection…</p>
+          <div className="flex items-center gap-2 py-4 text-muted-foreground text-sm">
+            <Loader2 className="size-4 animate-spin text-indigo-600" />
+            <span>Checking YouTube connection…</span>
+          </div>
         ) : connection.isError ? (
-          <p role="alert">
-            Unable to load YouTube status.{" "}
-            <Button variant="outline" onClick={() => connection.refetch()}>
+          <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive flex items-center justify-between">
+            <span>Unable to load YouTube status.</span>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => connection.refetch()}
+              className="cursor-pointer"
+            >
               Try again
             </Button>
-          </p>
+          </div>
         ) : (
           <>
             <Badge variant={channel?.connected ? "default" : "secondary"}>

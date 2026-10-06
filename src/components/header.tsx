@@ -128,21 +128,23 @@ export const Header = ({
       </div>
 
       {/* DESKTOP SIDEBAR TOGGLE BUTTON */}
-      <Button
+      <button
         type="button"
-        className={`hidden md:flex absolute top-1/2 -translate-y-1/2 h-6 w-6 rounded-full z-30 transition-all duration-300 cursor-pointer bg-background hover:bg-indigo-50 hover:text-indigo-600 border shadow-xs items-center justify-center p-0 ${
+        className={`hidden md:flex absolute top-1/2 -translate-y-1/2 h-6 w-6 rounded-full z-30 transition-[left] duration-300 ease-in-out cursor-pointer bg-background hover:bg-indigo-50 hover:text-indigo-600 border border-border shadow-xs items-center justify-center p-0 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
           isSidebarOpen ? "left-[214px]" : "left-[58px]"
         }`}
-        variant="outline"
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsSidebarOpen(!isSidebarOpen);
+        }}
         aria-label={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
       >
         {isSidebarOpen ? (
-          <ChevronLeft className="h-3.5 w-3.5 pointer-events-none" />
+          <ChevronLeft className="h-3.5 w-3.5 pointer-events-none text-foreground" />
         ) : (
-          <ChevronRight className="h-3.5 w-3.5 pointer-events-none" />
+          <ChevronRight className="h-3.5 w-3.5 pointer-events-none text-foreground" />
         )}
-      </Button>
+      </button>
     </header>
   );
 };

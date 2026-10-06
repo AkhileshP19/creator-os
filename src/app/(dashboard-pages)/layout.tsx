@@ -28,6 +28,17 @@ export default function DashboardLayout({
     isLoaded && !!isSignedIn,
   );
 
+  if (!isLoaded) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-2">
+          <div className="size-8 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin" />
+          <span className="text-xs text-muted-foreground font-medium">Loading CreatorOS...</span>
+        </div>
+      </div>
+    );
+  }
+
   if (!isSignedIn) {
     return <RedirectToSignIn />;
   }
