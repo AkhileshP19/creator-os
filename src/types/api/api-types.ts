@@ -1,4 +1,9 @@
 export const ApiEndPoint = {
+  YOUTUBE_CONNECT: "/api/integrations/youtube/connect",
+  YOUTUBE_STATUS: "/api/integrations/youtube/status",
+  YOUTUBE_DISCONNECT: "/api/integrations/youtube",
+  PUBLISH_JOBS: "/api/publish-jobs",
+  RETRY_PUBLISH_JOB: "/api/publish-jobs/{id}/retry",
   GET_DASHBOARD_OVERVIEW: "api/dashboard/overview",
   GET_DASHBOARD_PROJECTS: "/api/projects",
   GET_AI_ACTIVITY: "api/dashboard/ai-activity",

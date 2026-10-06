@@ -15,6 +15,7 @@ import {
 } from "./flow-video-service.js";
 import { buildVideoPrompt } from "./video-prompt-service.js";
 import { completeVideoWorkflow } from "./video-review-service.js";
+import { updateContentStatus } from "./content-status-service.js";
 const workflowExecutionService = {
   startVideoGeneration: async (contentId: string, currentUserId: string, regenerationApprovalId?: string) => {
     const workflow = await aiWorkflowService.createWorkflow({
@@ -72,6 +73,10 @@ const workflowExecutionService = {
       );
       Object.assign(error, { statusCode: 404 });
       throw error;
+    }
+
+    if (contentIdea.status === "PENDING") {
+      await updateContentStatus(contentIdea.id, "IN_PROGRESS");
     }
 
     if (!contentIdea.description?.trim()) {
@@ -258,6 +263,10 @@ const workflowExecutionService = {
       Object.assign(error, { statusCode: 404 });
 
       throw error;
+    }
+
+    if (contentIdea.status === "PENDING") {
+      await updateContentStatus(contentIdea.id, "IN_PROGRESS");
     }
 
     /*

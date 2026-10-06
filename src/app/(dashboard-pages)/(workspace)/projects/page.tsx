@@ -187,10 +187,17 @@ export default function ProjectsPage() {
   })
 
   return (
-    <div className="space-y-6 p-5 max-h-[80vh] w-full overflow-y-hidden">
-      <h1 className="text-2xl font-bold mb-4">Projects</h1>
+    <div className="w-full max-w-7xl mx-auto space-y-6 p-4 sm:p-6 lg:p-8">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          Projects
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Manage your video production projects, brand presets, and timelines.
+        </p>
+      </div>
       {projectsData && projectsData.length === 0 ? (
-        <div className="text-center text-muted-foreground">
+        <div className="text-center py-12 text-sm text-muted-foreground">
           No projects found. Create a new project to get started.
         </div>
       ) : (

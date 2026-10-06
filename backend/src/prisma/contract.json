@@ -227,6 +227,10 @@
                 "value": "UPLOADING"
               },
               {
+                "name": "SCHEDULED",
+                "value": "SCHEDULED"
+              },
+              {
                 "name": "PUBLISHED",
                 "value": "PUBLISHED"
               },
@@ -949,6 +953,21 @@
                   "namespace": "public"
                 }
               },
+              "publishJobs": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "assetId"
+                  ]
+                },
+                "to": {
+                  "model": "PublishJob",
+                  "namespace": "public"
+                }
+              },
               "workflow": {
                 "cardinality": "N:1",
                 "nullable": false,
@@ -1410,6 +1429,21 @@
               }
             },
             "relations": {
+              "publishJobs": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "integrationId"
+                  ]
+                },
+                "to": {
+                  "model": "PublishJob",
+                  "namespace": "public"
+                }
+              },
               "user": {
                 "cardinality": "N:1",
                 "nullable": false,
@@ -1824,6 +1858,27 @@
           },
           "PublishJob": {
             "fields": {
+              "assetId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "attemptCount": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "containsSyntheticMedia": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
               "contentId": {
                 "nullable": false,
                 "type": {
@@ -1835,6 +1890,13 @@
                 "nullable": false,
                 "type": {
                   "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "description": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
               },
@@ -1852,7 +1914,21 @@
                   "kind": "scalar"
                 }
               },
+              "externalVideoUrl": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "integrationId": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
@@ -1886,10 +1962,38 @@
                   "kind": "scalar"
                 }
               },
+              "retryAllowed": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
               "scheduledAt": {
-                "nullable": true,
+                "nullable": false,
                 "type": {
                   "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "selfDeclaredMadeForKids": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
+              "tags": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/json@1",
+                  "kind": "scalar"
+                }
+              },
+              "title": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
               },
@@ -1899,9 +2003,46 @@
                   "codecId": "pg/timestamptz-temporal@1",
                   "kind": "scalar"
                 }
+              },
+              "uploadSession": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "uploadSize": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "uploadedAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
               }
             },
             "relations": {
+              "asset": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "assetId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Asset",
+                  "namespace": "public"
+                }
+              },
               "content": {
                 "cardinality": "N:1",
                 "nullable": false,
@@ -1917,15 +2058,43 @@
                   "model": "ContentIdea",
                   "namespace": "public"
                 }
+              },
+              "integration": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "integrationId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Integration",
+                  "namespace": "public"
+                }
               }
             },
             "storage": {
               "fields": {
+                "assetId": {
+                  "column": "assetId"
+                },
+                "attemptCount": {
+                  "column": "attemptCount"
+                },
+                "containsSyntheticMedia": {
+                  "column": "containsSyntheticMedia"
+                },
                 "contentId": {
                   "column": "contentId"
                 },
                 "createdAt": {
                   "column": "createdAt"
+                },
+                "description": {
+                  "column": "description"
                 },
                 "errorMessage": {
                   "column": "errorMessage"
@@ -1933,8 +2102,14 @@
                 "externalVideoId": {
                   "column": "externalVideoId"
                 },
+                "externalVideoUrl": {
+                  "column": "externalVideoUrl"
+                },
                 "id": {
                   "column": "id"
+                },
+                "integrationId": {
+                  "column": "integrationId"
                 },
                 "platform": {
                   "column": "platform"
@@ -1945,11 +2120,32 @@
                 "publishedAt": {
                   "column": "publishedAt"
                 },
+                "retryAllowed": {
+                  "column": "retryAllowed"
+                },
                 "scheduledAt": {
                   "column": "scheduledAt"
                 },
+                "selfDeclaredMadeForKids": {
+                  "column": "selfDeclaredMadeForKids"
+                },
+                "tags": {
+                  "column": "tags"
+                },
+                "title": {
+                  "column": "title"
+                },
                 "updatedAt": {
                   "column": "updatedAt"
+                },
+                "uploadSession": {
+                  "column": "uploadSession"
+                },
+                "uploadSize": {
+                  "column": "uploadSize"
+                },
+                "uploadedAt": {
+                  "column": "uploadedAt"
                 }
               },
               "namespaceId": "public",
@@ -3342,7 +3538,14 @@
                   "id"
                 ]
               },
-              "uniques": []
+              "uniques": [
+                {
+                  "columns": [
+                    "userId",
+                    "provider"
+                  ]
+                }
+              ]
             },
             "notification": {
               "columns": {
@@ -3636,12 +3839,35 @@
             "publishJob": {
               "checks": [
                 {
-                  "expression": "\"publishStatus\" IN ('QUEUED', 'UPLOADING', 'PUBLISHED', 'FAILED')",
-                  "name": "publishJob_publishStatus_check_96e79131",
+                  "expression": "\"publishStatus\" IN ('QUEUED', 'UPLOADING', 'SCHEDULED', 'PUBLISHED', 'FAILED')",
+                  "name": "publishJob_publishStatus_check_47af4f03",
                   "prefix": "publishJob_publishStatus_check"
                 }
               ],
               "columns": {
+                "assetId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "attemptCount": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 0
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "containsSyntheticMedia": {
+                  "codecId": "pg/bool@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nativeType": "bool",
+                  "nullable": false
+                },
                 "contentId": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -3656,6 +3882,11 @@
                   "nativeType": "timestamptz",
                   "nullable": false
                 },
+                "description": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "errorMessage": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -3666,7 +3897,17 @@
                   "nativeType": "text",
                   "nullable": true
                 },
+                "externalVideoUrl": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "integrationId": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
@@ -3678,6 +3919,10 @@
                 },
                 "publishStatus": {
                   "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "QUEUED"
+                  },
                   "nativeType": "text",
                   "nullable": false,
                   "valueSet": {
@@ -3692,10 +3937,38 @@
                   "nativeType": "timestamptz",
                   "nullable": true
                 },
+                "retryAllowed": {
+                  "codecId": "pg/bool@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": true
+                  },
+                  "nativeType": "bool",
+                  "nullable": false
+                },
                 "scheduledAt": {
                   "codecId": "pg/timestamptz-temporal@1",
                   "nativeType": "timestamptz",
-                  "nullable": true
+                  "nullable": false
+                },
+                "selfDeclaredMadeForKids": {
+                  "codecId": "pg/bool@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nativeType": "bool",
+                  "nullable": false
+                },
+                "tags": {
+                  "codecId": "pg/json@1",
+                  "nativeType": "json",
+                  "nullable": false
+                },
+                "title": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
                 },
                 "updatedAt": {
                   "codecId": "pg/timestamptz-temporal@1",
@@ -3705,6 +3978,21 @@
                   },
                   "nativeType": "timestamptz",
                   "nullable": false
+                },
+                "uploadSession": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "uploadSize": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": true
+                },
+                "uploadedAt": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
                 }
               },
               "foreignKeys": [
@@ -3723,15 +4011,72 @@
                     "namespaceId": "public",
                     "tableName": "contentIdea"
                   }
+                },
+                {
+                  "source": {
+                    "columns": [
+                      "assetId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "publishJob"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "asset"
+                  }
+                },
+                {
+                  "source": {
+                    "columns": [
+                      "integrationId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "publishJob"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "integration"
+                  }
                 }
               ],
               "indexes": [
+                {
+                  "columns": [
+                    "assetId"
+                  ],
+                  "name": "publishJob_assetId_idx_4ebe630a",
+                  "prefix": "publishJob_assetId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "assetId",
+                    "integrationId"
+                  ],
+                  "name": "publishJob_assetId_integrationId_idx_5c947514",
+                  "prefix": "publishJob_assetId_integrationId_idx",
+                  "unique": false
+                },
                 {
                   "columns": [
                     "contentId"
                   ],
                   "name": "publishJob_contentId_idx_37b207ad",
                   "prefix": "publishJob_contentId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "integrationId"
+                  ],
+                  "name": "publishJob_integrationId_idx_c1110add",
+                  "prefix": "publishJob_integrationId_idx",
                   "unique": false
                 },
                 {
@@ -3749,6 +4094,14 @@
                   ],
                   "name": "publishJob_publishStatus_idx_23c14a2a",
                   "prefix": "publishJob_publishStatus_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "scheduledAt"
+                  ],
+                  "name": "publishJob_scheduledAt_idx_f69c1204",
+                  "prefix": "publishJob_scheduledAt_idx",
                   "unique": false
                 }
               ],
@@ -4113,6 +4466,7 @@
               "values": [
                 "QUEUED",
                 "UPLOADING",
+                "SCHEDULED",
                 "PUBLISHED",
                 "FAILED"
               ]
@@ -4150,7 +4504,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "37c7868863fc3424e32cd4d07a0dbed3ffce2abf69826af9a9944845a9625cfa"
+    "storageHash": "53e41f16cf1e61d95ce0b2215fd445f91ba1798047c5c3bcfc2f635e2f304cd0"
   },
   "execution": {
     "executionHash": "355bd382d172b725b2744b758bca97ea474e0acbb64c4adffb07f3c881b1f01e",

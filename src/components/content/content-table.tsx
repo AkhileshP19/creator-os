@@ -48,158 +48,207 @@ export const ContentTable = ({
   onGenerateVideo,
   isGeneratingVideo,
 }: ContentTableProps) => {
+  const items = contentIdeas || [];
+
   return (
-    <div>
-      <Table className="border-b border-border border-separate border-spacing-0">
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[40px]">Name</TableHead>
-            <TableHead className="w-[100px]">Status</TableHead>
-            <TableHead className="w-[100px]">Scheduled date</TableHead>
-            <TableHead className="w-[100px]">Scheduled time</TableHead>
-            <TableHead className="w-[100px]">Actions</TableHead>
-            <TableHead className="w-[100px]">Script</TableHead>
-            <TableHead className="w-[100px]">Video</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {contentIdeas.map((contentIdea, idx) => (
-            <TableRow
-              key={contentIdea.id}
-              className={`${idx % 2 !== 0 ? "bg-muted" : "bg-background"}`}
-            >
-              <TableCell className="text-[#4f46e5] font-semibold py-6">
-                {contentIdea.title}
-              </TableCell>
-              <TableCell>{contentIdea.status}</TableCell>
-              <TableCell>
-                {contentIdea.scheduledDate
-                  ? new Date(contentIdea.scheduledDate).toLocaleDateString()
-                  : "-"}
-              </TableCell>
-              <TableCell>
-                {contentIdea.scheduledDate
-                  ? new Date(contentIdea.scheduledDate).toLocaleTimeString()
-                  : "-"}
-              </TableCell>
-              <TableCell className="flex items-center gap-8 py-6">
-                <Pencil
-                  onClick={() => {
-                    setIsEditModalOpen(true);
-                    setSelectedContentData(contentIdea);
-                    setIsCreateOrEditMode("edit");
-                  }}
-                  className="cursor-pointer"
-                />
-                <Trash
-                  onClick={() => onDeleteContent(contentIdea.id)}
-                  className="cursor-pointer"
-                />
-              </TableCell>
-              <TableCell>
-                {contentIdea.script.status === "NOT_GENERATED" && (
-                  <Button
-                    className="bg-indigo-600 hover:bg-indigo-700 cursor-pointer py-4"
-                    onClick={() => onGenerateScript(contentIdea.id)}
-                    // Only disable and show loader if THIS row's ID matches
-                    disabled={isGeneratingScript === contentIdea.id}
-                  >
-                    {isGeneratingScript === contentIdea.id && (
-                      <Loader2 className="w-6 h-6 animate-spin mr-2" />
-                    )}
-                    Generate Script
-                  </Button>
-                )}
-
-                {contentIdea.script.status === "COMPLETED" && (
-                  <Button
-                    className="bg-indigo-600 hover:bg-indigo-700 cursor-pointer py-4"
-                    onClick={() => {
-                      setIsViewScriptModalOpen(true);
-                      setSelectedContentData(contentIdea);
-                    }}
-                  >
-                    View Script
-                  </Button>
-                )}
-
-                {contentIdea.script.status === "FAILED" && (
-                  <Button
-                    className="bg-indigo-600 hover:bg-indigo-700 cursor-pointer py-4"
-                    onClick={() => onGenerateScript(contentIdea.id)}
-                    // Only disable and show loader if THIS row's ID matches
-                    disabled={isGeneratingScript === contentIdea.id}
-                  >
-                    {isGeneratingScript === contentIdea.id && (
-                      <Loader2 className="w-6 h-6 animate-spin mr-2" />
-                    )}
-                    Retry Script
-                  </Button>
-                )}
-              </TableCell>
-              <TableCell>
-                {(!contentIdea.video ||
-                  contentIdea.video.status === "NOT_GENERATED") && (
-                  <Button
-                    className="bg-indigo-600 hover:bg-indigo-700 cursor-pointer py-4"
-                    onClick={() => onGenerateVideo(contentIdea.id)}
-                    disabled={
-                      contentIdea.script.status !== "COMPLETED" ||
-                      isGeneratingVideo === contentIdea.id
-                    }
-                    title={
-                      contentIdea.script.status !== "COMPLETED"
-                        ? "Please generate script first"
-                        : undefined
-                    }
-                  >
-                    {isGeneratingVideo === contentIdea.id && (
-                      <Loader2 className="w-6 h-6 animate-spin mr-2" />
-                    )}
-                    Generate Video
-                  </Button>
-                )}
-
-                {(contentIdea.video?.status === "QUEUED" ||
-                  contentIdea.video?.status === "RUNNING") && (
-                  <Button
-                    disabled
-                    className="bg-indigo-600/80 py-4 cursor-wait"
-                  >
-                    <Loader2 className="w-6 h-6 animate-spin mr-2" />
-                    Generating...
-                  </Button>
-                )}
-
-                {contentIdea.video?.status === "COMPLETED" && (
-                  <Button
-                    className="bg-indigo-600 hover:bg-indigo-700 cursor-pointer py-4"
-                    onClick={() => {
-                      setIsViewVideoModalOpen(true);
-                      setSelectedContentData(contentIdea);
-                    }}
-                  >
-                    View Video
-                  </Button>
-                )}
-
-                {contentIdea.video?.status === "FAILED" && (
-                  <Button
-                    className="bg-indigo-600 hover:bg-indigo-700 cursor-pointer py-4"
-                    onClick={() => onGenerateVideo(contentIdea.id)}
-                    disabled={isGeneratingVideo === contentIdea.id}
-                  >
-                    {isGeneratingVideo === contentIdea.id && (
-                      <Loader2 className="w-6 h-6 animate-spin mr-2" />
-                    )}
-                    Retry Video
-                  </Button>
-                )}
-              </TableCell>
+    <div className="rounded-xl border bg-card shadow-xs overflow-hidden flex flex-col">
+      <div className="overflow-x-auto w-full">
+        <Table className="w-full min-w-[700px]">
+          <TableHeader>
+            <TableRow className="bg-muted/40 hover:bg-muted/40">
+              <TableHead className="min-w-[180px] font-semibold text-xs">Title</TableHead>
+              <TableHead className="w-[110px] font-semibold text-xs">Status</TableHead>
+              <TableHead className="w-[120px] font-semibold text-xs">Scheduled Date</TableHead>
+              <TableHead className="w-[110px] font-semibold text-xs">Scheduled Time</TableHead>
+              <TableHead className="w-[90px] font-semibold text-xs">Actions</TableHead>
+              <TableHead className="w-[130px] font-semibold text-xs">Script</TableHead>
+              <TableHead className="w-[130px] font-semibold text-xs">Video</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {items.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={7}
+                  className="h-32 text-center text-sm text-muted-foreground"
+                >
+                  No content ideas found. Click &quot;Add New Content&quot; to get started.
+                </TableCell>
+              </TableRow>
+            ) : (
+              items.map((contentIdea) => (
+                <TableRow
+                  key={contentIdea.id}
+                  className="hover:bg-indigo-50/20 transition-colors"
+                >
+                  <TableCell
+                    className="text-indigo-600 font-semibold cursor-pointer hover:underline py-4 max-w-[220px] truncate"
+                    onClick={() => {
+                      setIsEditModalOpen(true);
+                      setSelectedContentData(contentIdea);
+                      setIsCreateOrEditMode("edit");
+                    }}
+                    title={contentIdea.title}
+                  >
+                    {contentIdea.title}
+                  </TableCell>
+                  <TableCell>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
+                      {contentIdea.status}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-xs text-muted-foreground">
+                    {contentIdea.scheduledDate
+                      ? new Date(contentIdea.scheduledDate).toLocaleDateString()
+                      : "-"}
+                  </TableCell>
+                  <TableCell className="text-xs text-muted-foreground">
+                    {contentIdea.scheduledDate
+                      ? new Date(contentIdea.scheduledDate).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "-"}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <button
+                        type="button"
+                        aria-label="Edit content"
+                        onClick={() => {
+                          setIsEditModalOpen(true);
+                          setSelectedContentData(contentIdea);
+                          setIsCreateOrEditMode("edit");
+                        }}
+                        className="p-1.5 rounded-md hover:bg-indigo-50 hover:text-indigo-600 transition-colors cursor-pointer"
+                      >
+                        <Pencil className="size-4" />
+                      </button>
+                      <button
+                        type="button"
+                        aria-label="Delete content"
+                        onClick={() => onDeleteContent(contentIdea.id)}
+                        className="p-1.5 rounded-md hover:bg-rose-50 hover:text-rose-600 transition-colors cursor-pointer"
+                      >
+                        <Trash className="size-4" />
+                      </button>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {contentIdea.script.status === "NOT_GENERATED" && (
+                      <Button
+                        size="sm"
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs h-8 px-3 cursor-pointer shadow-2xs"
+                        onClick={() => onGenerateScript(contentIdea.id)}
+                        disabled={isGeneratingScript === contentIdea.id}
+                      >
+                        {isGeneratingScript === contentIdea.id && (
+                          <Loader2 className="size-3.5 animate-spin mr-1.5" />
+                        )}
+                        Generate Script
+                      </Button>
+                    )}
+
+                    {contentIdea.script.status === "COMPLETED" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-indigo-200 text-indigo-700 hover:bg-indigo-50 text-xs h-8 px-3 cursor-pointer"
+                        onClick={() => {
+                          setIsViewScriptModalOpen(true);
+                          setSelectedContentData(contentIdea);
+                        }}
+                      >
+                        View Script
+                      </Button>
+                    )}
+
+                    {contentIdea.script.status === "FAILED" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-rose-200 text-rose-700 hover:bg-rose-50 text-xs h-8 px-3 cursor-pointer"
+                        onClick={() => onGenerateScript(contentIdea.id)}
+                        disabled={isGeneratingScript === contentIdea.id}
+                      >
+                        {isGeneratingScript === contentIdea.id && (
+                          <Loader2 className="size-3.5 animate-spin mr-1.5" />
+                        )}
+                        Retry Script
+                      </Button>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {(!contentIdea.video ||
+                      contentIdea.video.status === "NOT_GENERATED") && (
+                      <Button
+                        size="sm"
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs h-8 px-3 cursor-pointer shadow-2xs"
+                        onClick={() => onGenerateVideo(contentIdea.id)}
+                        disabled={
+                          contentIdea.script.status !== "COMPLETED" ||
+                          isGeneratingVideo === contentIdea.id
+                        }
+                        title={
+                          contentIdea.script.status !== "COMPLETED"
+                            ? "Please generate script first"
+                            : undefined
+                        }
+                      >
+                        {isGeneratingVideo === contentIdea.id && (
+                          <Loader2 className="size-3.5 animate-spin mr-1.5" />
+                        )}
+                        Generate Video
+                      </Button>
+                    )}
+
+                    {(contentIdea.video?.status === "QUEUED" ||
+                      contentIdea.video?.status === "RUNNING") && (
+                      <Button
+                        size="sm"
+                        disabled
+                        className="bg-indigo-600/80 text-white text-xs h-8 px-3 cursor-wait"
+                      >
+                        <Loader2 className="size-3.5 animate-spin mr-1.5" />
+                        Generating...
+                      </Button>
+                    )}
+
+                    {contentIdea.video?.status === "COMPLETED" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-indigo-200 text-indigo-700 hover:bg-indigo-50 text-xs h-8 px-3 cursor-pointer"
+                        onClick={() => {
+                          setIsViewVideoModalOpen(true);
+                          setSelectedContentData(contentIdea);
+                        }}
+                      >
+                        View Video
+                      </Button>
+                    )}
+
+                    {contentIdea.video?.status === "FAILED" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-rose-200 text-rose-700 hover:bg-rose-50 text-xs h-8 px-3 cursor-pointer"
+                        onClick={() => onGenerateVideo(contentIdea.id)}
+                        disabled={isGeneratingVideo === contentIdea.id}
+                      >
+                        {isGeneratingVideo === contentIdea.id && (
+                          <Loader2 className="size-3.5 animate-spin mr-1.5" />
+                        )}
+                        Retry Video
+                      </Button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       <PaginationController
         currentPage={currentPage}

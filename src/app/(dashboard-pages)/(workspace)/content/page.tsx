@@ -2,7 +2,10 @@
 
 import { AddNewContentModal } from "@/components/content/add-new-content-modal";
 import { Button } from "@/components/ui/button";
-import { newContentFormSchema } from "@/schema/validation-schemas/new-content-schema";
+import {
+  newContentFormSchema,
+  createNewContentSchema,
+} from "@/schema/validation-schemas/new-content-schema";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,6 +20,7 @@ import {
   ContentIdea,
   CreateContentIdeaRequest,
   CreateContentIdeaResponse,
+  UpdateContentIdeaRequest,
 } from "@/types/content-types";
 import { ContentTable } from "@/components/content/content-table";
 import { usePatchData } from "@/hooks/fetch/usePatchData";
@@ -38,8 +42,7 @@ const emptyContentFormValues: z.infer<typeof newContentFormSchema> = {
   description: "",
   category: "",
   tags: [],
-  status: "",
-  scheduledDate: undefined,
+  scheduledDate: undefined as unknown as Date,
   scheduledTime: "",
   priority: "",
 };
@@ -69,7 +72,19 @@ export default function ContentPage() {
   );
 
   const form = useForm<z.infer<typeof newContentFormSchema>>({
-    resolver: zodResolver(newContentFormSchema),
+    resolver: (values, context, options) => {
+      const originalDate =
+        isCreateOrEditMode === "edit" && selectedContentData?.scheduledDate
+          ? new Date(selectedContentData.scheduledDate)
+          : null;
+      const schema = createNewContentSchema(originalDate);
+      const resolver = zodResolver(schema);
+      return resolver(
+        values as Parameters<typeof resolver>[0],
+        context,
+        options as Parameters<typeof resolver>[2],
+      );
+    },
     mode: "onChange",
     defaultValues: emptyContentFormValues,
   });
@@ -109,7 +124,7 @@ export default function ContentPage() {
     );
 
   const { mutateAsync: updateContentMutation, isPending: isUpdating } =
-    usePatchData<CreateContentIdeaResponse, CreateContentIdeaRequest>(
+    usePatchData<CreateContentIdeaResponse, UpdateContentIdeaRequest>(
       ApiEndPoint.UPDATE_CONTENT_IDEA,
       [selectedContentData?.id ?? ""],
     );
@@ -162,24 +177,34 @@ export default function ContentPage() {
   const handleCreateNewContent = async (
     data: z.infer<typeof newContentFormSchema>,
   ) => {
-    const payload: CreateContentIdeaRequest = {
-      projectId: data.projectId,
-      title: data.title,
-      description: data.description ?? null,
-      category: data.category ?? null,
-      tags: data.tags ?? [],
-      scheduledDate: getScheduledDateTime(
-        data.scheduledDate,
-        data.scheduledTime,
-      ),
-      status: data.status as CreateContentIdeaRequest["status"],
-      priority: data.priority as CreateContentIdeaRequest["priority"],
-    };
-
     try {
       if (isCreateOrEditMode === "create") {
+        const payload: CreateContentIdeaRequest = {
+          projectId: data.projectId,
+          title: data.title,
+          description: data.description ?? null,
+          category: data.category ?? null,
+          tags: data.tags ?? [],
+          scheduledDate: getScheduledDateTime(
+            data.scheduledDate,
+            data.scheduledTime,
+          ),
+          status: "PENDING",
+          priority: data.priority as CreateContentIdeaRequest["priority"],
+        };
         await createContentIdea(payload);
       } else {
+        const payload: UpdateContentIdeaRequest = {
+          title: data.title,
+          description: data.description ?? null,
+          category: data.category ?? null,
+          tags: data.tags ?? [],
+          scheduledDate: getScheduledDateTime(
+            data.scheduledDate,
+            data.scheduledTime,
+          ),
+          priority: data.priority as UpdateContentIdeaRequest["priority"],
+        };
         await updateContentMutation(payload);
       }
       refetchContentIdeas();
@@ -194,7 +219,11 @@ export default function ContentPage() {
       form.reset(emptyContentFormValues);
     } catch (error) {
       console.error("failed to create content idea", error);
-      toast.error("Failed to create content idea");
+      toast.error(
+        isCreateOrEditMode === "create"
+          ? "Failed to create content idea"
+          : "Failed to update content idea",
+      );
     }
   };
 
@@ -260,9 +289,16 @@ export default function ContentPage() {
   };
 
   return (
-    <div className="space-y-6 p-5 max-h-[80vh] w-full">
-      <div className="flex justify-between gap-4">
-        <h1 className="text-2xl font-bold mb-4">Content</h1>
+    <div className="w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            Content
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Manage your content pipeline, script generation, and video creation.
+          </p>
+        </div>
         <Button
           onClick={() => {
             setSelectedContentData(null);
@@ -270,32 +306,30 @@ export default function ContentPage() {
             setIsAddContentModalOpen(true);
             setIsCreateOrEditMode("create");
           }}
-          className="px-4 py-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md shadow-md hover:cursor-pointer"
+          className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm cursor-pointer self-start sm:self-auto h-10 px-4"
         >
           Add New Content
         </Button>
       </div>
 
-      <div className="space-y-6 p-5 max-h-[80vh] w-full">
-        <ContentTable
-          contentIdeas={contentIdeasData}
-          currentPage={currentPage}
-          totalPages={totalContentIdeasPages}
-          onPageChange={handleClickPage}
-          perPage={perPage}
-          onPerPageChange={handlePageSizeChange}
-          setIsEditModalOpen={setIsAddContentModalOpen}
-          setIsViewScriptModalOpen={setIsViewScriptModalOpen}
-          setIsViewVideoModalOpen={setIsViewVideoModalOpen}
-          setSelectedContentData={setSelectedContentData}
-          setIsCreateOrEditMode={setIsCreateOrEditMode}
-          onDeleteContent={handleDeleteContent}
-          onGenerateScript={handleScriptGeneration}
-          isGeneratingScript={generatingScriptId}
-          onGenerateVideo={handleVideoGeneration}
-          isGeneratingVideo={generatingVideoId}
-        />
-      </div>
+      <ContentTable
+        contentIdeas={contentIdeasData}
+        currentPage={currentPage}
+        totalPages={totalContentIdeasPages}
+        onPageChange={handleClickPage}
+        perPage={perPage}
+        onPerPageChange={handlePageSizeChange}
+        setIsEditModalOpen={setIsAddContentModalOpen}
+        setIsViewScriptModalOpen={setIsViewScriptModalOpen}
+        setIsViewVideoModalOpen={setIsViewVideoModalOpen}
+        setSelectedContentData={setSelectedContentData}
+        setIsCreateOrEditMode={setIsCreateOrEditMode}
+        onDeleteContent={handleDeleteContent}
+        onGenerateScript={handleScriptGeneration}
+        isGeneratingScript={generatingScriptId}
+        onGenerateVideo={handleVideoGeneration}
+        isGeneratingVideo={generatingVideoId}
+      />
 
       <AddNewContentModal
         open={isAddContentModalOpen}

@@ -82,16 +82,16 @@ export default function DashboardPage() {
   });
 
   return (
-    <main className="min-w-0 flex-1 overflow-y-auto p-6 space-y-6">
+    <div className="w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
       <DashboardHeader
         setIsCreateProjectModalOpen={setIsCreateProjectModalOpen}
       />
       <DashboardTiles data={data!} />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="col-span-1 md:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="col-span-1 lg:col-span-2">
           <Projects data={projectsData} />
         </div>
-        <div className="col-span-1 md:col-span-1">
+        <div className="col-span-1">
           <AIActivity data={aiActivityData} />
         </div>
       </div>
@@ -109,6 +109,6 @@ export default function DashboardPage() {
         mode="create"
         refetchProjects={refetchProjects}
       />
-    </main>
+    </div>
   );
 }

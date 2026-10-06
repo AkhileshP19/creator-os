@@ -1,5 +1,34 @@
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { Readable } from "node:stream";
+
+export async function getB2ObjectStream(objectKey: string, offset = 0) {
+  if (!s3Client || !bucketName) throw new Error("B2 is not configured");
+  if (!objectKey || /^https?:/i.test(objectKey))
+    throw new Error("Invalid B2 object key");
+  const object = await s3Client.send(
+    new GetObjectCommand({
+      Bucket: bucketName,
+      Key: objectKey,
+      ...(offset ? { Range: `bytes=${offset}-` } : {}),
+    }),
+    { abortSignal: AbortSignal.timeout(600_000) },
+  );
+  if (
+    !(object.Body instanceof Readable) ||
+    !object.ContentLength ||
+    object.ContentLength <= 0
+  ) {
+    if (object.Body instanceof Readable) object.Body.destroy();
+    throw new Error("B2 did not return a readable video");
+  }
+  // The paused stream can fail while the upload session is being initialized.
+  // Keep that from becoming an uncaught EventEmitter error; the upload checks it.
+  object.Body.on("error", () => {});
+  return { stream: object.Body, size: object.ContentLength };
+}
+
+export const b2PublishingStorage = { getObjectStream: getB2ObjectStream };
 
 const bucketName = process.env.B2_BUCKET_NAME;
 const endpoint = process.env.B2_ENDPOINT;

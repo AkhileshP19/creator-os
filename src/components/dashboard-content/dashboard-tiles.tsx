@@ -40,33 +40,35 @@ export const DashboardTiles = ({ data }: { data: DashboardOverviewResponse }) =>
     ]
 
     return (
-        <div>
-            <div className="grid lg:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-4 w-full">
+        <div className="w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
                 {metrics.map((metric) => (
-                    <div key={metric.key} className="p-4 border rounded-lg bg-background">
+                    <div key={metric.key} className="p-4 sm:p-5 border rounded-xl bg-card shadow-xs hover:shadow-sm transition-shadow">
                         <div className="flex justify-between items-center mb-3">
-                            <span className="text-muted-foreground text-sm font-semibold">{metric.label}</span>
-                            {metric.icon}
+                            <span className="text-muted-foreground text-xs sm:text-sm font-medium">{metric.label}</span>
+                            <div className="flex items-center justify-center size-8 rounded-lg bg-indigo-50 text-indigo-600">
+                                {metric.icon}
+                            </div>
                         </div>
-                        <div className="text-2xl font-bold">
-                            {metric.value}
+                        <div className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+                            {metric.value ?? "0"}
                         </div>
                         <div className="text-xs mt-2 text-muted-foreground">
                             {metric.trend === "up" ?
-                                <div className="flex items-center gap-2">
-                                    <TrendingUp color="green" size={12} />
-                                    <span className="text-green-500"> {metric.change}</span>
+                                <div className="flex items-center gap-1.5">
+                                    <TrendingUp className="size-3.5 text-emerald-600" />
+                                    <span className="text-emerald-600 font-medium">{metric.change}</span>
                                     <span className="text-muted-foreground">{metric.changePeriod}</span>
                                 </div>
                                 : metric.trend === "down" ?
-                                    <div className="flex items-center gap-2">
-                                        <TrendingDown color="red" size={12} />
-                                        <span className="text-red-500"> {metric.change}</span>
+                                    <div className="flex items-center gap-1.5">
+                                        <TrendingDown className="size-3.5 text-rose-500" />
+                                        <span className="text-rose-500 font-medium">{metric.change}</span>
                                         <span className="text-muted-foreground">{metric.changePeriod}</span>
                                     </div>
                                     : metric.key === "pendingReviews" ?
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-muted-foreground text-xs">Needed your attention</span>
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="text-muted-foreground text-xs font-medium">Needs your attention</span>
                                         </div>
                                         : null}
                         </div>

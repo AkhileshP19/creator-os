@@ -37,59 +37,78 @@ export const ProjectsTable = ({
   onPerPageChange,
 }: ProjectsTableProps) => {
   return (
-    <div>
-      <Table className="border-b border-border border-separate border-spacing-0">
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[40px]">Name</TableHead>
-            <TableHead className="w-[100px]">Status</TableHead>
-            <TableHead className="w-[100px]">Created date</TableHead>
-            <TableHead className="w-[100px]">Created time</TableHead>
-            <TableHead className="w-[100px]">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {projects.map((project, idx) => (
-            <TableRow
-              key={project.id}
-              className={`${idx % 2 !== 0 ? "bg-muted" : "bg-background"}`}
-            >
-              <TableCell className="text-[#4f46e5] font-semibold py-6">
-                {project.name}
-              </TableCell>
-              <TableCell>
-                <ProjectStatusBadge status={project.status} />
-              </TableCell>
-              <TableCell>
-                {new Date(project.createdAt).toLocaleDateString()}
-              </TableCell>
-              <TableCell>
-                {new Date(project.createdAt).toLocaleTimeString()}
-              </TableCell>
-              <TableCell className="flex items-center gap-8 py-6">
-                <Pencil
-                  onClick={() => {
-                    setIsEditModalOpen(true);
-                    setSelectedProjectData(project);
-                  }}
-                  className="cursor-pointer"
-                />
-                <Settings
-                  onClick={() => {
-                    setSelectedProjectData(project);
-                    setIsSettingsModalOpen(true);
-                  }}
-                  className="cursor-pointer"
-                />
-                <Trash
-                  onClick={() => onDeleteProject(project.id)}
-                  className="cursor-pointer"
-                />
-              </TableCell>
+    <div className="rounded-xl border bg-card shadow-xs overflow-hidden flex flex-col">
+      <div className="overflow-x-auto w-full">
+        <Table className="w-full min-w-[650px]">
+          <TableHeader>
+            <TableRow className="bg-muted/40 hover:bg-muted/40">
+              <TableHead className="min-w-[160px] font-semibold text-xs">Name</TableHead>
+              <TableHead className="w-[120px] font-semibold text-xs">Status</TableHead>
+              <TableHead className="w-[130px] font-semibold text-xs">Created Date</TableHead>
+              <TableHead className="w-[120px] font-semibold text-xs">Created Time</TableHead>
+              <TableHead className="w-[110px] font-semibold text-xs">Actions</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {projects.map((project) => (
+              <TableRow
+                key={project.id}
+                className="hover:bg-indigo-50/20 transition-colors"
+              >
+                <TableCell className="text-indigo-600 font-semibold py-4 max-w-[200px] truncate">
+                  {project.name}
+                </TableCell>
+                <TableCell>
+                  <ProjectStatusBadge status={project.status} />
+                </TableCell>
+                <TableCell className="text-xs text-muted-foreground">
+                  {new Date(project.createdAt).toLocaleDateString()}
+                </TableCell>
+                <TableCell className="text-xs text-muted-foreground">
+                  {new Date(project.createdAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <button
+                      type="button"
+                      aria-label="Edit project"
+                      onClick={() => {
+                        setIsEditModalOpen(true);
+                        setSelectedProjectData(project);
+                      }}
+                      className="p-1.5 rounded-md hover:bg-indigo-50 hover:text-indigo-600 transition-colors cursor-pointer"
+                    >
+                      <Pencil className="size-4" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Project settings"
+                      onClick={() => {
+                        setSelectedProjectData(project);
+                        setIsSettingsModalOpen(true);
+                      }}
+                      className="p-1.5 rounded-md hover:bg-indigo-50 hover:text-indigo-600 transition-colors cursor-pointer"
+                    >
+                      <Settings className="size-4" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Delete project"
+                      onClick={() => onDeleteProject(project.id)}
+                      className="p-1.5 rounded-md hover:bg-rose-50 hover:text-rose-600 transition-colors cursor-pointer"
+                    >
+                      <Trash className="size-4" />
+                    </button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
       <PaginationController
         currentPage={currentPage}

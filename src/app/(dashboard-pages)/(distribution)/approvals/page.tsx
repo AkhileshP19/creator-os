@@ -94,9 +94,9 @@ export default function ApprovalPage() {
   ];
 
   return (
-    <main className="min-w-0 flex-1 space-y-6 p-4 sm:p-6 lg:p-8">
+    <div className="w-full max-w-7xl mx-auto space-y-6 p-4 sm:p-6 lg:p-8">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight">Approvals</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Approvals</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Review generated videos before they move to publishing.
         </p>
@@ -110,21 +110,27 @@ export default function ApprovalPage() {
           }
         }}
       >
-        <TabsList aria-label="Approval status">
-          {tabs.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value}>
-              {tab.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(200px,1fr)_180px_160px_190px]">
+        <div className="overflow-x-auto pb-1 max-w-full">
+          <TabsList aria-label="Approval status" className="bg-muted p-1 rounded-lg inline-flex">
+            {tabs.map((tab) => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className="data-active:bg-indigo-600 data-active:text-white transition-colors text-xs sm:text-sm px-3 sm:px-4 py-1.5"
+              >
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
+        <div className="mt-5 grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <div className="relative">
             <Search className="absolute top-3 left-3 size-4 text-muted-foreground" />
             <Input
               aria-label="Search content title"
               placeholder="Search content title…"
               value={search}
-              className="h-10 pl-9"
+              className="h-10 pl-9 text-xs sm:text-sm"
               onChange={(event) => {
                 setSearch(event.target.value);
                 setPageNo(1);
@@ -251,44 +257,30 @@ export default function ApprovalPage() {
                 {approvals.totalCount}{" "}
                 {approvals.totalCount === 1 ? "review" : "reviews"}
               </p>
-              <div className="grid gap-5 2xl:grid-cols-2">
+              <div className="grid gap-5 grid-cols-1 xl:grid-cols-2">
                 {approvals.data.map((item) => (
                   <ApprovalCard key={item.approvalId} approval={item} />
                 ))}
               </div>
-              <div className="overflow-x-auto">
+              <div className="rounded-xl border bg-card shadow-xs overflow-hidden">
                 <PaginationController
                   currentPage={approvals.currentPage || pageNo}
                   totalPages={approvals.totalPages}
                   onPageChange={setPageNo}
                   maxVisibleButtons={3}
-                />
-              </div>
-              <div className="flex items-center justify-end gap-2 text-sm text-muted-foreground">
-                <span>Videos per page</span>
-                <Select
-                  value={String(pageSize)}
-                  onValueChange={(value) => {
-                    setPageSize(Number(value));
+                  perPage={pageSize}
+                  onPerPageChange={(value) => {
+                    setPageSize(value);
                     setPageNo(1);
                   }}
-                >
-                  <SelectTrigger aria-label="Videos per page">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[6, 12, 24].map((size) => (
-                      <SelectItem key={size} value={String(size)}>
-                        {size}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  perPageOptions={[6, 12, 24]}
+                  label="Videos per page"
+                />
               </div>
             </div>
           )}
         </TabsContent>
       </Tabs>
-    </main>
+    </div>
   );
 }
