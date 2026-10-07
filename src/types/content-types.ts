@@ -36,7 +36,16 @@ export interface CreateContentIdeaRequest {
   description: string | null;
   category: string | null;
   tags: string[]; // Or JsonValue if your API raw returns generic json
-  status: "DRAFT" | "ARCHIVED" | "PENDING" | "IN_PROGRESS" | "COMPLETED";
+  status: "PENDING";
+  scheduledDate: string | null;
+  priority: "P0" | "P1" | "P2" | "P3";
+}
+
+export interface UpdateContentIdeaRequest {
+  title: string;
+  description: string | null;
+  category: string | null;
+  tags: string[];
   scheduledDate: string | null;
   priority: "P0" | "P1" | "P2" | "P3";
 }

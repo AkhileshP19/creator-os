@@ -19,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { calculateTagsLength } from "@/schema/validation-schemas/new-content-schema";
 
 export interface FormTagsFieldProps<
   TFieldValues extends FieldValues,
@@ -110,6 +111,14 @@ export function FormTagsField<TFieldValues extends FieldValues>({
     setDraft(nextDraft);
     if (nextDraft.trim() && hasDuplicate(nextDraft.trim())) {
       showDuplicateError();
+    } else if (
+      nextDraft.trim() &&
+      calculateTagsLength([...tags, nextDraft.trim()]) > 500
+    ) {
+      setError(name, {
+        type: "custom",
+        message: "Tags exceed YouTube's 500 character limit",
+      });
     } else if (!foundDuplicate && (!error || error.type === "duplicate")) {
       clearErrors(name);
     }
@@ -132,6 +141,10 @@ export function FormTagsField<TFieldValues extends FieldValues>({
     field.onChange(tags.filter((tag) => tag !== tagToRemove));
     clearErrors(name);
   };
+
+  const currentTagsLength = calculateTagsLength(
+    draft.trim() ? [...tags, draft.trim()] : tags,
+  );
 
   return (
     <FormItem className={className}>
@@ -189,11 +202,23 @@ export function FormTagsField<TFieldValues extends FieldValues>({
           />
         </div>
       </FormControl>
-      {error && (
-        <FormMessage className="text-red-500 text-xs">
-          {error.message}
-        </FormMessage>
-      )}
+      <div className="flex items-center justify-between text-xs min-h-[1.25rem] mt-1">
+        <div>
+          {error && (
+            <FormMessage className="text-destructive text-xs">
+              {error.message}
+            </FormMessage>
+          )}
+        </div>
+        <span
+          className={cn(
+            "text-muted-foreground ml-auto font-mono text-[0.75rem]",
+            currentTagsLength > 500 && "text-destructive font-semibold",
+          )}
+        >
+          {currentTagsLength}/500
+        </span>
+      </div>
     </FormItem>
   );
 }

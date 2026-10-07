@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Film, Search } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Film, Loader2 } from "lucide-react";
 import { ApprovalCard } from "@/components/approvals/approval-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -11,14 +11,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PaginationController } from "@/components/ui/custom/pagination-controller";
+import { QueryErrorState } from "@/components/ui/custom/query-error-state";
 import { usePaginatedData } from "@/hooks/fetch/usePaginatedDataParams";
 import { useFetchData } from "@/hooks/fetch/useFetchData";
 import useDebounceSearch from "@/hooks/optimization/useDebounceSearch";
+import { useDashboardSearch } from "@/components/dashboard-search-context";
 import { ApiEndPoint } from "@/types/api/api-types";
 import type {
   ApprovalFilters,
@@ -48,13 +49,17 @@ const sortOptions = [
 export default function ApprovalPage() {
   const [pageNo, setPageNo] = useState(1);
   const [pageSize, setPageSize] = useState(6);
-  const [search, setSearch] = useState("");
-  const debouncedSearch = useDebounceSearch(search, 350);
+  const { search } = useDashboardSearch();
+  const debouncedSearch = useDebounceSearch(search, 300);
   const [status, setStatus] = useState<ReviewStatusFilter>("ALL");
   const [projectId, setProjectId] = useState("");
   const [scheduledDateFilter, setDateFilter] =
     useState<ApprovalFilters["scheduledDateFilter"]>("ALL");
   const [sort, setSort] = useState("soonest");
+
+  useEffect(() => {
+    setPageNo(1);
+  }, [debouncedSearch]);
   const projects = useFetchData<Project[]>(
     ApiEndPoint.GET_ALL_PROJECTS,
     "all-projects",
@@ -94,9 +99,9 @@ export default function ApprovalPage() {
   ];
 
   return (
-    <main className="min-w-0 flex-1 space-y-6 p-4 sm:p-6 lg:p-8">
+    <div className="w-full max-w-7xl mx-auto space-y-6 p-4 sm:p-6 lg:p-8">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight">Approvals</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Approvals</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Review generated videos before they move to publishing.
         </p>
@@ -110,44 +115,45 @@ export default function ApprovalPage() {
           }
         }}
       >
-        <TabsList aria-label="Approval status">
-          {tabs.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value}>
-              {tab.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(200px,1fr)_180px_160px_190px]">
-          <div className="relative">
-            <Search className="absolute top-3 left-3 size-4 text-muted-foreground" />
-            <Input
-              aria-label="Search content title"
-              placeholder="Search content title…"
-              value={search}
-              className="h-10 pl-9"
-              onChange={(event) => {
-                setSearch(event.target.value);
-                setPageNo(1);
-              }}
-            />
-          </div>
+        <div className="overflow-x-auto pb-1 max-w-full">
+          <TabsList aria-label="Approval status" className="bg-muted p-1 rounded-lg inline-flex">
+            {tabs.map((tab) => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className="data-active:bg-indigo-600 data-active:text-white transition-colors text-xs sm:text-sm px-3 sm:px-4 py-1.5"
+              >
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
+        <div className="mt-5 grid gap-3 grid-cols-1 sm:grid-cols-3">
           <Select
             items={projectOptions}
             value={projectId || "ALL"}
+            disabled={projects.isLoading}
             onValueChange={(value) => {
               setProjectId(value === "ALL" || !value ? "" : value);
               setPageNo(1);
             }}
           >
             <SelectTrigger aria-label="Project" className="h-10 w-full">
-              <SelectValue />
+              <SelectValue placeholder={projects.isLoading ? "Loading projects..." : "All Projects"} />
             </SelectTrigger>
             <SelectContent>
-              {projectOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
+              {projects.isLoading ? (
+                <div className="flex items-center justify-center p-3 text-xs text-muted-foreground gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
+                  Loading projects...
+                </div>
+              ) : (
+                projectOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))
+              )}
             </SelectContent>
           </Select>
           <Select
@@ -203,26 +209,25 @@ export default function ApprovalPage() {
         )}
         <TabsContent value={status}>
           {approvals.error ? (
-            <Card className="space-y-3 p-8 text-center" role="alert">
-              <p>{approvals.error.message ?? "Unable to load approvals."}</p>
-              <Button variant="outline" onClick={() => approvals.refetch()}>
-                Try again
-              </Button>
-            </Card>
-          ) : initialLoading ? (
+            <QueryErrorState
+              title="Failed to load approvals"
+              message={approvals.error.message || "Unable to load approvals. Please try again."}
+              onRetry={() => approvals.refetch()}
+            />
+          ) : approvals.isLoading ? (
             <div
-              className="grid gap-5 2xl:grid-cols-2"
+              className="grid gap-5 grid-cols-1 xl:grid-cols-2"
               role="status"
               aria-label="Loading approvals"
             >
               {[1, 2, 3, 4].map((item) => (
                 <Card key={item} className="flex gap-5 overflow-hidden p-4">
-                  <Skeleton className="aspect-[9/16] w-32 shrink-0" />
+                  <Skeleton className="aspect-[9/16] w-32 shrink-0 rounded-lg" />
                   <div className="flex-1 space-y-4 pt-2">
                     <Skeleton className="h-5 w-24" />
                     <Skeleton className="h-6 w-full" />
                     <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full rounded-md" />
                   </div>
                 </Card>
               ))}
@@ -251,44 +256,30 @@ export default function ApprovalPage() {
                 {approvals.totalCount}{" "}
                 {approvals.totalCount === 1 ? "review" : "reviews"}
               </p>
-              <div className="grid gap-5 2xl:grid-cols-2">
+              <div className="grid gap-5 grid-cols-1 xl:grid-cols-2">
                 {approvals.data.map((item) => (
                   <ApprovalCard key={item.approvalId} approval={item} />
                 ))}
               </div>
-              <div className="overflow-x-auto">
+              <div className="rounded-xl border bg-card shadow-xs overflow-hidden">
                 <PaginationController
                   currentPage={approvals.currentPage || pageNo}
                   totalPages={approvals.totalPages}
                   onPageChange={setPageNo}
                   maxVisibleButtons={3}
-                />
-              </div>
-              <div className="flex items-center justify-end gap-2 text-sm text-muted-foreground">
-                <span>Videos per page</span>
-                <Select
-                  value={String(pageSize)}
-                  onValueChange={(value) => {
-                    setPageSize(Number(value));
+                  perPage={pageSize}
+                  onPerPageChange={(value) => {
+                    setPageSize(value);
                     setPageNo(1);
                   }}
-                >
-                  <SelectTrigger aria-label="Videos per page">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[6, 12, 24].map((size) => (
-                      <SelectItem key={size} value={String(size)}>
-                        {size}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  perPageOptions={[6, 12, 24]}
+                  label="Videos per page"
+                />
               </div>
             </div>
           )}
         </TabsContent>
       </Tabs>
-    </main>
+    </div>
   );
 }

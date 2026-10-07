@@ -2,6 +2,7 @@ import { Temporal } from "temporal-polyfill";
 import { db } from "../prisma/db.js";
 import type { JsonValue } from "@prisma/orm-postgres/target/codec-types";
 import { or } from "@prisma/orm-postgres/orm-client";
+import { updateContentStatus } from "./content-status-service.js";
 
 export type NewContentFormValues = {
   projectId: string;
@@ -9,7 +10,7 @@ export type NewContentFormValues = {
   description?: string;
   category?: string;
   tags: JsonValue;
-  status: "DRAFT" | "ARCHIVED" | "PENDING" | "IN_PROGRESS" | "COMPLETED";
+  status?: "PENDING" | "DRAFT";
   scheduledDate?: Temporal.Instant;
   priority: "P0" | "P1" | "P2" | "P3";
   createdById: string;
@@ -51,7 +52,6 @@ export interface UpdateContentIdeaInput {
   description?: string | null;
   category?: string | null;
   tags?: JsonValue;
-  status?: IdeaStatus;
   scheduledDate?: Temporal.Instant | null;
   priority?: PriorityLevel;
 }
@@ -108,7 +108,7 @@ const contentIdeaService = {
       category: category ?? null,
       tags,
       scheduledDate: scheduledDate ?? null,
-      status,
+      status: status ?? "PENDING",
       priority,
       createdById,
       deletedAt: null,
@@ -253,6 +253,32 @@ const contentIdeaService = {
       return deletedContentIdea;
     } catch (error) {
       console.error("Failed to delete content idea:", error);
+      throw error;
+    }
+  },
+
+  archiveContentIdea: async (contentId: string, currentUserId: string) => {
+    try {
+      const existing = await db.orm.public.ContentIdea.where({
+        id: contentId,
+        createdById: currentUserId,
+        deletedAt: null,
+      }).first();
+
+      if (!existing) {
+        const error = new Error("Content idea not found");
+        Object.assign(error, { statusCode: 404 });
+        throw error;
+      }
+
+      await updateContentStatus(contentId, "ARCHIVED");
+      return db.orm.public.ContentIdea.where({
+        id: contentId,
+        createdById: currentUserId,
+        deletedAt: null,
+      }).first();
+    } catch (error) {
+      console.error("Failed to archive content idea:", error);
       throw error;
     }
   },

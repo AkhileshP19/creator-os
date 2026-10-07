@@ -42,6 +42,7 @@ function selectReview(query: ReturnType<typeof ownedApprovals>) {
     reviewedAt: f.approval.reviewedAt,
     contentId: f.contentIdea.id,
     title: f.contentIdea.title,
+    tags: f.contentIdea.tags,
     description: f.contentIdea.description,
     category: f.contentIdea.category,
     scheduledDate: f.contentIdea.scheduledDate,
@@ -79,11 +80,7 @@ async function getDurations(rows: ReviewRow[]) {
     .all();
   for (const workflow of workflows) {
     const input = workflow.aiRequests[0]?.input;
-    if (
-      input &&
-      typeof input === "object" &&
-      !Array.isArray(input)
-    ) {
+    if (input && typeof input === "object" && !Array.isArray(input)) {
       const inputObj = input as Record<string, unknown>;
       if (typeof inputObj.durationSeconds === "number") {
         durations.set(workflow.id, inputObj.durationSeconds);
@@ -92,9 +89,59 @@ async function getDurations(rows: ReviewRow[]) {
   }
   return durations;
 }
-async function present(row: ReviewRow, durationSeconds: number | null = null) {
+
+async function getPublishStates(rows: ReviewRow[]) {
+  const assetIds = rows.flatMap((row) => (row.assetId ? [row.assetId] : []));
+
+  const states = new Map<
+    string,
+    {
+      publishJobId: string;
+      publishStatus:
+        "QUEUED" | "UPLOADING" | "SCHEDULED" | "PUBLISHED" | "FAILED";
+      externalVideoUrl: string | null;
+      publishError: string | null;
+    }
+  >();
+
+  if (!assetIds.length) return states;
+
+  const jobs = await db.orm.public.PublishJob.where((job) =>
+    job.assetId.in(assetIds),
+  )
+    .orderBy((job) => job.createdAt.desc())
+    .all();
+
+  for (const job of jobs) {
+    if (states.has(job.assetId)) continue;
+
+    states.set(job.assetId, {
+      publishJobId: job.id,
+      publishStatus: job.publishStatus,
+      externalVideoUrl: job.externalVideoUrl,
+      publishError: job.errorMessage,
+    });
+  }
+
+  return states;
+}
+
+type PublishState = {
+  publishJobId: string;
+  publishStatus: "QUEUED" | "UPLOADING" | "SCHEDULED" | "PUBLISHED" | "FAILED";
+  externalVideoUrl: string | null;
+  publishError: string | null;
+};
+
+async function present(
+  row: ReviewRow,
+  durationSeconds: number | null = null,
+  publishState: PublishState | null = null,
+) {
   const { storageUrl, assetDeletedAt, assetType, ...review } = row;
+
   let videoUrl: string | null = null;
+
   if (
     storageUrl &&
     !assetDeletedAt &&
@@ -102,16 +149,27 @@ async function present(row: ReviewRow, durationSeconds: number | null = null) {
     row.workflowStatus === "COMPLETED"
   ) {
     const signed = await getB2SignedUrl(storageUrl, 3600);
-    if (/^https?:\/\//.test(signed)) videoUrl = signed;
+
+    if (/^https?:\/\//.test(signed)) {
+      videoUrl = signed;
+    }
   }
+
   return {
     ...review,
     durationSeconds,
     videoUrl,
+
+    publishJobId: publishState?.publishJobId ?? null,
+    publishStatus: publishState?.publishStatus ?? null,
+    externalVideoUrl: publishState?.externalVideoUrl ?? null,
+    publishError: publishState?.publishError ?? null,
+
     regenerationError:
       row.regenerationStatus === "FAILED"
         ? "Video generation failed. Please try again."
         : null,
+
     playbackError: videoUrl
       ? null
       : "Video playback is unavailable. Try refreshing the video.",
@@ -188,10 +246,16 @@ const approvalService = {
         .offset((currentPage - 1) * filters.pageSize),
     );
     const durations = await getDurations(rows);
+    const publishStates = await getPublishStates(rows);
+
     return {
       responseData: await Promise.all(
         rows.map((row) =>
-          present(row, durations.get(row.workflowId ?? "") ?? null),
+          present(
+            row,
+            durations.get(row.workflowId ?? "") ?? null,
+            row.assetId ? (publishStates.get(row.assetId) ?? null) : null,
+          ),
         ),
       ),
       totalCount,
@@ -206,10 +270,19 @@ const approvalService = {
         .where((f, op) => op.eq(f.approval.id, approvalId))
         .limit(1),
     );
-    if (!row)
+
+    if (!row) {
       workflowError("Approval not found or you do not have access to it", 404);
+    }
+
     const durations = await getDurations([row]);
-    return present(row, durations.get(row.workflowId ?? "") ?? null);
+    const publishStates = await getPublishStates([row]);
+
+    return present(
+      row,
+      durations.get(row.workflowId ?? "") ?? null,
+      row.assetId ? (publishStates.get(row.assetId) ?? null) : null,
+    );
   },
 
   decide: async (

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosRequestConfig } from "axios";
 
 export const ID_PLACEHOLDER = "{id}";
@@ -73,7 +72,16 @@ const api = axios.create({
 api.interceptors.request.use(
   async (config) => {
     const clerk =
-      typeof window !== "undefined" ? (window as any).Clerk : undefined;
+      typeof window !== "undefined"
+        ? (
+            window as Window & {
+              Clerk?: {
+                load: () => Promise<void>;
+                session?: { getToken: () => Promise<string | null> };
+              };
+            }
+          ).Clerk
+        : undefined;
 
     if (clerk) {
       try {
@@ -83,8 +91,8 @@ api.interceptors.request.use(
           config.headers = config.headers ?? {};
           config.headers.Authorization = `Bearer ${token}`;
         }
-      } catch (error) {
-        console.error("Error retrieving Clerk token:", error);
+      } catch {
+        throw new Error("Unable to authenticate. Please sign in again.");
       }
     }
     return config;
@@ -99,18 +107,18 @@ export const apiHandler = async <T>(
   config?: AxiosRequestConfig,
 ): Promise<T> => {
   try {
-    const baseURL = "http://localhost:5000"; // Decide backend dynamically
+    const baseURL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
     // const baseURL = "https://fluffy-fiesta-7q5xpp46x9pfrrrr-5000.app.github.dev";
     // const baseURL = "https://840bfc6a05b8a2.lhr.life";
-    console.log(baseURL);
 
     // Detect if we want a blob (Excel download)
     const wantsExcel =
       config?.headers?.Accept ===
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    const normalizedUrl = url.startsWith("/") ? url : `/${url}`;
     const requestConfig: AxiosRequestConfig = {
       method,
-      url: `${baseURL}${url}`,
+      url: `${baseURL}${normalizedUrl}`,
       data,
       ...config,
       headers: {
@@ -129,7 +137,6 @@ export const apiHandler = async <T>(
     }
 
     const response = await api(requestConfig);
-    console.log(response.data);
 
     // If blob, return the blob directly
     if (wantsExcel && response.data instanceof Blob) {
@@ -137,12 +144,11 @@ export const apiHandler = async <T>(
     }
 
     return response.data.data;
-  } catch (error: any) {
-    console.error(
-      `API ${method} request to ${url} failed:`,
-      error.response || error,
-    );
-    throw error.response?.data || error;
+  } catch (error: unknown) {
+    // Axios errors can contain Authorization headers. Never log request objects.
+    throw axios.isAxiosError(error)
+      ? (error.response?.data ?? new Error("Unable to reach the server"))
+      : error;
   }
 };
 

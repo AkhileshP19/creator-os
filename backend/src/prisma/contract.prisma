@@ -49,6 +49,7 @@ enum ApprovalStatus {
 enum PublishStatus {
   QUEUED
   UPLOADING
+  SCHEDULED
   PUBLISHED
   FAILED
 }
@@ -246,6 +247,7 @@ model Asset {
   workflow AIWorkflow @relation(fields: [workflowId], references: [id])
 
   approval Approval?
+  publishJobs PublishJob[]
 
   @@index([workflowId])
 }
@@ -274,19 +276,36 @@ model Approval {
 model PublishJob {
   id              String        @id @default(uuid())
   contentId       String
+  assetId         String
+  integrationId   String
   platform        String
-  publishStatus   PublishStatus
-  scheduledAt     DateTime?
+  publishStatus   PublishStatus @default(QUEUED)
+  scheduledAt     DateTime
+  uploadedAt      DateTime?
+  title           String
+  description     String?
+  tags            Json
+  selfDeclaredMadeForKids Boolean @default(false)
+  containsSyntheticMedia Boolean @default(false)
+  attemptCount    Int @default(0)
+  uploadSession   String?
+  uploadSize      Int?
+  retryAllowed    Boolean @default(true)
   publishedAt     DateTime?
   externalVideoId String?
+  externalVideoUrl String?
   errorMessage    String?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @default(now())
 
   content ContentIdea @relation(fields: [contentId], references: [id])
+  asset Asset @relation(fields: [assetId], references: [id])
+  integration Integration @relation(fields: [integrationId], references: [id])
 
   @@index([publishStatus])
   @@index([platform, publishStatus])
+  @@index([scheduledAt])
+  @@index([assetId, integrationId])
 }
 
 model Notification {
@@ -317,7 +336,9 @@ model Integration {
   updatedAt    DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id])
+  publishJobs PublishJob[]
 
+  @@unique([userId, provider])
   @@index([userId])
 }
 

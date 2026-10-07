@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { PublishDialog } from "@/components/publishing/publish-modal";
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import {
   CalendarDays,
-  Check,
+  Eye,
   Clock3,
   Folder,
   Loader2,
@@ -42,6 +43,7 @@ import type {
   RejectResponse,
   RegenerateResponse,
 } from "@/types/approval-types";
+import Link from "next/link";
 
 function dateTime(value: string | null) {
   return value
@@ -274,7 +276,7 @@ export function ApprovalCard({ approval }: { approval: ApprovalListItem }) {
                   disabled={busy || !source || videoFailed}
                   onClick={() => setAction("approve")}
                 >
-                  <Check />
+                  <Eye />
                   Approve
                 </Button>
                 <Button
@@ -288,20 +290,64 @@ export function ApprovalCard({ approval }: { approval: ApprovalListItem }) {
                 </Button>
               </>
             )}
-            {approval.status === "APPROVED" && (
-              <p className="flex items-center gap-2 text-sm font-medium text-emerald-600">
-                <Check className="size-4" />
-                Approved for future publishing
-              </p>
+            {approval.status === "APPROVED" && !approval.publishStatus && (
+              <PublishDialog approval={approval} />
             )}
+
+            {approval.status === "APPROVED" &&
+              approval.publishStatus === "QUEUED" && (
+                <Button disabled variant="outline">
+                  <Clock3 />
+                  Queued for publishing
+                </Button>
+              )}
+
+            {approval.status === "APPROVED" &&
+              approval.publishStatus === "UPLOADING" && (
+                <Button disabled variant="outline">
+                  <Loader2 className="animate-spin" />
+                  Uploading to YouTube
+                </Button>
+              )}
+
+            {approval.status === "APPROVED" &&
+              approval.publishStatus === "SCHEDULED" && (
+                <Button disabled variant="outline">
+                  <CalendarDays />
+                  Scheduled on YouTube
+                </Button>
+              )}
+
+            {approval.status === "APPROVED" &&
+              approval.publishStatus === "PUBLISHED" &&
+              approval.externalVideoUrl && (
+                <Button className="min-h-10 bg-indigo-600 text-white hover:bg-indigo-700">
+                  <a
+                    href={approval.externalVideoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex gap-2 items-center"
+                  >
+                    <Eye className="size-4" />
+                    <span>View on YouTube</span>
+                  </a>
+                </Button>
+              )}
+
+            {approval.status === "APPROVED" &&
+              approval.publishStatus === "FAILED" && (
+                <Button variant="destructive">
+                  <Link href="/publishing">Publishing failed</Link>
+                </Button>
+              )}
             {approval.status === "REJECTED" && (
               <Button
                 variant="outline"
-                className="min-h-10"
+                className="min-h-10 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50/50"
                 disabled={busy || generating || !approval.assetId}
                 onClick={() => setAction("regenerate")}
               >
-                <RefreshCw />
+                <RefreshCw className="size-4" />
                 Regenerate Video
               </Button>
             )}
@@ -375,7 +421,11 @@ export function ApprovalCard({ approval }: { approval: ApprovalListItem }) {
             >
               Cancel
             </Button>
-            <Button disabled={busy} onClick={submit}>
+            <Button
+              disabled={busy}
+              onClick={submit}
+              className="bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer"
+            >
               {busy && <Loader2 className="animate-spin" />}
               {action === "approve" ? "Approve Video" : "Regenerate Video"}
             </Button>

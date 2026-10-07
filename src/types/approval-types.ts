@@ -1,7 +1,18 @@
 import type { ApiResponse } from "@/types/api/api-types";
 export type ApprovalStatus = "PENDING" | "APPROVED" | "REJECTED" | "REGENERATE";
 export type ReviewStatusFilter = "ALL" | "PENDING" | "APPROVED" | "REJECTED";
-export type WorkflowStatus = "QUEUED" | "RUNNING" | "COMPLETED" | "FAILED" | "CANCELLED";
+export type WorkflowStatus =
+  | "QUEUED"
+  | "RUNNING"
+  | "COMPLETED"
+  | "FAILED"
+  | "CANCELLED";
+export type PublishStatus =
+  | "QUEUED"
+  | "UPLOADING"
+  | "SCHEDULED"
+  | "PUBLISHED"
+  | "FAILED";
 export interface ApprovalListItem {
   approvalId: string;
   status: ApprovalStatus;
@@ -11,6 +22,7 @@ export interface ApprovalListItem {
   reviewedAt: string | null;
   contentId: string;
   title: string;
+  tags: unknown;
   description: string | null;
   category: string | null;
   scheduledDate: string | null;
@@ -26,6 +38,10 @@ export interface ApprovalListItem {
   regenerationWorkflowId: string | null;
   regenerationStatus: WorkflowStatus | null;
   regenerationError: string | null;
+  publishJobId: string | null;
+  publishStatus: PublishStatus | null;
+  externalVideoUrl: string | null;
+  publishError: string | null;
 }
 export type ApprovalDetail = ApprovalListItem;
 export interface ApprovalFilters {
@@ -36,9 +52,21 @@ export interface ApprovalFilters {
   sortOrder: "ASC" | "DESC";
   timezone: string;
 }
-export interface ApprovalQueryParams extends ApprovalFilters { pageNo: number; pageSize: number; search: string }
+export interface ApprovalQueryParams extends ApprovalFilters {
+  pageNo: number;
+  pageSize: number;
+  search: string;
+}
 export type ApproveRequest = Record<string, never>;
-export interface RejectRequest { comments?: string }
+export interface RejectRequest {
+  comments?: string;
+}
 export type ApproveResponse = ApiResponse<ApprovalDetail>;
 export type RejectResponse = ApiResponse<ApprovalDetail>;
-export interface RegenerateResponse { responseData: { approvalId: string; workflowId: string; status: WorkflowStatus } }
+export interface RegenerateResponse {
+  responseData: {
+    approvalId: string;
+    workflowId: string;
+    status: WorkflowStatus;
+  };
+}

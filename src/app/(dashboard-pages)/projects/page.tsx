@@ -21,12 +21,19 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import z from "zod";
+import { Button } from "@/components/ui/button";
+import { QueryErrorState } from "@/components/ui/custom/query-error-state";
+import { useDashboardSearch } from "@/components/dashboard-search-context";
+import useDebounceSearch from "@/hooks/optimization/useDebounceSearch";
 
 export default function ProjectsPage() {
   const [projectToDeleteId, setProjectToDeleteId] = useState<string | null>(
     null,
   );
-  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
+  const [createOrEditMode, setCreateOrEditMode] = useState<"create" | "edit">(
+    "create",
+  );
   const [isSettingsModalOpen, setIsSettingsModalOpen] =
     useState<boolean>(false);
   const [projectSettingsMode, setProjectSettingsMode] = useState<
@@ -43,6 +50,8 @@ export default function ProjectsPage() {
   };
   const [perPage, setPerPage] = useState<number>(7);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const { search } = useDashboardSearch();
+  const debouncedSearch = useDebounceSearch(search, 300);
 
   const projectSettingsForm = useForm<
     z.infer<typeof projectSettingsFormSchema>
@@ -61,6 +70,8 @@ export default function ProjectsPage() {
     data: projectsData,
     refetch: refetchProjects,
     totalPages: totalProjectsPages,
+    isLoading: isLoadingProjects,
+    error: projectsError,
   } = usePaginatedData<ProjectData>({
     apiEndPoint: ApiEndPoint.GET_DASHBOARD_PROJECTS,
     queryKey: "projects",
@@ -68,6 +79,7 @@ export default function ProjectsPage() {
       pageNo: currentPage,
       pageSize: perPage,
     },
+    search: debouncedSearch,
   });
 
   const {
@@ -183,20 +195,47 @@ export default function ProjectsPage() {
   }, [isSettingsModalOpen, projectSettings, projectSettingsForm]);
 
   useEffect(() => {
-    console.log("selected project data", selectedProjectData);
-  })
+    setCurrentPage(1);
+  }, [debouncedSearch]);
 
   return (
-    <div className="space-y-6 p-5 max-h-[80vh] w-full overflow-y-hidden">
-      <h1 className="text-2xl font-bold mb-4">Projects</h1>
-      {projectsData && projectsData.length === 0 ? (
-        <div className="text-center text-muted-foreground">
-          No projects found. Create a new project to get started.
+    <div className="w-full max-w-7xl mx-auto space-y-6 p-4 sm:p-6 lg:p-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            Projects
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Manage your video production projects, brand presets, and timelines.
+          </p>
         </div>
+        <Button
+          onClick={() => {
+            setSelectedProjectData(null);
+            setCreateOrEditMode("create");
+            setIsCreateModalOpen(true);
+          }}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm cursor-pointer self-start sm:self-auto h-10 px-4"
+        >
+          Add New Project
+        </Button>
+      </div>
+      {projectsError ? (
+        <QueryErrorState
+          title="Failed to load projects"
+          message="An error occurred while fetching your projects. Please try again."
+          onRetry={refetchProjects}
+        />
       ) : (
         <ProjectsTable
           projects={projectsData || []}
-          setIsEditModalOpen={setIsEditModalOpen}
+          isLoading={isLoadingProjects}
+          setIsEditModalOpen={(isOpen) => {
+            setIsCreateModalOpen(isOpen);
+            if (isOpen) {
+              setCreateOrEditMode("edit");
+            }
+          }}
           setSelectedProjectData={setSelectedProjectData}
           setIsSettingsModalOpen={setIsSettingsModalOpen}
           onDeleteProject={handleDeleteProject}
@@ -209,10 +248,16 @@ export default function ProjectsPage() {
       )}
 
       <CreateProjectModal
-        key={`edit-${isEditModalOpen}-${selectedProjectData?.id ?? ""}`}
-        open={isEditModalOpen}
-        onOpenChange={setIsEditModalOpen}
-        mode="edit"
+        key={`project-modal-${isCreateModalOpen}-${createOrEditMode}-${selectedProjectData?.id ?? ""}`}
+        open={isCreateModalOpen}
+        onOpenChange={(nextOpen) => {
+          setIsCreateModalOpen(nextOpen);
+          if (!nextOpen) {
+            setSelectedProjectData(null);
+            setCreateOrEditMode("create");
+          }
+        }}
+        mode={createOrEditMode}
         projectId={selectedProjectData?.id}
         incomingProjectName={selectedProjectData?.name}
         incomingProjectDesc={selectedProjectData?.description}

@@ -38,19 +38,12 @@ interface AddNewContentModalProps {
   form: UseFormReturn<z.infer<typeof newContentFormSchema>>;
   onSubmit: (data: z.infer<typeof newContentFormSchema>) => void;
   allProjects: ProjectData[];
+  isLoadingProjects?: boolean;
   isSubmitting: boolean;
   mode: "create" | "edit";
   selectedContentData?: ContentIdea;
   isUpdating: boolean;
 }
-
-const statusLabels: Record<string, string> = {
-  DRAFT: "Draft",
-  PENDING: "Pending",
-  IN_PROGRESS: "In Progress",
-  COMPLETED: "Completed",
-  ARCHIVED: "Archived",
-};
 
 const priorityLabels: Record<string, string> = {
   P0: "Critical",
@@ -65,8 +58,7 @@ const emptyContentFormValues = {
   description: "",
   category: "",
   tags: [] as string[],
-  status: "",
-  scheduledDate: undefined,
+  scheduledDate: undefined as unknown as Date,
   scheduledTime: "",
   priority: "",
 };
@@ -77,6 +69,7 @@ export const AddNewContentModal = ({
   form,
   onSubmit,
   allProjects,
+  isLoadingProjects = false,
   isSubmitting,
   mode,
   selectedContentData,
@@ -113,7 +106,6 @@ export const AddNewContentModal = ({
         tags: Array.isArray(selectedContentData.tags)
           ? (selectedContentData.tags as string[])
           : [],
-        status: selectedContentData.status,
         priority: selectedContentData.priority,
         scheduledDate: selectedContentData.scheduledDate
           ? new Date(selectedContentData.scheduledDate)
@@ -155,13 +147,19 @@ export const AddNewContentModal = ({
                       Projects <span className="text-red-500">*</span>
                     </FormLabel>
                     <Select
-                      disabled={mode === "edit"}
+                      disabled={mode === "edit" || isLoadingProjects}
                       value={field.value}
                       onValueChange={field.onChange}
                     >
                       <FormControl>
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select Project">
+                          <SelectValue
+                            placeholder={
+                              isLoadingProjects
+                                ? "Loading projects..."
+                                : "Select Project"
+                            }
+                          >
                             {
                               allProjects.find((p) => p.id === field.value)
                                 ?.name
@@ -169,14 +167,33 @@ export const AddNewContentModal = ({
                           </SelectValue>
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
-                        {allProjects.map((project) => (
-                          <SelectItem key={project.id} value={project.id}>
-                            {project.name}
-                          </SelectItem>
-                        ))}
+                      <SelectContent alignItemWithTrigger={false} side="bottom">
+                        {isLoadingProjects ? (
+                          <div className="flex items-center justify-center p-3 text-xs text-muted-foreground gap-2">
+                            <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
+                            Loading projects...
+                          </div>
+                        ) : allProjects.length === 0 ? (
+                          <div className="p-4 text-center text-xs space-y-1">
+                            <p className="font-medium text-foreground">No projects found</p>
+                            <p className="text-muted-foreground text-[11px]">
+                              Create a project under the Projects page first.
+                            </p>
+                          </div>
+                        ) : (
+                          allProjects.map((project) => (
+                            <SelectItem key={project.id} value={project.id}>
+                              {project.name}
+                            </SelectItem>
+                          ))
+                        )}
                       </SelectContent>
                     </Select>
+                    {!isLoadingProjects && allProjects.length === 0 && (
+                      <p className="text-xs text-amber-600 font-medium">
+                        No projects available. Please create a project first in the Projects section.
+                      </p>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -186,36 +203,84 @@ export const AddNewContentModal = ({
               <FormField
                 control={form.control}
                 name="title"
-                render={({ field, fieldState }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Title <span className="text-red-500">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter title..." {...field} />
-                    </FormControl>
-                    {fieldState.error && (
-                      <FormMessage>{fieldState.error?.message}</FormMessage>
-                    )}
-                  </FormItem>
-                )}
+                render={({ field, fieldState }) => {
+                  const titleLength = field.value ? field.value.length : 0;
+                  return (
+                    <FormItem>
+                      <FormLabel>
+                        Title <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Enter title..."
+                          maxLength={100}
+                          {...field}
+                        />
+                      </FormControl>
+                      <div className="flex items-center justify-between text-xs min-h-[1.25rem] mt-1">
+                        <div>
+                          {fieldState.error && (
+                            <FormMessage>
+                              {fieldState.error?.message}
+                            </FormMessage>
+                          )}
+                        </div>
+                        <span
+                          className={`text-muted-foreground ml-auto font-mono text-[0.75rem] ${
+                            titleLength > 100
+                              ? "text-destructive font-semibold"
+                              : ""
+                          }`}
+                        >
+                          {titleLength}/100
+                        </span>
+                      </div>
+                    </FormItem>
+                  );
+                }}
               />
 
               {/* Description Field */}
               <FormField
                 control={form.control}
                 name="description"
-                render={({ field, fieldState }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Enter description..." {...field} />
-                    </FormControl>
-                    {fieldState.error && (
-                      <FormMessage>{fieldState.error?.message}</FormMessage>
-                    )}
-                  </FormItem>
-                )}
+                render={({ field, fieldState }) => {
+                  const descBytes = field.value
+                    ? new TextEncoder().encode(field.value).length
+                    : 0;
+                  return (
+                    <FormItem>
+                      <FormLabel>
+                        Description <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Enter description..."
+                          rows={4}
+                          {...field}
+                        />
+                      </FormControl>
+                      <div className="flex items-center justify-between text-xs min-h-[1.25rem] mt-1">
+                        <div>
+                          {fieldState.error && (
+                            <FormMessage>
+                              {fieldState.error?.message}
+                            </FormMessage>
+                          )}
+                        </div>
+                        <span
+                          className={`text-muted-foreground ml-auto font-mono text-[0.75rem] ${
+                            descBytes > 5000
+                              ? "text-destructive font-semibold"
+                              : ""
+                          }`}
+                        >
+                          {descBytes}/5000 B
+                        </span>
+                      </div>
+                    </FormItem>
+                  );
+                }}
               />
 
               {/* Category Field */}
@@ -262,79 +327,36 @@ export const AddNewContentModal = ({
                 )}
               />
 
-              <div className="grid grid-cols-2 gap-4">
-                {/* Status Field */}
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field, fieldState }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Status <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a status">
-                              {statusLabels[field.value] || "Select a status"}
-                            </SelectValue>
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="DRAFT">Draft</SelectItem>
-                          <SelectItem value="PENDING">Pending</SelectItem>
-                          <SelectItem value="IN_PROGRESS">
-                            In Progress
-                          </SelectItem>
-                          <SelectItem value="COMPLETED">Completed</SelectItem>
-                          <SelectItem value="ARCHIVED">Archived</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {fieldState.error && (
-                        <FormMessage>{fieldState.error?.message}</FormMessage>
-                      )}
-                    </FormItem>
-                  )}
-                />
-
-                {/* Priority Field */}
-                <FormField
-                  control={form.control}
-                  name="priority"
-                  render={({ field, fieldState }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Priority <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a priority">
-                              {priorityLabels[field.value] ||
-                                "Select a priority"}
-                            </SelectValue>
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="P0">Critical</SelectItem>
-                          <SelectItem value="P1">High</SelectItem>
-                          <SelectItem value="P2">Medium</SelectItem>
-                          <SelectItem value="P3">Low</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {fieldState.error && (
-                        <FormMessage>{fieldState.error?.message}</FormMessage>
-                      )}
-                    </FormItem>
-                  )}
-                />
-              </div>
+              {/* Priority Field */}
+              <FormField
+                control={form.control}
+                name="priority"
+                render={({ field, fieldState }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Priority <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a priority">
+                            {priorityLabels[field.value] || "Select a priority"}
+                          </SelectValue>
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="P0">Critical</SelectItem>
+                        <SelectItem value="P1">High</SelectItem>
+                        <SelectItem value="P2">Medium</SelectItem>
+                        <SelectItem value="P3">Low</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {fieldState.error && (
+                      <FormMessage>{fieldState.error?.message}</FormMessage>
+                    )}
+                  </FormItem>
+                )}
+              />
             </div>
 
             {/* Sticky Footer */}

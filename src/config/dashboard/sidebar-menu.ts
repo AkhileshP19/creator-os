@@ -17,6 +17,7 @@ export const sidebarOptions = {
     dashboard: {
       icon: LayoutDashboard,
       label: "Dashboard",
+      href: "/dashboard",
     },
   },
 
@@ -24,14 +25,17 @@ export const sidebarOptions = {
     projects: {
       icon: FolderKanban,
       label: "Projects",
+      href: "/projects",
     },
     content: {
       icon: FileText,
       label: "Content",
+      href: "/content",
     },  
     assets: {
       icon: Images,
       label: "Assets",
+      href: "/assets",
     },
   },
 
@@ -39,14 +43,17 @@ export const sidebarOptions = {
     aiGeneration: {
       icon: Sparkles,
       label: "AI Generation",
+      href: "/ai-generation",
     },
     automation: {
       icon: Workflow,
       label: "Automation",
+      href: "/automation",
     },
     analytics: {
       icon: ChartColumn,
       label: "Analytics",
+      href: "/analytics",
     },
   },
 
@@ -54,10 +61,12 @@ export const sidebarOptions = {
     publishing: {
       icon: Send,
       label: "Publishing",
+      href: "/publishing",
     },
     approvals: {
       icon: ClipboardCheck,
       label: "Approvals",
+      href: "/approvals",
     },
   },
 
@@ -65,10 +74,12 @@ export const sidebarOptions = {
     notifications: {
       icon: Bell,
       label: "Notifications",
+      href: "/notifications",
     },
     settings: {
       icon: Settings,
       label: "Settings",
+      href: "/settings",
     },
   },
 } as const;

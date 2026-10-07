@@ -16,6 +16,15 @@ export const createContentIdeaController: RequestHandler = async (req, res) => {
     } = req.body;
     const createdById = req.currentUser.id;
 
+    const initialStatus = status ?? "PENDING";
+    if (initialStatus !== "PENDING" && initialStatus !== "DRAFT") {
+      return res.status(400).json({
+        status: "ERROR",
+        message: "Initial status must be PENDING or DRAFT",
+        data: null,
+      });
+    }
+
     const newContentIdea = await contentIdeaService.createContentIdea({
       projectId,
       title,
@@ -25,7 +34,7 @@ export const createContentIdeaController: RequestHandler = async (req, res) => {
       ...(scheduledDate
         ? { scheduledDate: Temporal.Instant.from(scheduledDate) }
         : {}),
-      status,
+      status: initialStatus,
       priority,
       createdById,
     });
@@ -149,17 +158,24 @@ export const updateContentIdeaController: RequestHandler = async (req, res) => {
       description,
       category,
       tags,
-      status,
       scheduledDate,
       priority,
+      status,
     } = req.body;
+
+    if (status !== undefined) {
+      return res.status(400).json({
+        status: "ERROR",
+        message: "Lifecycle status cannot be updated via the edit content endpoint",
+        data: null,
+      });
+    }
 
     const updateData = {
       ...(title !== undefined && { title }),
       ...(description !== undefined && { description }),
       ...(category !== undefined && { category }),
       ...(tags !== undefined && { tags }),
-      ...(status !== undefined && { status }),
       ...(priority !== undefined && { priority }),
       ...(scheduledDate !== undefined && {
         scheduledDate:
@@ -223,6 +239,49 @@ export const deleteContentIdeaController: RequestHandler = async (req, res) => {
     return res.status(500).json({
       status: "ERROR",
       message: "Failed to delete content idea",
+      data: null,
+    });
+  }
+};
+
+export const archiveContentIdeaController: RequestHandler = async (req, res) => {
+  try {
+    const contentId = req.params.contentId;
+
+    if (!contentId || Array.isArray(contentId)) {
+      return res.status(400).json({
+        status: "ERROR",
+        message: "Invalid content ID",
+        data: null,
+      });
+    }
+
+    const currentUserId = req.currentUser.id;
+
+    const archivedContentIdea = await contentIdeaService.archiveContentIdea(
+      contentId,
+      currentUserId,
+    );
+
+    return res.status(200).json({
+      status: "SUCCESS",
+      message: "Content idea archived successfully",
+      data: {
+        responseData: archivedContentIdea,
+      },
+    });
+  } catch (error) {
+    console.error("Failed to archive content idea:", error);
+    const statusCode =
+      error instanceof Error &&
+      "statusCode" in error &&
+      typeof error.statusCode === "number"
+        ? error.statusCode
+        : 500;
+
+    return res.status(statusCode).json({
+      status: "ERROR",
+      message: "Failed to archive content idea",
       data: null,
     });
   }
