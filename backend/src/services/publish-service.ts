@@ -155,6 +155,12 @@ export const publishService = {
       query = query.where((f, op) =>
         op.eq(f.publishJob.contentId, filters.contentId!),
       );
+    if (filters.search?.trim()) {
+      const escaped = filters.search.trim().replace(/[\\%_]/g, "\\$&");
+      query = query.where((f, op) =>
+        op.ilike(f.publishJob.title, `%${escaped}%`),
+      );
+    }
     const count = await db
       .runtime()
       .query(query.select("totalCount", (_f, op) => op.count()).build());

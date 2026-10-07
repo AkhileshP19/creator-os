@@ -31,11 +31,16 @@ export const getPendingReviewsController: RequestHandler = async (req, res) => {
     const userId = req.currentUser.id;
     const pageNo = Math.max(1, Number(req.query.pageNo) || 1);
     const pageSize = Math.max(1, Number(req.query.pageSize) || 5);
+    const search =
+      typeof req.query.search === "string" && req.query.search.trim().length > 0
+        ? req.query.search.trim()
+        : undefined;
 
     const result = await dashboardService.getPendingReviews(
       userId,
       pageNo,
       pageSize,
+      search,
     );
 
     return res.status(200).json({

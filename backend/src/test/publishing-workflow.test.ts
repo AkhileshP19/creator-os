@@ -15,6 +15,7 @@ import {
 import {
   createPublishJobSchema,
   oauthCallbackSchema,
+  publishJobQuerySchema,
 } from "../schema/validation-schemas/publish-validation.js";
 import type { WorkflowTransaction } from "../services/video-review-service.js";
 
@@ -227,6 +228,20 @@ test("schemas reject missing code, ownership inputs, invalid metadata and declar
     createPublishJobSchema.safeParse({ ...input, title: "" }).success,
     false,
   );
+});
+test("publishJobQuerySchema validates and trims search parameter", () => {
+  const parsed = publishJobQuerySchema.parse({
+    search: "  video title  ",
+    status: "SCHEDULED",
+  });
+  assert.equal(parsed.search, "video title");
+  assert.equal(parsed.status, "SCHEDULED");
+
+  const parsedEmpty = publishJobQuerySchema.parse({});
+  assert.equal(parsedEmpty.search, undefined);
+  assert.equal(parsedEmpty.status, "ALL");
+  assert.equal(parsedEmpty.pageNo, 1);
+  assert.equal(parsedEmpty.pageSize, 20);
 });
 test("connect URL requests offline access, minimal scopes and PKCE", async () => {
   fixture();

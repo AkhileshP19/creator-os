@@ -35,6 +35,7 @@ export const publishJobQuerySchema = z.object({
     .enum(["ALL", "QUEUED", "UPLOADING", "SCHEDULED", "PUBLISHED", "FAILED"])
     .default("ALL"),
   contentId: z.string().min(1).optional(),
+  search: z.string().trim().max(200).optional(),
 });
 export const publishIdSchema = z.string().min(1).max(200);
 export const retryPublishJobSchema = z.object({}).strict();

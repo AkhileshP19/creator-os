@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { useDashboardSearch } from "@/components/dashboard-search-context";
+import useDebounceSearch from "@/hooks/optimization/useDebounceSearch";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -173,7 +175,13 @@ function JobCard({ job }: { job: PublishJob }) {
 export default function PublishingPage() {
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState<PublishStatus | "ALL">("ALL");
-  const jobs = usePublishJobs(page, status);
+  const { search } = useDashboardSearch();
+  const debouncedSearch = useDebounceSearch(search, 300);
+  const jobs = usePublishJobs(page, status, debouncedSearch);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, status]);
 
   const statusOptions = [
     { value: "ALL", label: "All statuses" },

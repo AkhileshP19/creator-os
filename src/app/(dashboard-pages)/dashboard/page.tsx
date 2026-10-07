@@ -131,6 +131,7 @@ export default function DashboardPage() {
       pageSize: 5,
     },
     enabled: true,
+    search: debouncedSearch,
   });
 
   const { data: automationData } = usePaginatedData<AutomationActivityData>({

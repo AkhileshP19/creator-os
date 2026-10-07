@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Film, Loader2, Search } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Film, Loader2 } from "lucide-react";
 import { ApprovalCard } from "@/components/approvals/approval-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -11,7 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -20,6 +19,7 @@ import { QueryErrorState } from "@/components/ui/custom/query-error-state";
 import { usePaginatedData } from "@/hooks/fetch/usePaginatedDataParams";
 import { useFetchData } from "@/hooks/fetch/useFetchData";
 import useDebounceSearch from "@/hooks/optimization/useDebounceSearch";
+import { useDashboardSearch } from "@/components/dashboard-search-context";
 import { ApiEndPoint } from "@/types/api/api-types";
 import type {
   ApprovalFilters,
@@ -49,13 +49,17 @@ const sortOptions = [
 export default function ApprovalPage() {
   const [pageNo, setPageNo] = useState(1);
   const [pageSize, setPageSize] = useState(6);
-  const [search, setSearch] = useState("");
-  const debouncedSearch = useDebounceSearch(search, 350);
+  const { search } = useDashboardSearch();
+  const debouncedSearch = useDebounceSearch(search, 300);
   const [status, setStatus] = useState<ReviewStatusFilter>("ALL");
   const [projectId, setProjectId] = useState("");
   const [scheduledDateFilter, setDateFilter] =
     useState<ApprovalFilters["scheduledDateFilter"]>("ALL");
   const [sort, setSort] = useState("soonest");
+
+  useEffect(() => {
+    setPageNo(1);
+  }, [debouncedSearch]);
   const projects = useFetchData<Project[]>(
     ApiEndPoint.GET_ALL_PROJECTS,
     "all-projects",
@@ -124,20 +128,7 @@ export default function ApprovalPage() {
             ))}
           </TabsList>
         </div>
-        <div className="mt-5 grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="relative">
-            <Search className="absolute top-3 left-3 size-4 text-muted-foreground" />
-            <Input
-              aria-label="Search content title"
-              placeholder="Search content title…"
-              value={search}
-              className="h-10 pl-9 text-xs sm:text-sm"
-              onChange={(event) => {
-                setSearch(event.target.value);
-                setPageNo(1);
-              }}
-            />
-          </div>
+        <div className="mt-5 grid gap-3 grid-cols-1 sm:grid-cols-3">
           <Select
             items={projectOptions}
             value={projectId || "ALL"}

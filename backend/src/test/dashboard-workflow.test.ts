@@ -80,3 +80,41 @@ test("dashboard pending reviews returns paginated pending items", async () => {
   assert.equal(item.metadata.source, "ai_generated");
   assert.equal(item.metadata.durationSeconds, 10);
 });
+
+test("dashboard pending reviews supports search filtering by contentIdea title", async () => {
+  const now = Temporal.Now.instant();
+  let capturedQueryAst = "";
+
+  mock.method(db, "runtime", () => ({
+    query: async (plan: unknown) => {
+      const planStr = JSON.stringify(plan ?? {});
+      capturedQueryAst = planStr;
+      if (planStr.includes("totalCount")) {
+        return [{ totalCount: 1 }];
+      }
+      return [
+        {
+          approvalId: "app-1",
+          contentId: "content-1",
+          projectId: "proj-1",
+          title: "Searched Title",
+          createdAt: now,
+          storageUrl: "https://example.com/video.mp4",
+          workflowId: null,
+        },
+      ];
+    },
+  }));
+
+  const result = await dashboardService.getPendingReviews(
+    "owner-1",
+    1,
+    5,
+    "Searched",
+  );
+
+  assert.equal(result.totalCount, 1);
+  assert.equal(result.responseData[0]?.title, "Searched Title");
+  assert.ok(capturedQueryAst.includes("Searched"));
+});
+

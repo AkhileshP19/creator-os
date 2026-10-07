@@ -23,6 +23,8 @@ import toast from "react-hot-toast";
 import z from "zod";
 import { Button } from "@/components/ui/button";
 import { QueryErrorState } from "@/components/ui/custom/query-error-state";
+import { useDashboardSearch } from "@/components/dashboard-search-context";
+import useDebounceSearch from "@/hooks/optimization/useDebounceSearch";
 
 export default function ProjectsPage() {
   const [projectToDeleteId, setProjectToDeleteId] = useState<string | null>(
@@ -48,6 +50,8 @@ export default function ProjectsPage() {
   };
   const [perPage, setPerPage] = useState<number>(7);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const { search } = useDashboardSearch();
+  const debouncedSearch = useDebounceSearch(search, 300);
 
   const projectSettingsForm = useForm<
     z.infer<typeof projectSettingsFormSchema>
@@ -75,6 +79,7 @@ export default function ProjectsPage() {
       pageNo: currentPage,
       pageSize: perPage,
     },
+    search: debouncedSearch,
   });
 
   const {
@@ -190,8 +195,8 @@ export default function ProjectsPage() {
   }, [isSettingsModalOpen, projectSettings, projectSettingsForm]);
 
   useEffect(() => {
-    console.log("selected project data", selectedProjectData);
-  })
+    setCurrentPage(1);
+  }, [debouncedSearch]);
 
   return (
     <div className="w-full max-w-7xl mx-auto space-y-6 p-4 sm:p-6 lg:p-8">

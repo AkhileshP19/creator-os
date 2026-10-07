@@ -21,13 +21,22 @@ export function useYouTubeConnection() {
     staleTime: 0,
   });
 }
-export function usePublishJobs(pageNo: number, status: PublishStatus | "ALL") {
+export function usePublishJobs(
+  pageNo: number,
+  status: PublishStatus | "ALL",
+  search?: string,
+) {
+  const normalizedSearch = search?.trim();
+  const searchParam = normalizedSearch
+    ? `&search=${encodeURIComponent(normalizedSearch)}`
+    : "";
+
   return useQuery({
-    queryKey: ["publish-jobs", pageNo, status],
+    queryKey: ["publish-jobs", pageNo, status, normalizedSearch ?? ""],
     queryFn: () =>
       apiHandler<PaginatedApiResponse<PublishJob>>(
         "GET",
-        `${ApiEndPoint.PUBLISH_JOBS}?pageNo=${pageNo}&pageSize=20&status=${status}`,
+        `${ApiEndPoint.PUBLISH_JOBS}?pageNo=${pageNo}&pageSize=20&status=${status}${searchParam}`,
       ),
     refetchInterval: 10_000,
   });

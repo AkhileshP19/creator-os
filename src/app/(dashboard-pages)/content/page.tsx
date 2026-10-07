@@ -6,10 +6,12 @@ import {
   newContentFormSchema,
   createNewContentSchema,
 } from "@/schema/validation-schemas/new-content-schema";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useDashboardSearch } from "@/components/dashboard-search-context";
+import useDebounceSearch from "@/hooks/optimization/useDebounceSearch";
 import { useFetchData } from "@/hooks/fetch/useFetchData";
 import { ApiEndPoint } from "@/types/api/api-types";
 import { ProjectData } from "@/types/dashboard-types";
@@ -53,6 +55,12 @@ export default function ContentPage() {
     useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [perPage, setPerPage] = useState<number>(7);
+  const { search } = useDashboardSearch();
+  const debouncedSearch = useDebounceSearch(search, 300);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch]);
   const [selectedContentData, setSelectedContentData] =
     useState<ContentIdea | null>(null);
   const [isCreateOrEditMode, setIsCreateOrEditMode] = useState<
@@ -112,6 +120,7 @@ export default function ContentPage() {
       pageNo: currentPage,
       pageSize: perPage,
     },
+    search: debouncedSearch,
     refetchInterval: (data) => {
       const items = data?.responseData ?? [];
       const hasGeneratingVideo = items.some(

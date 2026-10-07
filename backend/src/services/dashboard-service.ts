@@ -328,8 +328,17 @@ const dashboardService = {
     userId: string,
     pageNo: number,
     pageSize: number,
+    search?: string,
   ): Promise<PaginatedPendingReviewsResult> => {
-    const query = ownedPendingApprovalsQuery(userId);
+    let query = ownedPendingApprovalsQuery(userId);
+
+    const normalizedSearch = search?.trim();
+    if (normalizedSearch) {
+      const escaped = normalizedSearch.replace(/[\\%_]/g, "\\$&");
+      query = query.where((f, op) =>
+        op.ilike(f.contentIdea.title, `%${escaped}%`),
+      );
+    }
 
     const countRows = await db
       .runtime()
