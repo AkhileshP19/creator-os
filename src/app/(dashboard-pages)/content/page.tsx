@@ -36,6 +36,7 @@ import { GeneratedVideoModal } from "@/components/content/generated-video-modal"
 import {
   GeneratedVideo,
   GenerateVideoRequest,
+  GenerateVideoResponse,
 } from "@/types/generate-video-types";
 import { QueryErrorState } from "@/components/ui/custom/query-error-state";
 
@@ -57,10 +58,6 @@ export default function ContentPage() {
   const [perPage, setPerPage] = useState<number>(7);
   const { search } = useDashboardSearch();
   const debouncedSearch = useDebounceSearch(search, 300);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [debouncedSearch]);
   const [selectedContentData, setSelectedContentData] =
     useState<ContentIdea | null>(null);
   const [isCreateOrEditMode, setIsCreateOrEditMode] = useState<
@@ -147,7 +144,7 @@ export default function ContentPage() {
     [contentToDeleteId ?? ""],
   );
 
-  const { mutateAsync: generateScriptMutation, isPending: isGeneratingScript } =
+  const { mutateAsync: generateScriptMutation } =
     usePostData<GenerateScriptResponse, GenerateScriptRequest>(
       ApiEndPoint.GENERATE_SCRIPT,
     );
@@ -162,7 +159,9 @@ export default function ContentPage() {
     );
 
   const { mutateAsync: generateVideoMutation } =
-    usePostData<any, any>(ApiEndPoint.GENERATE_VIDEO);
+    usePostData<GenerateVideoResponse, GenerateVideoRequest>(
+      ApiEndPoint.GENERATE_VIDEO,
+    );
 
   const { data: videoData, isLoading: isFetchingVideo } =
     useFetchData<GeneratedVideo>(
@@ -300,6 +299,11 @@ export default function ContentPage() {
     setPerPage(value);
     setCurrentPage(1);
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCurrentPage(1);
+  }, [debouncedSearch]);
 
   return (
     <div className="w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">

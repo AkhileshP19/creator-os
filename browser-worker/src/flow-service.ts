@@ -689,8 +689,22 @@ export async function generateVideoWithFlow(
     `[${input.workflowId}] Video uploaded to B2: ${uploadResult.objectKey}`,
   );
 
+  await fs.rm(
+    downloadResult.localFilePath,
+    {
+      force: true,
+    },
+  );
+
+  console.log(
+    `[${input.workflowId}] Temporary local video deleted.`,
+  );
+
   return {
-    ...downloadResult,
+    workflowId:
+      downloadResult.workflowId,
+    fileName:
+      downloadResult.fileName,
     objectKey:
       uploadResult.objectKey,
   };

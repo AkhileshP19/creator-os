@@ -18,7 +18,6 @@ interface GenerateFlowVideoInput {
 interface FlowWorkerVideoResult {
   workflowId: string;
   fileName: string;
-  localFilePath: string;
   objectKey: string;
 }
 
@@ -44,8 +43,13 @@ const flowWorkerDispatcher =
   });
 
 const browserWorkerUrl =
-  process.env.BROWSER_WORKER_URL ??
-  "http://localhost:5100";
+  process.env.BROWSER_WORKER_URL?.trim();
+
+if (!browserWorkerUrl) {
+  throw new Error(
+    "BROWSER_WORKER_URL is not configured.",
+  );
+}
 
 function isFlowWorkerSuccessResponse(
   value: unknown,
@@ -91,7 +95,6 @@ function isFlowWorkerSuccessResponse(
   return (
     typeof result.workflowId === "string" &&
     typeof result.fileName === "string" &&
-    typeof result.localFilePath === "string" &&
     typeof result.objectKey === "string"
   );
 }
@@ -192,8 +195,6 @@ export async function generateVideo(
   return {
     fileName:
       result.fileName,
-    localFilePath:
-      result.localFilePath,
     objectKey:
       result.objectKey,
   };
