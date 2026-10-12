@@ -1,0 +1,160 @@
+import axios, { AxiosRequestConfig } from "axios";
+
+export const ID_PLACEHOLDER = "{id}";
+
+export const buildEndpointUrl = (ids: ApiIds, apiEndPoint: string): string => {
+  if (typeof apiEndPoint !== "string") {
+    throw new Error("apiEndPoint must be a string");
+  }
+
+  const allIds = Array.isArray(ids)
+    ? ids.map((id) => (typeof id === "string" ? id : id.toString()))
+    : [ids];
+
+  return allIds.reduce((accUrl: string, currentId) => {
+    const idAsString =
+      typeof currentId === "string" ? currentId : currentId.toString(); // Ensure it's always a string
+
+    return accUrl.replace(ID_PLACEHOLDER, idAsString);
+  }, apiEndPoint);
+};
+
+export const buildCacheKey = (
+  ids: ApiIds,
+  cacheKeyTemplate: string,
+): string => {
+  const allIds = Array.isArray(ids) ? ids : [ids];
+
+  return allIds.reduce((accUrl: string, currentId) => {
+    const idAsString =
+      typeof currentId === "number" || !isNaN(Number(currentId))
+        ? currentId.toString()
+        : String(currentId); // Ensure ID is always a string
+
+    return accUrl.replace(ID_PLACEHOLDER, idAsString);
+  }, cacheKeyTemplate);
+};
+
+export const buildUrlWithFilters = (
+  ids: ApiIds,
+  apiEndPoint: string,
+  filters?: Record<string, unknown>,
+): string => {
+  let url = buildEndpointUrl(ids || [], apiEndPoint);
+
+  if (filters) {
+    const queryStringParams: { [key: string]: string } = {};
+    Object.keys(filters).forEach((key) => {
+      const value = filters[key];
+      if (value && value.toString().length > 0) {
+        queryStringParams[key] = value.toString();
+      }
+    });
+
+    const params = new URLSearchParams(queryStringParams);
+    if (params.toString().length > 0) {
+      url += `?${params.toString()}`;
+    }
+  }
+
+  return url;
+};
+
+export type ApiIds = number | string | (number | string)[];
+
+const api = axios.create({
+  headers: {
+    Accept: "application/json",
+  },
+});
+
+// ✅ **Attach Authorization Token to Every Request**
+api.interceptors.request.use(
+  async (config) => {
+    const clerk =
+      typeof window !== "undefined"
+        ? (
+            window as Window & {
+              Clerk?: {
+                load: () => Promise<void>;
+                session?: { getToken: () => Promise<string | null> };
+              };
+            }
+          ).Clerk
+        : undefined;
+
+    if (clerk) {
+      try {
+        await clerk.load();
+        const token = await clerk.session?.getToken();
+        if (token) {
+          config.headers = config.headers ?? {};
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+      } catch {
+        throw new Error("Unable to authenticate. Please sign in again.");
+      }
+    }
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
+
+export const apiHandler = async <T>(
+  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH",
+  url: string,
+  data?: unknown,
+  config?: AxiosRequestConfig,
+): Promise<T> => {
+  try {
+
+    const baseURL = process.env.NEXT_PUBLIC_API_URL;
+
+    if (!baseURL) {
+      throw new Error(
+        "NEXT_PUBLIC_API_URL is not configured.",
+      );
+    }
+
+    // Detect if we want a blob (Excel download)
+    const wantsExcel =
+      config?.headers?.Accept ===
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    const normalizedUrl = url.startsWith("/") ? url : `/${url}`;
+    const requestConfig: AxiosRequestConfig = {
+      method,
+      url: `${baseURL}${normalizedUrl}`,
+      data,
+      ...config,
+      headers: {
+        ...config?.headers, // Merge existing config headers (handle potential undefined)
+      },
+      ...(wantsExcel ? { responseType: "blob" } : {}), // Set responseType to blob if we want an Excel file
+    };
+
+    // Conditionally remove Content-Type for FormData in POST requests
+    if (
+      method === "POST" &&
+      data instanceof FormData &&
+      requestConfig.headers
+    ) {
+      delete requestConfig.headers["Content-Type"];
+    }
+
+    const response = await api(requestConfig);
+
+    // If blob, return the blob directly
+    if (wantsExcel && response.data instanceof Blob) {
+      return response.data as T;
+    }
+
+    return response.data.data;
+  } catch (error: unknown) {
+    // Axios errors can contain Authorization headers. Never log request objects.
+    throw axios.isAxiosError(error)
+      ? (error.response?.data ?? new Error("Unable to reach the server"))
+      : error;
+  }
+};
+
+export default api;

@@ -1,0 +1,23 @@
+import { getAuth } from "@clerk/express";
+import type { NextFunction, Request, Response } from "express";
+import { db } from "../prisma/db.js";
+
+// Find the existing CreatorOS user and attach it to the request.
+const currentUserMiddleware = async(
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const auth = getAuth(req);
+    const clerkUserId = auth.userId;
+    const dbUser = await db.orm.public.User
+        .where({ clerkUserId, deletedAt: null })
+        .first();
+    if (!dbUser) {
+        return res.status(401).json({ status: "ERROR", message: "Current user not found", data: null });
+    }
+    req.currentUser = dbUser;
+    next();
+};
+
+export default currentUserMiddleware;

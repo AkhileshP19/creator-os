@@ -1,0 +1,9 @@
+node_modules
+.env
+dist
+
+browser-profile
+downloads
+debug
+
+browser-profile

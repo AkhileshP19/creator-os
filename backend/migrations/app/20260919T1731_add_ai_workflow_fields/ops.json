@@ -1,0 +1,587 @@
+[
+  {
+    "id": "column.public.aIRequest.errorMessage",
+    "label": "Add column \"errorMessage\" to \"aIRequest\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "errorMessage",
+        "table": "aIRequest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"errorMessage\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "aIRequest",
+          "errorMessage"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"errorMessage\"",
+        "sql": "ALTER TABLE \"public\".\"aIRequest\" ADD COLUMN \"errorMessage\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"errorMessage\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "aIRequest",
+          "errorMessage"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.aIRequest.input",
+    "label": "Add column \"input\" to \"aIRequest\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "input",
+        "table": "aIRequest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"input\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "aIRequest",
+          "input"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"input\"",
+        "sql": "ALTER TABLE \"public\".\"aIRequest\" ADD COLUMN \"input\" json"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"input\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "aIRequest",
+          "input"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.aIRequest.model",
+    "label": "Add column \"model\" to \"aIRequest\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "model",
+        "table": "aIRequest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"model\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "aIRequest",
+          "model"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"model\"",
+        "sql": "ALTER TABLE \"public\".\"aIRequest\" ADD COLUMN \"model\" text DEFAULT 'gemini-3.5-flash' NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"model\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "aIRequest",
+          "model"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.aIRequest.output",
+    "label": "Add column \"output\" to \"aIRequest\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "output",
+        "table": "aIRequest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"output\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "aIRequest",
+          "output"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"output\"",
+        "sql": "ALTER TABLE \"public\".\"aIRequest\" ADD COLUMN \"output\" json"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"output\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "aIRequest",
+          "output"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.aIRequest.provider",
+    "label": "Add column \"provider\" to \"aIRequest\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "provider",
+        "table": "aIRequest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"provider\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "aIRequest",
+          "provider"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"provider\"",
+        "sql": "ALTER TABLE \"public\".\"aIRequest\" ADD COLUMN \"provider\" text DEFAULT 'GEMINI' NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"provider\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "aIRequest",
+          "provider"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.aIWorkflow.createdAt",
+    "label": "Add column \"createdAt\" to \"aIWorkflow\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "createdAt",
+        "table": "aIWorkflow"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"createdAt\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "aIWorkflow",
+          "createdAt"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"createdAt\"",
+        "sql": "ALTER TABLE \"public\".\"aIWorkflow\" ADD COLUMN \"createdAt\" timestamptz DEFAULT (now()) NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"createdAt\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "aIWorkflow",
+          "createdAt"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.aIWorkflow.model",
+    "label": "Add column \"model\" to \"aIWorkflow\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "model",
+        "table": "aIWorkflow"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"model\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "aIWorkflow",
+          "model"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"model\"",
+        "sql": "ALTER TABLE \"public\".\"aIWorkflow\" ADD COLUMN \"model\" text DEFAULT 'gemini-3.5-flash' NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"model\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "aIWorkflow",
+          "model"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.aIWorkflow.provider",
+    "label": "Add column \"provider\" to \"aIWorkflow\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "provider",
+        "table": "aIWorkflow"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"provider\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "aIWorkflow",
+          "provider"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"provider\"",
+        "sql": "ALTER TABLE \"public\".\"aIWorkflow\" ADD COLUMN \"provider\" text DEFAULT 'GEMINI' NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"provider\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "aIWorkflow",
+          "provider"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.aIWorkflow.updatedAt",
+    "label": "Add column \"updatedAt\" to \"aIWorkflow\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "updatedAt",
+        "table": "aIWorkflow"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"updatedAt\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "aIWorkflow",
+          "updatedAt"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"updatedAt\"",
+        "sql": "ALTER TABLE \"public\".\"aIWorkflow\" ADD COLUMN \"updatedAt\" timestamptz DEFAULT (now()) NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"updatedAt\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "aIWorkflow",
+          "updatedAt"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "setDefault.aIWorkflow.status",
+    "label": "Set default on \"aIWorkflow\".\"status\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "status",
+        "table": "aIWorkflow"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"status\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "aIWorkflow",
+          "status"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "set default on \"status\"",
+        "sql": "ALTER TABLE \"public\".\"aIWorkflow\" ALTER COLUMN \"status\" SET DEFAULT 'QUEUED'"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"status\" has a default",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"column_default\" IS NOT NULL)) AS \"result\"",
+        "params": [
+          "public",
+          "aIWorkflow",
+          "status"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "checkConstraint.aIRequest.aIRequest_provider_check_76b212d5",
+    "label": "Add check constraint \"aIRequest_provider_check_76b212d5\" on \"aIRequest\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "aIRequest_provider_check_76b212d5",
+        "table": "aIRequest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"aIRequest_provider_check_76b212d5\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "aIRequest_provider_check_76b212d5",
+          "public",
+          "\"public\".\"aIRequest\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add check constraint \"aIRequest_provider_check_76b212d5\"",
+        "sql": "ALTER TABLE \"public\".\"aIRequest\" ADD CONSTRAINT \"aIRequest_provider_check_76b212d5\" CHECK (\"provider\" IN ('GEMINI', 'OPENAI', 'CLAUDE', 'CUSTOM'))"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"aIRequest_provider_check_76b212d5\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "aIRequest_provider_check_76b212d5",
+          "public",
+          "\"public\".\"aIRequest\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "checkConstraint.aIWorkflow.aIWorkflow_provider_check_76b212d5",
+    "label": "Add check constraint \"aIWorkflow_provider_check_76b212d5\" on \"aIWorkflow\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "aIWorkflow_provider_check_76b212d5",
+        "table": "aIWorkflow"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"aIWorkflow_provider_check_76b212d5\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "aIWorkflow_provider_check_76b212d5",
+          "public",
+          "\"public\".\"aIWorkflow\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add check constraint \"aIWorkflow_provider_check_76b212d5\"",
+        "sql": "ALTER TABLE \"public\".\"aIWorkflow\" ADD CONSTRAINT \"aIWorkflow_provider_check_76b212d5\" CHECK (\"provider\" IN ('GEMINI', 'OPENAI', 'CLAUDE', 'CUSTOM'))"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"aIWorkflow_provider_check_76b212d5\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "aIWorkflow_provider_check_76b212d5",
+          "public",
+          "\"public\".\"aIWorkflow\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "checkConstraint.aIWorkflow.aIWorkflow_workflowType_check_2b9649b5",
+    "label": "Add check constraint \"aIWorkflow_workflowType_check_2b9649b5\" on \"aIWorkflow\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "aIWorkflow_workflowType_check_2b9649b5",
+        "table": "aIWorkflow"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"aIWorkflow_workflowType_check_2b9649b5\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "aIWorkflow_workflowType_check_2b9649b5",
+          "public",
+          "\"public\".\"aIWorkflow\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add check constraint \"aIWorkflow_workflowType_check_2b9649b5\"",
+        "sql": "ALTER TABLE \"public\".\"aIWorkflow\" ADD CONSTRAINT \"aIWorkflow_workflowType_check_2b9649b5\" CHECK (\"workflowType\" IN ('SCRIPT_GENERATION', 'VIDEO_GENERATION', 'AUDIO_GENERATION', 'IMAGE_GENERATION'))"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"aIWorkflow_workflowType_check_2b9649b5\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "aIWorkflow_workflowType_check_2b9649b5",
+          "public",
+          "\"public\".\"aIWorkflow\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.aIWorkflow.aIWorkflow_contentId_status_idx_9952abf4",
+    "label": "Create index \"aIWorkflow_contentId_status_idx_9952abf4\" on \"aIWorkflow\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "aIWorkflow_contentId_status_idx_9952abf4",
+        "table": "aIWorkflow"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"aIWorkflow_contentId_status_idx_9952abf4\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"aIWorkflow_contentId_status_idx_9952abf4\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"aIWorkflow_contentId_status_idx_9952abf4\"",
+        "sql": "CREATE INDEX \"aIWorkflow_contentId_status_idx_9952abf4\" ON \"public\".\"aIWorkflow\" (\"contentId\", \"status\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"aIWorkflow_contentId_status_idx_9952abf4\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"aIWorkflow_contentId_status_idx_9952abf4\""
+        ]
+      }
+    ]
+  }
+]
