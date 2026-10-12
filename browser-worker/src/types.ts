@@ -12,6 +12,5 @@ export interface FlowVideoGenerationInput {
 export interface FlowVideoGenerationResult {
   workflowId: string;
   fileName: string;
-  localFilePath: string;
   objectKey: string;
 }

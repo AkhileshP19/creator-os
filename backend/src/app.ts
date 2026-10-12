@@ -18,61 +18,101 @@ import dashboardRouter from "./routes/dashboard-routes.js";
 
 const app: Application = express();
 
-const frontendOrigin =
-  process.env.FRONTEND_URL ??
-  "https://3000-cs-b0a3eeed-73e8-4ee2-8e5d-ac3dd27f7294.cs-asia-southeast1-bool.cloudshell.dev";
-const allowedOrigins = new Set([frontendOrigin, "http://localhost:3000"]);
+const localFrontendOrigin = "http://localhost:3000";
 
-// app.use(
-//   cors({
-//     origin: (origin, callback) => {
-//       if (!origin || allowedOrigins.has(origin)) {
-//         callback(null, true);
-//         return;
-//       }
+const configuredFrontendOrigin =
+  process.env.FRONTEND_URL?.trim();
 
-//       callback(new Error(`Origin ${origin} is not allowed by CORS`));
-//     },
-//     credentials: true,
-//     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-//     allowedHeaders: ["Content-Type", "Authorization"],
-//   }),
-// );
+if (
+  process.env.NODE_ENV === "production" &&
+  !configuredFrontendOrigin
+) {
+  throw new Error(
+    "FRONTEND_URL must be configured in production.",
+  );
+}
 
-// OAuth initiation sets an HttpOnly browser-binding cookie. Only integration
-// routes need credentialed CORS, including their preflight requests.
+const allowedOrigins = new Set<string>();
+
+if (configuredFrontendOrigin) {
+  allowedOrigins.add(configuredFrontendOrigin);
+}
+
+if (process.env.NODE_ENV !== "production") {
+  allowedOrigins.add(localFrontendOrigin);
+}
+
 app.use(
-  cors((req, callback) =>
-    callback(
-      null,
-      req.url.startsWith("/api/integrations")
-        ? { origin: [...allowedOrigins], credentials: true }
-        : {},
-    ),
-  ),
+  cors({
+    origin: (origin, callback) => {
+      if (
+        !origin ||
+        allowedOrigins.has(origin)
+      ) {
+        callback(null, true);
+        return;
+      }
+
+      callback(
+        new Error(
+          `Origin ${origin} is not allowed by CORS`,
+        ),
+      );
+    },
+    credentials: true,
+    methods: [
+      "GET",
+      "POST",
+      "PUT",
+      "PATCH",
+      "DELETE",
+      "OPTIONS",
+    ],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+    ],
+  }),
 );
+
 app.use(clerkMiddleware());
 
 app.use(express.json());
 
 app.use(
   "/generated-videos",
-  express.static(path.resolve(process.cwd(), "generated-videos")),
+  express.static(
+    path.resolve(
+      process.cwd(),
+      "generated-videos",
+    ),
+  ),
 );
 
 app.use("/api/health", healthRouter);
-
 app.use("/api/auth", authRouter);
 app.use("/api/projects", projectRouter);
-app.use("/api/content-ideas", contentIdeaRouter);
+app.use(
+  "/api/content-ideas",
+  contentIdeaRouter,
+);
 app.use("/api/ai", aiWorkflowRouter);
-app.use("/api/projects", projectSettingsRouter);
+app.use(
+  "/api/projects",
+  projectSettingsRouter,
+);
 app.use("/api/approvals", approvalRouter);
-app.use("/api/integrations", integrationRouter);
-app.use("/api/publish-jobs", publishRouter);
+app.use(
+  "/api/integrations",
+  integrationRouter,
+);
+app.use(
+  "/api/publish-jobs",
+  publishRouter,
+);
 app.use("/api/dashboard", dashboardRouter);
-app.use(notFoundMiddleware);
 
+app.use(notFoundMiddleware);
 app.use(errorMiddleware);
 
 export default app;

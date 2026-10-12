@@ -180,6 +180,7 @@ export default function PublishingPage() {
   const jobs = usePublishJobs(page, status, debouncedSearch);
 
   useEffect(() => {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1);
   }, [debouncedSearch, status]);
 

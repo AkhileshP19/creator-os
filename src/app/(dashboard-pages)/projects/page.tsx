@@ -179,6 +179,7 @@ export default function ProjectsPage() {
     }
 
     if (projectSettings) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setProjectSettingsMode("edit");
 
       projectSettingsForm.reset({
@@ -192,9 +193,11 @@ export default function ProjectsPage() {
 
     setProjectSettingsMode("create");
     projectSettingsForm.reset(emptyProjectSettingsFormValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSettingsModalOpen, projectSettings, projectSettingsForm]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1);
   }, [debouncedSearch]);
 

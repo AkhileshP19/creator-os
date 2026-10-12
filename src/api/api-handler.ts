@@ -107,9 +107,14 @@ export const apiHandler = async <T>(
   config?: AxiosRequestConfig,
 ): Promise<T> => {
   try {
-    const baseURL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
-    // const baseURL = "https://fluffy-fiesta-7q5xpp46x9pfrrrr-5000.app.github.dev";
-    // const baseURL = "https://840bfc6a05b8a2.lhr.life";
+
+    const baseURL = process.env.NEXT_PUBLIC_API_URL;
+
+    if (!baseURL) {
+      throw new Error(
+        "NEXT_PUBLIC_API_URL is not configured.",
+      );
+    }
 
     // Detect if we want a blob (Excel download)
     const wantsExcel =

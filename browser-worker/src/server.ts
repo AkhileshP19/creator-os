@@ -17,6 +17,8 @@ const port =
     process.env.PORT ?? 5100,
   );
 
+const host = process.env.HOST ?? "127.0.0.1";
+
 let generationInProgress = false;
 
 app.use(
@@ -146,9 +148,10 @@ app.post(
 
 app.listen(
   port,
+  host,
   () => {
     console.log(
-      `Browser worker running on http://localhost:${port}`,
+      `Browser worker running on http://${host}:${port}`,
     );
   },
 );

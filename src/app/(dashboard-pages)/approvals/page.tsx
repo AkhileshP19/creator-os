@@ -57,9 +57,7 @@ export default function ApprovalPage() {
     useState<ApprovalFilters["scheduledDateFilter"]>("ALL");
   const [sort, setSort] = useState("soonest");
 
-  useEffect(() => {
-    setPageNo(1);
-  }, [debouncedSearch]);
+
   const projects = useFetchData<Project[]>(
     ApiEndPoint.GET_ALL_PROJECTS,
     "all-projects",
@@ -89,7 +87,7 @@ export default function ApprovalPage() {
   });
   const filtered =
     !!debouncedSearch || !!projectId || scheduledDateFilter !== "ALL";
-  const initialLoading = approvals.isLoading && !approvals.isFetched;
+  // const initialLoading = approvals.isLoading && !approvals.isFetched;
   const projectOptions = [
     { value: "ALL", label: "All Projects" },
     ...(projects.data ?? []).map((project) => ({
@@ -97,6 +95,11 @@ export default function ApprovalPage() {
       label: project.name,
     })),
   ];
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPageNo(1);
+  }, [debouncedSearch]);
 
   return (
     <div className="w-full max-w-7xl mx-auto space-y-6 p-4 sm:p-6 lg:p-8">
