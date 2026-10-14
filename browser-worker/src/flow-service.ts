@@ -89,12 +89,17 @@ async function openProject(page: Page): Promise<void> {
 }
 
 async function configureVideoSettings(page: Page): Promise<void> {
-  const settingsButton = page
-    .getByRole("button", {
-      name: "Settings",
-      exact: true,
-    })
-    .first();
+  const promptBox = page.locator("flow-base-prompt-box");
+
+  await promptBox.waitFor({
+    state: "visible",
+    timeout: 30_000,
+  });
+
+  const settingsButton = promptBox.getByRole("button", {
+    name: "Settings",
+    exact: true,
+  }); 
 
   await settingsButton.waitFor({
     state: "visible",
