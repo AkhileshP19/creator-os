@@ -42,6 +42,7 @@ import {
   type PublishForm,
 } from "@/schema/validation-schemas/publish-schema";
 import { useQueryClient } from "@tanstack/react-query";
+import CacheKeys from "@/types/enums/cache-key-enums";
 import { FormTagsField } from "../ui/custom/content-tags-field";
 
 const audienceLabels: Record<string, string> = {
@@ -164,7 +165,7 @@ export function PublishDialog({ approval }: { approval: ApprovalListItem }) {
                         values.containsSyntheticMedia === "yes",
                     });
                     await queryClient.invalidateQueries({
-                      queryKey: ["approvals"],
+                      queryKey: [CacheKeys.APPROVALS],
                     });
                     toast.success("Video queued for scheduled publication");
                     setOpen(false);

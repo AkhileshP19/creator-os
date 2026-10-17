@@ -21,6 +21,7 @@ import { useFetchData } from "@/hooks/fetch/useFetchData";
 import useDebounceSearch from "@/hooks/optimization/useDebounceSearch";
 import { useDashboardSearch } from "@/components/dashboard-search-context";
 import { ApiEndPoint } from "@/types/api/api-types";
+import CacheKeys from "@/types/enums/cache-key-enums";
 import type {
   ApprovalFilters,
   ApprovalListItem,
@@ -57,10 +58,9 @@ export default function ApprovalPage() {
     useState<ApprovalFilters["scheduledDateFilter"]>("ALL");
   const [sort, setSort] = useState("soonest");
 
-
   const projects = useFetchData<Project[]>(
     ApiEndPoint.GET_ALL_PROJECTS,
-    "all-projects",
+    CacheKeys.ALL_PROJECTS,
   );
   const filters: ApprovalFilters = {
     status,
@@ -72,7 +72,7 @@ export default function ApprovalPage() {
   };
   const approvals = usePaginatedData<ApprovalListItem, ApprovalFilters>({
     apiEndPoint: ApiEndPoint.GET_APPROVALS,
-    queryKey: "approvals",
+    queryKey: CacheKeys.APPROVALS,
     filters,
     pagination: { pageNo, pageSize },
     search: debouncedSearch,
@@ -104,7 +104,9 @@ export default function ApprovalPage() {
   return (
     <div className="w-full max-w-7xl mx-auto space-y-6 p-4 sm:p-6 lg:p-8">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Approvals</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          Approvals
+        </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Review generated videos before they move to publishing.
         </p>
@@ -119,7 +121,10 @@ export default function ApprovalPage() {
         }}
       >
         <div className="overflow-x-auto pb-1 max-w-full">
-          <TabsList aria-label="Approval status" className="bg-muted p-1 rounded-lg inline-flex">
+          <TabsList
+            aria-label="Approval status"
+            className="bg-muted p-1 rounded-lg inline-flex"
+          >
             {tabs.map((tab) => (
               <TabsTrigger
                 key={tab.value}
@@ -142,7 +147,11 @@ export default function ApprovalPage() {
             }}
           >
             <SelectTrigger aria-label="Project" className="h-10 w-full">
-              <SelectValue placeholder={projects.isLoading ? "Loading projects..." : "All Projects"} />
+              <SelectValue
+                placeholder={
+                  projects.isLoading ? "Loading projects..." : "All Projects"
+                }
+              />
             </SelectTrigger>
             <SelectContent>
               {projects.isLoading ? (
@@ -214,7 +223,10 @@ export default function ApprovalPage() {
           {approvals.error ? (
             <QueryErrorState
               title="Failed to load approvals"
-              message={approvals.error.message || "Unable to load approvals. Please try again."}
+              message={
+                approvals.error.message ||
+                "Unable to load approvals. Please try again."
+              }
               onRetry={() => approvals.refetch()}
             />
           ) : approvals.isLoading ? (
