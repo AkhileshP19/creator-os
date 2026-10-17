@@ -22,7 +22,7 @@ export const Navbar = () => {
     pathname.startsWith("/notifications") ||
     pathname.startsWith("/settings");
 
-  if (isDashboardRoute) {
+  if (isDashboardRoute || pathname === "/") {
     return null;
   }
 

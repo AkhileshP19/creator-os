@@ -8,6 +8,7 @@ import { useFetchData } from "@/hooks/fetch/useFetchData";
 import { ApiEndPoint } from "@/types/api/api-types";
 import { AuthUser } from "@/types/auth-types";
 import { DashboardSearchProvider } from "@/components/dashboard-search-context";
+import CacheKeys from "@/types/enums/cache-key-enums";
 import { Button } from "@/components/ui/button";
 import { Cog, X } from "lucide-react";
 
@@ -22,7 +23,7 @@ export default function DashboardLayout({
 
   const {} = useFetchData<AuthUser>(
     ApiEndPoint.GET_AUTH_ME,
-    "auth-me",
+    CacheKeys.AUTH_ME,
     [],
     {},
     isLoaded && !!isSignedIn,

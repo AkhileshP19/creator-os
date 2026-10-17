@@ -34,6 +34,8 @@ import {
   CreateContentIdeaResponse,
 } from "@/types/content-types";
 import toast from "react-hot-toast";
+import CacheKeys from "@/types/enums/cache-key-enums";
+import { useQueryClient } from "@tanstack/react-query";
 
 const emptyContentFormValues = {
   projectId: "",
@@ -47,6 +49,7 @@ const emptyContentFormValues = {
 };
 
 export default function DashboardPage() {
+  const queryClient = useQueryClient();
   const [isCreateProjectModalOpen, setIsCreateProjectModalOpen] =
     useState<boolean>(false);
   const [isAddContentModalOpen, setIsAddContentModalOpen] =
@@ -71,7 +74,7 @@ export default function DashboardPage() {
   const { data: allProjectsData, isLoading: isLoadingProjects } =
     useFetchData<ProjectData[]>(
       ApiEndPoint.GET_ALL_PROJECTS,
-      "all-projects",
+      CacheKeys.ALL_PROJECTS,
       [],
       undefined,
       isAddContentModalOpen,
@@ -89,7 +92,7 @@ export default function DashboardPage() {
     refetch: refetchOverview,
   } = useFetchData<DashboardOverviewResponse>(
     ApiEndPoint.GET_DASHBOARD_OVERVIEW,
-    "dashboard-overview",
+    CacheKeys.DASHBOARD_OVERVIEW,
   );
 
   const {
@@ -99,7 +102,7 @@ export default function DashboardPage() {
     error: projectsError,
   } = usePaginatedData<ProjectData>({
     apiEndPoint: ApiEndPoint.GET_DASHBOARD_PROJECTS,
-    queryKey: "dashboard-projects",
+    queryKey: CacheKeys.DASHBOARD_PROJECTS,
     pagination: {
       pageNo: 1,
       pageSize: 5,
@@ -109,7 +112,7 @@ export default function DashboardPage() {
 
   const { data: aiActivityData } = usePaginatedData<AIActivityData>({
     apiEndPoint: ApiEndPoint.GET_AI_ACTIVITY,
-    queryKey: "ai-activity",
+    queryKey: CacheKeys.DASHBOARD_AI_ACTIVITY,
     pagination: {
       pageNo: 1,
       pageSize: 5,
@@ -125,7 +128,7 @@ export default function DashboardPage() {
     refetch: refetchReviews,
   } = usePaginatedData<PendingReviewsData>({
     apiEndPoint: ApiEndPoint.GET_PENDING_REVIEWS,
-    queryKey: "pending-reviews",
+    queryKey: CacheKeys.DASHBOARD_PENDING_REVIEWS,
     pagination: {
       pageNo: 1,
       pageSize: 5,
@@ -136,7 +139,7 @@ export default function DashboardPage() {
 
   const { data: automationData } = usePaginatedData<AutomationActivityData>({
     apiEndPoint: ApiEndPoint.GET_AUTOMATION_ACTIVITY,
-    queryKey: "automation-activity",
+    queryKey: CacheKeys.DASHBOARD_AUTOMATION_ACTIVITY,
     pagination: {
       pageNo: 1,
       pageSize: 5,
@@ -173,6 +176,14 @@ export default function DashboardPage() {
         priority: formData.priority as CreateContentIdeaRequest["priority"],
       };
       await createContentIdea(payload);
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: [CacheKeys.DASHBOARD_OVERVIEW],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: [CacheKeys.CONTENT_IDEAS],
+        }),
+      ]);
       toast.success("Content idea created successfully");
       setIsAddContentModalOpen(false);
       form.reset(emptyContentFormValues);

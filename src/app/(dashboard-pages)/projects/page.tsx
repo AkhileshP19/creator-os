@@ -25,8 +25,11 @@ import { Button } from "@/components/ui/button";
 import { QueryErrorState } from "@/components/ui/custom/query-error-state";
 import { useDashboardSearch } from "@/components/dashboard-search-context";
 import useDebounceSearch from "@/hooks/optimization/useDebounceSearch";
+import CacheKeys from "@/types/enums/cache-key-enums";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function ProjectsPage() {
+  const queryClient = useQueryClient();
   const [projectToDeleteId, setProjectToDeleteId] = useState<string | null>(
     null,
   );
@@ -74,7 +77,7 @@ export default function ProjectsPage() {
     error: projectsError,
   } = usePaginatedData<ProjectData>({
     apiEndPoint: ApiEndPoint.GET_DASHBOARD_PROJECTS,
-    queryKey: "projects",
+    queryKey: CacheKeys.PROJECTS,
     pagination: {
       pageNo: currentPage,
       pageSize: perPage,
@@ -104,7 +107,7 @@ export default function ProjectsPage() {
     refetch: refetchProjectSettings,
   } = useFetchData<ProjectSettings | null>(
     ApiEndPoint.GET_PROJECT_SETTINGS,
-    `project-settings-${selectedProjectData?.id ?? ""}`,
+    CacheKeys.PROJECT_SETTINGS,
     [selectedProjectData?.id ?? ""],
     undefined,
     isSettingsModalOpen && !!selectedProjectData?.id,
@@ -114,6 +117,20 @@ export default function ProjectsPage() {
     try {
       setProjectToDeleteId(projectId);
       await deleteProjectMutation.mutateAsync({});
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: [CacheKeys.PROJECTS],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: [CacheKeys.DASHBOARD_PROJECTS],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: [CacheKeys.ALL_PROJECTS],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: [CacheKeys.DASHBOARD_OVERVIEW],
+        }),
+      ]);
       refetchProjects();
       toast.success("Project deleted successfully");
       setProjectToDeleteId(null); // Reset the state after deletion
@@ -149,6 +166,9 @@ export default function ProjectsPage() {
         await updateProjectSettings(payload);
       }
 
+      await queryClient.invalidateQueries({
+        queryKey: [`project-settings-${selectedProjectData?.id ?? ""}`],
+      });
       refetchProjectSettings();
 
       toast.success(

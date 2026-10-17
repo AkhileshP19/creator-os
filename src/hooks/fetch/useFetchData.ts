@@ -35,9 +35,10 @@ export const useFetchData = <TData>(
   });
 
   return {
-    isLoading: isLoading || isFetching,
+    isLoading,
+    isFetching,
     isFetched,
-    data: data?.responseData, // Safely accessing `responseData`
+    data: data?.responseData,
     error,
     refetch,
   };

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiHandler } from "@/api/api-handler";
+import CacheKeys from "@/types/enums/cache-key-enums";
 import {
   ApiEndPoint,
   type ApiResponse,
@@ -12,7 +13,7 @@ import type {
 } from "@/types/publish-types";
 export function useYouTubeConnection() {
   return useQuery({
-    queryKey: ["youtube-connection"],
+    queryKey: [CacheKeys.YOUTUBE_CONNECTION],
     queryFn: () =>
       apiHandler<ApiResponse<YouTubeConnection>>(
         "GET",
@@ -32,13 +33,29 @@ export function usePublishJobs(
     : "";
 
   return useQuery({
-    queryKey: ["publish-jobs", pageNo, status, normalizedSearch ?? ""],
+    queryKey: [
+      CacheKeys.PUBLISH_JOBS,
+      pageNo,
+      status,
+      normalizedSearch ?? "",
+    ],
     queryFn: () =>
       apiHandler<PaginatedApiResponse<PublishJob>>(
         "GET",
         `${ApiEndPoint.PUBLISH_JOBS}?pageNo=${pageNo}&pageSize=20&status=${status}${searchParam}`,
       ),
-    refetchInterval: 10_000,
+    refetchInterval: (query) => {
+      const jobs = query.state.data?.responseData ?? [];
+
+      const hasActiveJob = jobs.some(
+        (job) =>
+          job.publishStatus === "QUEUED" ||
+          job.publishStatus === "UPLOADING" ||
+          job.publishStatus === "SCHEDULED",
+      );
+
+      return hasActiveJob ? 10_000 : false;
+    },
   });
 }
 export function usePublishingMutation<T>(
@@ -51,9 +68,10 @@ export function usePublishingMutation<T>(
       apiHandler("POST" === method ? "POST" : "DELETE", url, input),
     onSuccess: async () => {
       await Promise.all([
-        cache.invalidateQueries({ queryKey: ["publish-jobs"] }),
-        cache.invalidateQueries({ queryKey: ["youtube-connection"] }),
-        cache.invalidateQueries({ queryKey: ["approvals"] }),
+        cache.invalidateQueries({ queryKey: [CacheKeys.PUBLISH_JOBS] }),
+        cache.invalidateQueries({ queryKey: [CacheKeys.YOUTUBE_CONNECTION] }),
+        cache.invalidateQueries({ queryKey: [CacheKeys.APPROVALS] }),
+        cache.invalidateQueries({ queryKey: [CacheKeys.DASHBOARD_OVERVIEW] }),
       ]);
     },
   });
