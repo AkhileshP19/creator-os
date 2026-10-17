@@ -18,6 +18,8 @@ import { ProjectData } from "@/types/dashboard-types";
 import { usePostData } from "@/hooks/fetch/usePostData";
 import toast from "react-hot-toast";
 import { usePaginatedData } from "@/hooks/fetch/usePaginatedDataParams";
+import CacheKeys from "@/types/enums/cache-key-enums";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   ContentIdea,
   CreateContentIdeaRequest,
@@ -52,6 +54,7 @@ const emptyContentFormValues: z.infer<typeof newContentFormSchema> = {
 };
 
 export default function ContentPage() {
+  const queryClient = useQueryClient();
   const [isAddContentModalOpen, setIsAddContentModalOpen] =
     useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -98,7 +101,7 @@ export default function ContentPage() {
   const { data: allProjectsData, isLoading: isLoadingProjects } =
     useFetchData<ProjectData[]>(
       ApiEndPoint.GET_ALL_PROJECTS,
-      "all-projects",
+      CacheKeys.ALL_PROJECTS,
       [],
       undefined,
       isAddContentModalOpen,
@@ -112,7 +115,7 @@ export default function ContentPage() {
     totalPages: totalContentIdeasPages,
   } = usePaginatedData<ContentIdea>({
     apiEndPoint: ApiEndPoint.CREATE_CONTENT_IDEA,
-    queryKey: "content-ideas",
+    queryKey: CacheKeys.CONTENT_IDEAS,
     pagination: {
       pageNo: currentPage,
       pageSize: perPage,
@@ -152,7 +155,7 @@ export default function ContentPage() {
   const { data: scriptData, isLoading: isFetchingScript } =
     useFetchData<GeneratedScript>(
       ApiEndPoint.GET_SCRIPT,
-      "get-script",
+      CacheKeys.GET_SCRIPT,
       [selectedContentData?.script.workflowId ?? ""],
       undefined,
       !!(selectedContentData?.script.workflowId && isViewScriptModalOpen),
@@ -166,7 +169,7 @@ export default function ContentPage() {
   const { data: videoData, isLoading: isFetchingVideo } =
     useFetchData<GeneratedVideo>(
       ApiEndPoint.GET_VIDEO,
-      "get-video",
+      CacheKeys.GET_VIDEO,
       [selectedContentData?.video?.workflowId ?? ""],
       undefined,
       !!(selectedContentData?.video?.workflowId && isViewVideoModalOpen),
@@ -219,6 +222,11 @@ export default function ContentPage() {
         };
         await updateContentMutation(payload);
       }
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: [CacheKeys.DASHBOARD_OVERVIEW],
+        }),
+      ]);
       refetchContentIdeas();
       toast.success(
         isCreateOrEditMode === "create"
@@ -243,6 +251,11 @@ export default function ContentPage() {
     try {
       setContentToDeleteId(projectId);
       await deleteContentMutation.mutateAsync({});
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: [CacheKeys.DASHBOARD_OVERVIEW],
+        }),
+      ]);
       refetchContentIdeas();
       toast.success("Content idea deleted successfully");
       setContentToDeleteId(null);
@@ -260,6 +273,11 @@ export default function ContentPage() {
       };
 
       await generateScriptMutation(payload);
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: [CacheKeys.GET_SCRIPT],
+        }),
+      ]);
       toast.success("Script generated successfully");
       refetchContentIdeas();
     } catch (error) {
@@ -278,6 +296,11 @@ export default function ContentPage() {
         contentId,
       };
       await generateVideoMutation(payload);
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: [CacheKeys.GET_VIDEO],
+        }),
+      ]);
       toast.success("Video generation started");
       refetchContentIdeas();
     } catch (error) {

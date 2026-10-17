@@ -36,6 +36,8 @@ import {
 import { Dispatch, SetStateAction } from "react";
 import toast from "react-hot-toast";
 import { Loader2 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import CacheKeys from "@/types/enums/cache-key-enums";
 
 interface CreateProjectModalProps {
   open: boolean;
@@ -56,6 +58,7 @@ export const CreateProjectModal = ({
   incomingProjectDesc,
   refetchProjects,
 }: CreateProjectModalProps) => {
+  const queryClient = useQueryClient();
   const form = useForm<CreateProjectFormValues>({
     resolver: zodResolver(createProjectSchema),
     mode: "onChange",
@@ -96,6 +99,20 @@ export const CreateProjectModal = ({
         await updateProjectMutation.mutateAsync(values);
         toast.success("Project updated successfully!");
       }
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: [CacheKeys.PROJECTS],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: [CacheKeys.DASHBOARD_PROJECTS],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: [CacheKeys.ALL_PROJECTS],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: [CacheKeys.DASHBOARD_OVERVIEW],
+        }),
+      ]);
       onOpenChange(false);
       form.reset({ name: "", description: "" });
       refetchProjects?.();

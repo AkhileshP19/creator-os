@@ -34,6 +34,7 @@ import {
 import { usePostData } from "@/hooks/fetch/usePostData";
 import { useFetchData } from "@/hooks/fetch/useFetchData";
 import { ApiEndPoint } from "@/types/api/api-types";
+import CacheKeys from "@/types/enums/cache-key-enums";
 import type {
   ApprovalDetail,
   ApprovalListItem,
@@ -72,7 +73,7 @@ export function ApprovalCard({ approval }: { approval: ApprovalListItem }) {
   const [videoLoading, setVideoLoading] = useState(true);
   const detail = useFetchData<ApprovalDetail>(
     ApiEndPoint.GET_APPROVAL,
-    "approval-detail",
+    CacheKeys.APPROVAL_DETAIL,
     [approval.approvalId],
     undefined,
     false,
@@ -133,10 +134,12 @@ export function ApprovalCard({ approval }: { approval: ApprovalListItem }) {
       toast.error(message);
     } finally {
       await Promise.all([
-        cache.invalidateQueries({ queryKey: ["approvals"] }),
-        cache.invalidateQueries({ queryKey: ["content-ideas"] }),
-        cache.invalidateQueries({ queryKey: ["approval-detail"] }),
-        cache.invalidateQueries({ queryKey: ["get-video"] }),
+        cache.invalidateQueries({ queryKey: [CacheKeys.APPROVALS] }),
+        cache.invalidateQueries({ queryKey: [CacheKeys.CONTENT_IDEAS] }),
+        cache.invalidateQueries({ queryKey: [CacheKeys.APPROVAL_DETAIL] }),
+        cache.invalidateQueries({ queryKey: [CacheKeys.GET_VIDEO] }),
+        cache.invalidateQueries({ queryKey: [CacheKeys.DASHBOARD_PENDING_REVIEWS] }),
+        cache.invalidateQueries({ queryKey: [CacheKeys.DASHBOARD_OVERVIEW] }),
       ]);
     }
   }
