@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { Button } from "./ui/button";
@@ -15,7 +16,6 @@ import {
   ChevronLeft,
   ChevronRight,
   CircleHelp,
-  Cog,
   Menu,
   Search,
 } from "lucide-react";
@@ -36,6 +36,7 @@ export const Header = ({
 
   const pageTitle = useMemo(() => {
     const segment = pathname.split("/").filter(Boolean)[0] || "dashboard";
+
     return segment
       .split("-")
       .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
@@ -52,9 +53,15 @@ export const Header = ({
             : "w-[70px] justify-center overflow-hidden"
         }`}
       >
-        <div className="flex items-center justify-center size-8 rounded-lg bg-indigo-50 text-indigo-600 shrink-0">
-          <Cog className="size-5" />
-        </div>
+        <Image
+          src="/creatoros_logo.png"
+          alt="CreatorOS"
+          width={32}
+          height={32}
+          priority
+          className="size-8 shrink-0"
+        />
+
         {isSidebarOpen && (
           <span className="font-bold text-lg text-foreground tracking-tight whitespace-nowrap">
             Creator<span className="text-indigo-600">OS</span>
@@ -74,11 +81,20 @@ export const Header = ({
         >
           <Menu className="size-5" />
         </Button>
+
         <div className="flex items-center gap-1.5 font-bold text-base tracking-tight text-foreground">
-          <div className="flex items-center justify-center size-6 rounded bg-indigo-50 text-indigo-600">
-            <Cog className="size-4" />
-          </div>
-          <span className="hidden xs:inline">CreatorOS</span>
+          <Image
+            src="/creatoros_logo.png"
+            alt="CreatorOS"
+            width={24}
+            height={24}
+            priority
+            className="size-6 shrink-0"
+          />
+
+          <span className="hidden xs:inline">
+            Creator<span className="text-indigo-600">OS</span>
+          </span>
         </div>
       </div>
 
@@ -96,6 +112,7 @@ export const Header = ({
               onChange={(event) => setSearch(event.target.value)}
               className="text-xs sm:text-sm h-8 sm:h-9"
             />
+
             <InputGroupAddon>
               <Search className="size-3.5 sm:size-4 text-muted-foreground" />
             </InputGroupAddon>
@@ -148,4 +165,3 @@ export const Header = ({
     </header>
   );
 };
-
